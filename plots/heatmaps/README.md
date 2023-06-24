@@ -1,0 +1,1 @@
+This is the folder in which the heatmaps are generated
