@@ -497,6 +497,7 @@ void print_stats_acum(bool last_print){
   cout << "Number of K Edges Processed: " <<  (totalEdgesProcessed /1000) << "\n";
   cout << "Runtime in K cycles: " <<  (wall_time/1000) << "\n";
   cout << "Miliseconds (at "<<freq<<" Ghz): "<< miliseconds<<"\n";
+  cout << "Time per iteration (ms): "<< miliseconds<<"\n";
 
   if (last_print){  
     // Considering two memory operations per tile per cycle

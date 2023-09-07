@@ -121,12 +121,12 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
     while(i<end_index){
       penalty += check_dcache(tX,tY,graph->edge_array,i,timer+penalty, time_fetched_edges, time_prefetch_edges, prefetch_edges_tag);
       penalty += check_dcache(tX,tY,graph->edge_values,i,timer+penalty, time_fetched_value, time_prefetch_value, prefetch_value_tag);
-      int neighbor = graph->edge_array[i];
+      int columnID = graph->edge_array[i];
       int new_dist = sourceDist * graph->edge_values[i];
 
       // Invokation of the next task
       int dest = get_qid();
-      OQ(dest).enqueue(Msg(getHeadFlit(dest, neighbor), HEAD,timer) );
+      OQ(dest).enqueue(Msg(getHeadFlit(dest, columnID), HEAD,timer) );
       OQ(dest).enqueue(Msg(new_dist, TAIL,timer) );
       i+=1;
     }
@@ -134,39 +134,26 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
     pivot = start_index;
   }
   // Instruction to configure a vector operation 
-  // vector buffer_neighbor = out_vector(base=buffer_base, length=neighbor_len, stride=2)
-  // vector buffer_dist = out_vector(base=buffer_base+1, length=neighbor_len, stride=2)
-  // vector edge_load = out_vector(base=neighbor_begin, length=neighbor_len, stride=2)
-  // vector dist_load = out_vector(base=neighbor_begin+1, length=neighbor_len, stride=2)  // IF SSSP
-  // MOV buffer_neighbor = edge_load
+  // vector buffer_columnID = out_vector(base=buffer_base, length=columnID_len, stride=2)
+  // vector buffer_dist = out_vector(base=buffer_base+1, length=columnID_len, stride=2)
+  // vector edge_load = out_vector(base=columnID_begin, length=columnID_len, stride=2)
+  // vector dist_load = out_vector(base=columnID_begin+1, length=columnID_len, stride=2)  // IF SSSP
+  // MOV buffer_columnID = edge_load
   // MOV buffer_dist = dist_load + sourceDist // or 1 + sourceDist in BFS
-  // ASYNC MOV OQ = out_vector(base=buffer_base, length=neighbor_len, chain_length=2)
+  // ASYNC MOV OQ = out_vector(base=buffer_base, length=columnID_len, chain_length=2)
   
   store(vector_len*2);
-  return 8+penalty; // 3 queue loads + 4 vector configs, 2 vector ops of length (neighbor_len) + 1 MOV to OQ
+  return 8+penalty; // 3 queue loads + 4 vector configs, 2 vector ops of length (columnID_len) + 1 MOV to OQ
 }
 
 int task3_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(2).dequeue();
-  u_int32_t neighbor = task3_dequeue(msg.data);
+  u_int32_t columnID = task3_dequeue(msg.data);
   u_int32_t new_dist = IQ(2).dequeue().data;
   load(2);
-/*
-  #if ASSERT_MODE && STEAL_W == 1
-    // Check that neighbor is within the range of nodes that this core is responsible for
-    u_int32_t node_base = nodePerTile*global(tX,tY);
-    assert(neighbor>=node_base); assert(neighbor<(node_base+nodePerTile));
-  #endif
 
-  int penalty = check_dcache(tX,tY,ret,neighbor,timer, msg.time);
-  ret[neighbor] += new_dist;
-  store(1);
-
-  numFrontierNodesPushed[tX/COLUMNS_PER_TH]++; //Meta
-  return 2; //Task + RMW
-*/
-  int penalty = check_dcache(tX,tY,ret,neighbor,timer, msg.time);
-  ret[neighbor] += new_dist;
+  int penalty = check_dcache(tX,tY,ret,columnID,timer, msg.time);
+  ret[columnID] += new_dist;
   store(1);
   numFrontierNodesPushed[tX/COLUMNS_PER_TH]++; //Meta
   return penalty+1;
@@ -174,14 +161,14 @@ int task3_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
 
 int task3bis_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(3).dequeue();
-  u_int32_t neighbor = task3_dequeue(msg.data);
+  u_int32_t columnID = task3_dequeue(msg.data);
   u_int32_t new_dist = IQ(3).dequeue().data;
   load(2);
 
-  //ADDI [neighbor], new_dist
-  int ret_neighbor = check_pcache(tX,tY,neighbor,timer);
-  ret_neighbor += new_dist;
-  update_pcache(tX,tY,neighbor,ret_neighbor);
+  //ADDI [columnID], new_dist
+  int ret_columnID = check_pcache(tX,tY,columnID,timer);
+  ret_columnID += new_dist;
+  update_pcache(tX,tY,columnID,ret_columnID);
 
   numFrontierNodesPushed[tX/COLUMNS_PER_TH]++; //Meta
   return 2;

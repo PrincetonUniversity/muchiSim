@@ -24,8 +24,10 @@ movies = []
 average_perf_counters = ['Avg. Transactions:', 'Avg. Latency:', 'DHit Rate (hit/miss):']
 options = matrix_perf_counters + average_perf_counters
 
+dataset = "Kron"
+
 def parseAverage(configuration, application, size):
-    path = directory + "DATA-Kron16--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
+    path = directory + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
     with open(path, 'r') as f:
         lines = f.readlines()
         # Create a list of lists, one for each counter
@@ -41,7 +43,7 @@ def parseAverage(configuration, application, size):
         return database
 
 def parseMatrix(configuration, application, size):
-    path = directory + "DATA-Kron16--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
+    path = directory + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
     with open(path, 'r') as f:
         lines = f.readlines()
         database = {delim: [] for delim in matrix_perf_counters}
@@ -101,7 +103,7 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(QLabel("Size:", self))
         self.size_dropdown = QComboBox()
         self.size_dropdown.addItems(sizes)
-        self.size_dropdown.setCurrentText('64')
+        self.size_dropdown.setCurrentText('8')
         stats_layout.addWidget(self.size_dropdown)
         self.main_layout.addLayout(stats_layout)
 
@@ -120,7 +122,8 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(QLabel("Application:", self))
         self.app_dropdown = QComboBox()
         self.app_dropdown.addItems(apps)
-        self.app_dropdown.setCurrentIndex(6)
+        # Multi is 6, SPMV is 4
+        self.app_dropdown.setCurrentIndex(4)
         stats_layout.addWidget(self.app_dropdown)
         self.main_layout.addLayout(stats_layout)
 
@@ -262,8 +265,8 @@ class MainWindow(QMainWindow):
                     movie.start()
 
                     # Remove temporary PNG files
-                    for filename in filenames:
-                        os.remove(filename)
+                    # for filename in filenames:
+                    #     os.remove(filename)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
