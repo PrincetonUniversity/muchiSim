@@ -16,10 +16,11 @@ runs/large/
 runs3/
 datasets/
 
+sim_logs/*-BHEAT*
+sim_counters/*
 plots/heatmaps/*
 plots/scaling/*
 plots/temp/*
-*.log
 *.dSYM
 plots/*
-gui/env_gui/*
+*env_gui

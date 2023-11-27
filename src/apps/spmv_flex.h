@@ -19,7 +19,22 @@ void config_dataset(string dataset_filename){
 
 void config_app(){
   proxy_default = 0;
+  u_int32_t t3b_piped_tasks = 1;
+  u_int32_t t3_piped_tasks  = 64 * smt_per_tile;
+  #if PROXY_FACTOR>1 //proxys
+    t3b_piped_tasks = t3_piped_tasks;
+    t3_piped_tasks  = PROXY_ROUTING==1 ? unused_buffer : t3_piped_tasks / proxy_shrink;
+  #endif
 
+  task1_dest = dest_qid;
+
+  iq_sizes[1] = unused_buffer;
+  oq_sizes[1] = unused_buffer;
+  oq_sizes[2] = t3_piped_tasks  * num_task_params[2];
+  iq_sizes[2] = oq_sizes[2] * io_factor_t3;
+  oq_sizes[3] = t3b_piped_tasks * num_task_params[3];
+  iq_sizes[3] = oq_sizes[3] * io_factor_t3b;
+  
   dataset_words_per_tile = nodePerTile; //ret_array 
   dataset_words_per_tile += edgePerTile; //edge index array
   dataset_words_per_tile += nodePerTile; //node index array
@@ -31,12 +46,49 @@ int task_init(int tX, int tY){
   return 1;
 }
 
+
+int iterate(int tX, int tY, int64_t * global_params, u_int64_t startInd, u_int64_t endEdgeIndex, u_int64_t source_dist, u_int64_t timer){
+  int penalty = 0;
+  u_int64_t endInd = endEdgeIndex;
+  int dest = get_qid();
+  u_int32_t capacity = OQ(dest).capacity() / 2;
+  u_int32_t vector_len = (endEdgeIndex-startInd);
+  if (vector_len > capacity){
+    vector_len = capacity;
+    endInd = startInd + vector_len;
+    penalty += 4; store(4);
+    //global_params is stored in .tex (variable section) of the scratchpad
+    global_params[0] = endInd;
+    global_params[1] = endEdgeIndex;
+    global_params[2] = source_dist;
+    global_params[3] = 1;
+  }  
+  numEdgesProcessed[tX/COLUMNS_PER_TH]+=vector_len; //META
+
+  int i = startInd;
+  for (int i = startInd; i<endInd; i++){
+    penalty += check_dcache(tX,tY,graph->edge_array,i,timer+penalty);
+    penalty += check_dcache(tX,tY,graph->edge_values,i,timer+penalty);
+    int columnID = graph->edge_array[i];
+    int new_dist = source_dist * graph->edge_values[i];
+    flop(1);
+    OQ(dest).enqueue(Msg(getHeadFlit(dest, columnID), HEAD,timer) );
+    OQ(dest).enqueue(Msg(new_dist, TAIL,timer) );
+  }
+  store(vector_len*2);
+  penalty+=8; // 3 queue loads + 4 vector configs, 2 vector ops of length (columnID_len) + 1 MOV to OQ
+  return penalty;
+}
+
+
+
 int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
-  int64_t * global_params = &task_global_params[global(tX,tY)*num_global_params];
   u_int64_t startInd, endEdgeIndex, source_dist;
 
+  int64_t * global_params = &task_global_params[global(tX,tY)*num_global_params];
   int penalty = 0;
-  load_mem_wait(1);
+  load_mem_wait(1); // global_params[3]
+
   if (global_params[3]) {//LD. Transaction is 'parked'
     // Global variables
     global_params[3]=0;
@@ -45,9 +97,9 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
     source_dist = global_params[2];
     load_mem_wait(3);
     store(1); penalty = 2; // beq + store
-    penalty+=task1_helper(tX,tY,global_params, startInd, endEdgeIndex, source_dist, timer+penalty);
+    penalty += iterate(tX,tY,global_params, startInd, endEdgeIndex, source_dist, timer+penalty);
 
-  } else{
+  } else {
 
     Msg msg = IQ(0).dequeue(); //LD
     int node_base = nodePerTile*global(tX,tY);
@@ -57,8 +109,8 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
 
     u_int64_t time_fetched = msg.time, time_prefetch = msg.time; //META
     u_int64_t prefetch_tag = cache_tag(graph->node_array,node)+1; //META
-    u_int64_t time_fetched_vector = msg.time, time_prefetch_vector = msg.time; //META
-    u_int64_t prefetch_tag_vector = cache_tag(graph->dense_vector,node)+1; //META
+    u_int64_t time_fetched_vec = msg.time, time_prefetch_vec = msg.time; //META
+    u_int64_t prefetch_tag_vec = cache_tag(graph->dense_vector,node)+1; //META
 
     bool done = true;
     bool stop = (node > nodeEnd);
@@ -69,14 +121,12 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       penalty+=check_dcache(tX,tY,graph->node_array,node+1, timer+penalty, time_fetched, time_prefetch, prefetch_tag);
       startInd = graph->node_array[node]; //LD
       endEdgeIndex = graph->node_array[node+1]; //LD
-
-      if (startInd<endEdgeIndex){ //EQ, JMP
-        penalty+=check_dcache(tX,tY,graph->dense_vector, node, timer+penalty, time_fetched_vector, time_prefetch_vector, prefetch_tag_vector);
-        source_dist = 5;//graph->dense_vector[node]; //LD, Access to dense_vector array
-        
-        penalty+=task1_helper(tX,tY,global_params, startInd, endEdgeIndex, source_dist, timer+penalty);
+      bool len_not_zero = (endEdgeIndex-startInd) > 0;
+      if (len_not_zero){
+        penalty+=check_dcache(tX,tY,graph->dense_vector, node, timer+penalty, time_fetched_vec, time_prefetch_vec, prefetch_tag_vec);
+        source_dist = 5;//graph->dense_vector[node]; //LD, Access to dense_vec array     
+        penalty += iterate(tX,tY,global_params, startInd, endEdgeIndex, source_dist, timer+penalty);
       }
-
       node++; // ADD
       done = (node > nodeEnd); //EQ
       stop = done || global_params[3]; //OR. Transaction is 'parked'
@@ -87,62 +137,14 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       IQ(0).enqueue(Msg(node - node_base, MONO,timer+penalty) );
       penalty+=1;store(1);
     }
-
   }
+
   return penalty;
 }
 
+
 int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
-  Msg msg = IQ(1).dequeue();
-  u_int32_t start_index = task2_dequeue(msg.data);
-  u_int32_t end_index = IQ(1).dequeue().data;
-  int sourceDist  = IQ(1).dequeue().data;
-
-  #if ASSERT_MODE && STEAL_W == 1
-    check_range(tX,tY,start_index,end_index);
-    assert(msg.type == HEAD);
-  #endif
-
-  u_int32_t vector_len = (end_index-start_index);
-  numEdgesProcessed[tX/COLUMNS_PER_TH]+=vector_len; //META
-  u_int32_t random_start = start_index % vector_len; //random_number between 0 and vector_len-1
-  u_int32_t pivot = start_index + random_start;
-
-  u_int64_t time_fetched_edges = msg.time, time_prefetch_edges = msg.time; //META
-  u_int64_t prefetch_edges_tag = cache_tag(graph->edge_array,pivot)+1; //META
-  u_int64_t time_fetched_value = msg.time, time_prefetch_value = msg.time; //META
-  u_int64_t prefetch_value_tag = cache_tag(graph->edge_values,pivot)+1; //META
-
-  int penalty = 0;
-  while (start_index < end_index){
-    u_int32_t i = pivot;
-    while(i<end_index){
-      penalty += check_dcache(tX,tY,graph->edge_array,i,timer+penalty, time_fetched_edges, time_prefetch_edges, prefetch_edges_tag);
-      penalty += check_dcache(tX,tY,graph->edge_values,i,timer+penalty, time_fetched_value, time_prefetch_value, prefetch_value_tag);
-      int columnID = graph->edge_array[i];
-      int new_dist = sourceDist * graph->edge_values[i];
-      flop(1);
-
-      // Invokation of the next task
-      int dest = get_qid();
-      OQ(dest).enqueue(Msg(getHeadFlit(dest, columnID), HEAD,timer) );
-      OQ(dest).enqueue(Msg(new_dist, TAIL,timer) );
-      i+=1;
-    }
-    end_index = pivot;
-    pivot = start_index;
-  }
-  // Instruction to configure a vector operation 
-  // vector buffer_columnID = out_vector(base=buffer_base, length=columnID_len, stride=2)
-  // vector buffer_dist = out_vector(base=buffer_base+1, length=columnID_len, stride=2)
-  // vector edge_load = out_vector(base=columnID_begin, length=columnID_len, stride=2)
-  // vector dist_load = out_vector(base=columnID_begin+1, length=columnID_len, stride=2)  // IF SSSP
-  // MOV buffer_columnID = edge_load
-  // MOV buffer_dist = dist_load + sourceDist // or 1 + sourceDist in BFS
-  // ASYNC MOV OQ = out_vector(base=buffer_base, length=columnID_len, chain_length=2)
-  
-  store(vector_len*2);
-  return 8+penalty; // 3 queue loads + 4 vector configs, 2 vector ops of length (columnID_len) + 1 MOV to OQ
+  return 2;
 }
 
 int task3_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){

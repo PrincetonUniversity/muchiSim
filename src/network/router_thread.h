@@ -16,10 +16,10 @@ void router_thread(u_int32_t rid){
 
       bool local_router_active = true;
       while (local_router_active && waiting_routers==0) {
-        u_int64_t current_cycle = router_timer[rid];
+        u_int64_t current_noc_cycle = router_timer[rid];
 
         #if PRINT>=3
-          u_int64_t current_sample = (current_cycle / sample_time);
+          u_int64_t current_sample = (current_noc_cycle / sample_time);
           // SAMPLING AND PRINTING INSIDE HERE AT EACH SAMPLE
           if (current_sample > last_sample){
             last_sample++;
@@ -33,7 +33,7 @@ void router_thread(u_int32_t rid){
                     for (u_int32_t i=rid*columns; i<rid_next*columns; i++){
                       RouterModel * r = routers[i][j];
                       uint16_t input_occ = ((float)r->input_q[c][qid].occupancy()*10.0/(rq_sizes[qid]) );
-                      printf("%X,%c  ",input_occ, r->print_dest_route(c, qid,current_cycle) );
+                      printf("%X,%c  ",input_occ, r->print_dest_route(c, qid, current_noc_cycle) );
                     }
                     printf("\n%d:\t",j+1);
                   }
@@ -46,7 +46,7 @@ void router_thread(u_int32_t rid){
                 for (u_int32_t j=0; j<GRID_Y; j++){
                   for (u_int32_t i=rid*columns; i<rid_next*columns; i++){
                     RouterModel * r = routers[i][j];
-                    printf("%X,%c  ",(uint16_t)((float)r->input_q[C][qid].occupancy()*10.0/(oq_sizes[qid])),r->print_dest_route(C, qid,current_cycle) );
+                    printf("%X,%c  ",(uint16_t)((float)r->input_q[C][qid].occupancy()*10.0/(oq_sizes[qid])),r->print_dest_route(C, qid,current_noc_cycle) );
                   }
                   printf("\n%d:\t",j+1);
                 }
@@ -68,14 +68,14 @@ void router_thread(u_int32_t rid){
 
                     RouterModel * r = routers[i][j];
                     int d;
-                    for (d = 0; d <= E; d++) dest[d] = r->print_dest_route(d, qid, current_cycle);
+                    for (d = 0; d <= E; d++) dest[d] = r->print_dest_route(d, qid, current_noc_cycle);
                     #if BOARD_W < GRID_X
                       dest[d++] = '(';
-                      dest[d++] = r->print_dest_route(PY, qid, current_cycle);
-                      dest[d++] = r->print_dest_route(PX, qid, current_cycle);
+                      dest[d++] = r->print_dest_route(PY, qid, current_noc_cycle);
+                      dest[d++] = r->print_dest_route(PX, qid, current_noc_cycle);
                       dest[d++] = ')';
                     #endif
-                    dest[d++] = r->print_dest_route(C, qid, current_cycle);
+                    dest[d++] = r->print_dest_route(C, qid, current_noc_cycle);
                     printf("%s  ",dest);
                   }
                   printf("\n");
@@ -100,30 +100,29 @@ void router_thread(u_int32_t rid){
         #endif // END OF PRINT>=3
 
         // OBTAIN THE SLOWEST CORE ID
-        u_int64_t time_min = current_cycle;
+        u_int64_t current_pu_cy = noc_to_pu_cy(current_noc_cycle);
+        u_int64_t min_pu_cy = current_pu_cy;
         u_int32_t tileid_min = rid;
         for (u_int32_t i=rid*columns; i<rid_next*columns; i++){
           for (u_int32_t j=0; j<GRID_Y; j++){
              u_int32_t tileid = global(i,j);
-            if (core_timer[tileid*smt_per_tile] < time_min){
-              time_min = core_timer[tileid*smt_per_tile]; tileid_min = tileid;
+            if (core_timer[tileid*smt_per_tile] < min_pu_cy){
+              min_pu_cy = core_timer[tileid*smt_per_tile]; tileid_min = tileid;
             }
           }
         }
 
-        // The core should be 1 cycle ahread of the router (Active wait)
+        // The core (pu) should be ahead of the router (Active wait)
         // Wait while the router is ahead or equal to the slowest core
-
-        while (current_cycle >= time_min){
+        while (current_pu_cy >= min_pu_cy){
           if (waiting_routers>0) break;
           volatile u_int64_t * timer_ptr = &core_timer[tileid_min*smt_per_tile];
-          time_min = timer_ptr[0];
+          min_pu_cy = timer_ptr[0];
         }
 
         // Sync with other routers, make sure this router is not ahead
         u_int32_t mate_id = 0;
         u_int64_t my_time = router_timer[rid];
-
         while (mate_id < COLUMNS){
           volatile u_int64_t * timer_ptr = &router_timer[mate_id];
           if ( (timer_ptr[0] >= my_time) || !column_active[mate_id] || waiting_routers>0) mate_id++;
@@ -170,7 +169,7 @@ void router_thread(u_int32_t rid){
         // Check whether we enter in drain mode, and advance the routers
         for (u_int32_t i=base_i; i<end_i; i++){
           #if (BOARD_W == GRID_X)
-            for (u_int32_t j=0; j<GRID_Y; j++) local_router_active |= (routers[i][j]->advance(&printf_mutex, NULL, NULL, current_cycle, &frame_counters[i][j][ROUTER_ACTIVE]) > 0);
+            for (u_int32_t j=0; j<GRID_Y; j++) local_router_active |= (routers[i][j]->advance(&printf_mutex, NULL, NULL, current_noc_cycle, &frame_counters[i][j][ROUTER_ACTIVE]) > 0);
           #else
             // NOT ACCESSES IF BOARD_W == GRID_X
             for (u_int32_t pY=0; pY<GRID_Y/BOARD_H; pY++){ //board
@@ -189,7 +188,7 @@ void router_thread(u_int32_t rid){
                   drain_X[qid] = (routers[board_origin_X][j]->input_q[PX][qid].is_drain()) || (routers[board_end_X][j]->input_q[PX][qid].is_drain());
                   drain_Y[qid] = drain_X[qid] || drain_Y_board[qid];
                 }
-                local_router_active |= (routers[i][j]->advance(&printf_mutex, &drain_X[0], &drain_Y[0], current_cycle, &frame_counters[i][j][ROUTER_ACTIVE]) > 0);
+                local_router_active |= (routers[i][j]->advance(&printf_mutex, &drain_X[0], &drain_Y[0], current_noc_cycle, &frame_counters[i][j][ROUTER_ACTIVE]) > 0);
                 j++;
               }
             }
@@ -214,7 +213,7 @@ void router_thread(u_int32_t rid){
             for (u_int32_t j=0; j<GRID_Y; j++){
               RouterModel * r = routers[i][j];
               uint32_t global_cid = global(i,j);
-              check_active |= isActive[global_cid] || need_flush_pcache(global_cid);
+              check_active |= isActive[global_cid];// || need_flush_pcache(global_cid);
               check_active |= (r->check_queues_occupancy() > 0);
             }
           }
@@ -236,7 +235,9 @@ void router_thread(u_int32_t rid){
       if (waiting_threads2 == MAX_THREADS) {waiting_threads2 = 0;all_threads_cv2.notify_all();}
       else {all_threads_cv2.wait(lock2, [&] { return waiting_threads2 == 0; });}
     }
+    
     print_lock.routerEpochDone(rid);
+    router_timer[rid] += barrier_penalty;
     // Epochs ongoing is a local var
     current_epoch_ongoing = false;
     // Once we have synchronized the routers, we can check whether there are still nodes in the frontiers
@@ -244,6 +245,7 @@ void router_thread(u_int32_t rid){
     for (u_int32_t t = 0; t < COLUMNS; t++){
       current_epoch_ongoing |= epoch_has_work[t];
     }
+
     { // BARRIER AMONG ALL THREADS
         std::unique_lock<std::mutex> lock(all_threads_mutex);
         waiting_threads++;

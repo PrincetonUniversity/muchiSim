@@ -44,18 +44,17 @@ int task1_kernel(int tX, int tY, u_int64_t timer, u_int64_t & compute_cycles){
   int64_t * global_params = &task_global_params[global(tX,tY)*num_global_params];
   int64_t startInd, endEdgeIndex, source_dist;
 
-  int penalty = 3; // load, beq,jmp
-  load(1); //parked
+  int penalty = 2; // beq,jmp
+  load_mem_wait(1);
   if (global_params[3]) {
     global_params[3] = 0;
     startInd = global_params[0];
     endEdgeIndex = global_params[1];
     source_dist = global_params[2];
-    penalty+=3;load(3);
+    load_mem_wait(3);
   } else {
     Msg msg = IQ(0).peek();
-    int node = task3_dequeue(msg.data); //LD from Q
-    load(1);
+    int node = task3_dequeue(msg.data);
 
     #if ASSERT_MODE
     // Check that node is within the range of nodes that this core is responsible for
@@ -84,7 +83,7 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   u_int32_t start_index = task2_dequeue(msg.data);
   u_int32_t end_index = IQ(1).dequeue().data;
   int sourceDist  = IQ(1).dequeue().data;
-  load(3);
+
   #if ASSERT_MODE && STEAL_W == 1
     // ASSERT ONLY WITHOUT STEAL REGION
     check_range(tX,tY,start_index,end_index);
@@ -113,6 +112,7 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       #else
         u_int32_t new_dist = sourceDist + 1;
       #endif
+      flop(1); // We also count here that BFS performs a float even though it doesn't make much sense, just so flops are not 0 in BFS
       int dest = get_qid();
       OQ(dest).enqueue(Msg(getHeadFlit(dest, neighbor), HEAD,timer) );
       OQ(dest).enqueue(Msg(new_dist, TAIL,timer) );
@@ -141,12 +141,11 @@ int task3_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(2).dequeue();
   u_int32_t neighbor = task3_dequeue(msg.data);
   u_int32_t new_dist =  IQ(2).dequeue().data;
-  load(2);
 
   int penalty = check_dcache(tX,tY,ret,neighbor,timer, msg.time);
   int ret_neighbor = ret[neighbor];
   penalty +=2; //comp + beq
-  bool cond = (new_dist < ret_neighbor);
+  bool cond = (new_dist < ret_neighbor); flop(1);
   if (cond){
     ret[neighbor] = new_dist; //Surely it's a hit in the cache
     penalty+=1;store(1);
@@ -161,11 +160,11 @@ int task3bis_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(3).dequeue();
   u_int64_t neighbor = task3_dequeue(msg.data);
   u_int32_t new_dist = IQ(3).dequeue().data;
-  load(2);
 
-  int ret_neighbor = check_pcache(tX,tY,neighbor,timer);
-  bool cond = (new_dist < ret_neighbor);
-  int penalty = 3; //Load + comp + beq
+  int penalty = 0;
+  int ret_neighbor = check_pcache(tX,tY,neighbor,penalty,timer);
+  bool cond = (new_dist < ret_neighbor); flop(1);
+  penalty += 3; //Load + comp + beq
   if (cond){
     update_pcache(tX, tY, neighbor,new_dist);
     #if WRITE_THROUGH

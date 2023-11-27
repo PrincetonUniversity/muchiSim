@@ -1,3 +1,4 @@
+#if APP!=PAGE
 void initialize_proxys(){
   #if PROXYS>1
     for (int i=0;i<PROXYS;i++){
@@ -8,13 +9,13 @@ void initialize_proxys(){
     cout << "Allocated proxys" << endl << flush;
   #endif
 }
+#endif
 
 void writeback_evicted(int * proxy, int tX, int tY, u_int64_t neighbor_to_evict, u_int64_t timer){
-  //Only cascade writeback for Histo and SPMV
-  #if CASCADE_WRITEBACK
-    int dest = 3;
-  #else
-    int dest = 2;
+  int dest = dest_pcache_writeback();
+  #if ASSERT_MODE
+    //Writeback assumes that the proxy task has 2 flits
+    assert(num_task_params[dest]==2);
   #endif
   OQ(dest).enqueue(Msg(getHeadFlit(dest, neighbor_to_evict), HEAD,timer) );
   OQ(dest).enqueue(Msg(proxy[neighbor_to_evict], TAIL,timer) );
@@ -114,80 +115,82 @@ void update_pcache(int tX, int tY, u_int32_t neighbor, u_int32_t update){
   proxy[neighbor] = update;
 }
 
-int check_pcache(int tX, int tY, u_int32_t neighbor, u_int64_t timer){
-u_int16_t dst_rep_id = proxy_id(tX,tY); //META 
-int * proxy = (int*)proxys[dst_rep_id];
-load(1);
-int value = proxy[neighbor];
-#if PCACHE
-  // freq is the number of hits of a per-neighbour element
-  u_int16_t * freq = pcache_freq[dst_rep_id];
-  u_int32_t tileid = global(tX,tY);
-  // Tags that are currently in the per-tile pcache
-  u_int64_t * tags = pcache_tags[tileid];
+int check_pcache(int tX, int tY, u_int32_t neighbor, int & penalty, u_int64_t timer){
+  u_int16_t dst_rep_id = proxy_id(tX,tY); //META 
+  int * proxy = (int*)proxys[dst_rep_id];
+  
+  load_mem_wait(1);
 
-  if (proxys_cached){
-    if (freq[neighbor] > 0){
-      // CACHE HIT
-      pcache_hits++;
-    } else{
-      pcache_misses++;
-      // CACHE MISS
-      #if ASSERT_MODE
-      assert(freq[neighbor]==0);
-      #endif
-      value = proxy_default;
-      
-      // We decide which line to store the new value
-      // If cache full, we needed to evict an element
-      // If not full, then the replacement policy will always select an empty line
-      u_int16_t set_empty_lines = 0;
-      int evict_pcache_idx = replacement_policy(tileid, freq, tags, neighbor, set_empty_lines);
-      u_int64_t evict_tag = tags[evict_pcache_idx];
+  int value = proxy[neighbor];
+  #if PCACHE
+    // freq is the number of hits of a per-neighbour element
+    u_int16_t * freq = pcache_freq[dst_rep_id];
+    u_int32_t tileid = global(tX,tY);
+    // Tags that are currently in the per-tile pcache
+    u_int64_t * tags = pcache_tags[tileid];
 
-      if (set_empty_lines == 0){// IF CACHE SET FULL
-        // Evict Line
-        pcache_evictions++;
+    if (proxys_cached){
+      if (freq[neighbor] > 0){
+        // CACHE HIT
+        pcache_hits++;
+      } else{
+        pcache_misses++;
+        // CACHE MISS
         #if ASSERT_MODE
-          assert(evict_tag < UINT64_MAX);
-          assert(freq[evict_tag] > 0);
+        assert(freq[neighbor]==0);
         #endif
-        // Mark the previous element as evicted (freq = 0)
-        freq[evict_tag] = 0;
+        value = proxy_default;
+        
+        // We decide which line to store the new value
+        // If cache full, we needed to evict an element
+        // If not full, then the replacement policy will always select an empty line
+        u_int16_t set_empty_lines = 0;
+        int evict_pcache_idx = replacement_policy(tileid, freq, tags, neighbor, set_empty_lines);
+        u_int64_t evict_tag = tags[evict_pcache_idx];
 
-        #if WRITE_THROUGH==0
-          writeback_evicted(proxy, tX, tY, evict_tag, timer);
-        #endif
-      } else{ // IF CACHE NOT FULL
-        #if ASSERT_MODE
-          assert(evict_tag == UINT64_MAX);
-        #endif
-        // Increase the occupancy count
-        pcache_occupancy[tileid]++;
+        if (set_empty_lines == 0){// IF CACHE SET FULL
+          // Evict Line
+          pcache_evictions++;
+          #if ASSERT_MODE
+            assert(evict_tag < UINT64_MAX);
+            assert(freq[evict_tag] > 0);
+          #endif
+          // Mark the previous element as evicted (freq = 0)
+          freq[evict_tag] = 0;
+
+          #if WRITE_THROUGH==0
+            writeback_evicted(proxy, tX, tY, evict_tag, timer);
+          #endif
+        } else{ // IF CACHE NOT FULL
+          #if ASSERT_MODE
+            assert(evict_tag == UINT64_MAX);
+          #endif
+          // Increase the occupancy count
+          pcache_occupancy[tileid]++;
+        }
+
+        // Update the pcache tag with the new neighbor
+        tags[evict_pcache_idx] = neighbor;
+        freq[neighbor]++;
+
       }
+      #if DIRECT_MAPPED==0
+        // If the neighbor was not in the pcache, it's 1 now. If it was in the pcache, freq is incremented by 1.
+        freq[neighbor]++;
+        u_int32_t set = set_id_pcache(neighbor);
+        check_freq(freq, tags, set, neighbor);
+      #endif
 
-      // Update the pcache tag with the new neighbor
-      tags[evict_pcache_idx] = neighbor;
-      freq[neighbor]++;
-
+    } else{ // No cached, always hit (unless written back)
+      if (freq[neighbor] == 0){
+        value = proxy_default;
+        int occupancy = pcache_occupancy[tileid]++;
+        int idx=0;while (idx<pcache_size){if (tags[idx]==UINT64_MAX) break; idx++;}
+        assert(idx<pcache_size);
+        tags[idx] = neighbor;
+        freq[neighbor] = 1;
+      }
     }
-    #if DIRECT_MAPPED==0
-      // If the neighbor was not in the pcache, it's 1 now. If it was in the pcache, freq is incremented by 1.
-      freq[neighbor]++;
-      u_int32_t set = set_id_pcache(neighbor);
-      check_freq(freq, tags, set, neighbor);
-    #endif
-
-  } else{ // No cached, always hit (unless written back)
-    if (freq[neighbor] == 0){
-      value = proxy_default;
-      int occupancy = pcache_occupancy[tileid]++;
-      int idx=0;while (idx<pcache_size){if (tags[idx]==UINT64_MAX) break; idx++;}
-      assert(idx<pcache_size);
-      tags[idx] = neighbor;
-      freq[neighbor] = 1;
-    }
-  }
-#endif
-return value;
+  #endif
+  return value;
 }

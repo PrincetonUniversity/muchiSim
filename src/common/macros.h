@@ -1,6 +1,6 @@
-#include "stdio.h"
-#include "stdlib.h"
-#include "assert.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -8,7 +8,6 @@
 #include <climits>
 #include <math.h>
 #include <unistd.h>
-#include <omp.h>
 #include <iomanip>
 #include <set>
 #include <thread>
@@ -16,6 +15,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+using namespace std;
 
 // define a union structure with an int and a float
 union float_int{
@@ -29,10 +29,14 @@ union float_int{
 
 #define IQ(q) (routers[tX][tY]->output_q[C][q])
 #define OQ(q) (routers[tX][tY]->input_q[C][q])
-#define load(r) (frame_counters[tX][tY][LOAD]+=r)
-#define store(r) (frame_counters[tX][tY][STORE]+=r)
-#define msg(c,r) (frame_counters[id_X][id_Y][MSG_1+c]+=r)
-#define msgcol(c,r) (frame_counters[id_X][id_Y][MSG_IN_COLLISION+c]+=r)
+#define load(r) (frame_counters[tX][tY][LOAD] += (r) )
+#define store(r) (frame_counters[tX][tY][STORE] += (r) )
+#define flop(r) (frame_counters[tX][tY][FLOPS] += (r) )
+#define mem_wait_add(r) ({frame_counters[tX][tY][MEM_WAIT] += (r) - 1;} )
+#define load_mem_wait(num) ( {load(num); mem_wait_add((num)*sram_read_latency); penalty += sram_read_latency*(num); } )
+
+#define msg(c,r) (frame_counters[id_X][id_Y][MSG_1+c] += (r) )
+#define msgcol(c,r) (frame_counters[id_X][id_Y][MSG_IN_COLLISION+c] += (r) )
 
 // APP
 #define SSSP 0
@@ -41,8 +45,14 @@ union float_int{
 #define WCC 3
 #define SPMV 4
 #define HISTO 5
-#define HISTO_NODE_REDUCER 8
+#define FFT 6
+#define SPMV_FLEX 7
 
+#define ALTERNATIVE 10
+
+#ifndef FUNC
+  #define FUNC 1
+#endif
 
 //MESH PARAMETERS
 #ifndef GRID_X_LOG2
@@ -62,8 +72,20 @@ union float_int{
 
 // BOARD PARAMETERS
 // BOARD_W <= GRID_X
+#ifndef BOARD_W // default max package size is 64, unless board is specificied, then it's the same as board
+  #if PROXY_W < GRID_X // Proxy active, Tascade, package as die
+    #define DEFAULT_PACK_SIZE (DIE_W)
+  #else
+    #define DEFAULT_PACK_SIZE (DIE_W * 4) // Package of 16 dies
+  #endif
+  #define PACK_W (GRID_X > DEFAULT_PACK_SIZE ? DEFAULT_PACK_SIZE : GRID_X)
+#else
+  #define PACK_W (BOARD_W)
+#endif
+
+
 #ifndef BOARD_W
-   #define BOARD_W (GRID_X)
+  #define BOARD_W (GRID_X)
 #endif
 #define BOARD_H (BOARD_W)
 #define BOARD_W_HALF (BOARD_W / 2)
@@ -78,7 +100,6 @@ union float_int{
 #define BOARD_BUSES (BOARD_W / MUX_BUS)
 
 
-#define PACK_W (GRID_X > 64 ? 64 : GRID_X)
 #define PACK_H (PACK_W)
 #define PACK_W_HALF (PACK_W / 2)
 #define PACK_H_HALF (PACK_H / 2)
@@ -133,50 +154,71 @@ union float_int{
    #define STEAL_H (STEAL_W)
 #endif
 
+// NETWORK PARAMETERS
+#ifndef TORUS
+  #define TORUS 0
+#endif
+
 // RUCHE PARAMETERS
+// By default (if not set), set as one hop per die if more than one die
+// Otherwise set to no ruche
 #ifndef RUCHE_X
-   #define RUCHE_X (DIE_W_HALF)
+  #if DIES > 1
+    #if TORUS
+      #define RUCHE_X (DIE_W_HALF)
+    #else // Mesh mode
+      #define RUCHE_X (DIE_W)
+    #endif
+  #else
+    #define RUCHE_X 0
+  #endif
 #endif
 #define RUCHE_Y (RUCHE_X)
 
-// NETWORK PARAMETERS
-#ifndef TORUS
-  #define TORUS 1
-#endif
+
 #ifndef QUEUE_PRIO
   #define QUEUE_PRIO 0
 #endif
-#ifndef GLOBAL_BARRIER
+#ifndef GLOBAL_BARRIER // 0: no barrier, 1: barrier, 2: barrier drain proxy at a sync step, 3: barrier no coalescing
   #define GLOBAL_BARRIER 0
 #endif
+
 #ifndef SHUFFLE
-  #define SHUFFLE 1
+  #define SHUFFLE 0
 #endif
 
-// Values 2 or 3
-#define PHY_NOCS 2
+#ifndef PHY_NOCS
+  // Values 1,2, or 3
+  #define PHY_NOCS 1
+#endif
+
 #ifndef NOC_CONF
   #define NOC_CONF 2
 #endif
-
 // NOC_CONF:0 means 2 NoCS of 32 bits intra die, which get throttled to a shared 32 bits across dies
 // NOC_CONF:1 means 2 NoCS of 32 and 64 bit intra die, which get throttled to a shared 32 bits across dies
 // NOC_CONF:2 means 2 NoCS of 32 and 64 bit intra die, which get throttled to 2 NoCs of 32 and 32 bits across dies
 // NOC_CONF:3 means 2 NoCS of 32 and 64 bit intra and inter-die
+#define NO_WIDE_NOC 99
 #if NOC_CONF>0
-    #define WIDE_NOC 1
+  // Set to PHYSICAL NOC INDEX 1
+  #define WIDE_NOC_ID (PHY_NOCS - 1)
 #else
-  // Set this to a Channel that doesn't exist
-  #define WIDE_NOC 9
+  #define WIDE_NOC_ID (NO_WIDE_NOC)
 #endif
 
 
-#ifndef PCACHE
-  #define PCACHE 1
+#define PCACHE (PROXY_FACTOR > 1)
+
+#ifndef FORCE_PROXY_RATIO
+  #define FORCE_PROXY_RATIO 0
 #endif
+
 #ifndef DCACHE
   #define DCACHE 1 //1: cache and DRAM in separete die, 2: cache and DRAM in the same HBM die
 #endif
+
+#define hops_to_mc(die_w) ( ( ((die_w) / 2) + 0.5) * 2 )
 
 #ifndef LOOP_CHUNK
   #define LOOP_CHUNK 64
@@ -207,7 +249,7 @@ union float_int{
   #define set_id_dcache(tag)((tag / GRID_SIZE / dcache_footprint_ratio / CACHE_WAYS))
 #endif
 
-//ROUTER BASED
+// TASKS AND LOGICAL CHANNELS
 #define NUM_QUEUES 4
 #define NUM_TASKS 5
 
@@ -228,18 +270,17 @@ union float_int{
 #define die_id(tX,tY) ((tX / DIE_W)*DIE_FACTOR+(tY / DIE_H))
 #define board_id(tX,tY) ((tX / BOARD_W)*BOARD_FACTOR+(tY / BOARD_H))
 
-#if PHY_NOCS == 3
-  #define phy_noc(d,qid) (d*PHY_NOCS+(qid-1))
-  // TODO change if we use 3 PHY NOCs
-  #define wide_noc(qid) (qid==2)
+// Assigment of logical channels (qid) to particular physical channels (noc)
+#if PHY_NOCS > 2
+  #define phy_noc(d,qid) (d*PHY_NOCS + (qid-1))
+  #define wide_noc(qid) ((qid-1)==WIDE_NOC_ID)
+#elif PHY_NOCS == 2
+  // Make NoC2 be the wide one
+  #define phy_noc(d,qid) (d*2 + (qid/2))
+  #define wide_noc(qid) ((qid/2)==WIDE_NOC_ID)
 #else
-  // #if PROXY_FACTOR==1 // No Proxy
-    #define phy_noc(d,qid) (d*PHY_NOCS+(qid/2))
-    #define wide_noc(qid) ((qid/2)==WIDE_NOC)
-  // #else // Make NOC3 wide
-  //   #define phy_noc(d,qid) (d*PHY_NOCS+(qid/3))
-  //   #define wide_noc(qid) ((qid/3)==WIDE_NOC)
-  // #endif
+  #define phy_noc(d,qid) (d)
+  #define wide_noc(qid) (WIDE_NOC_ID==0)
 #endif
 
 #if TORUS==0
@@ -248,17 +289,22 @@ union float_int{
   #define global(x, y)( (( (u_int32_t)y << GRID_X_LOG2) + (u_int32_t) x) )
 #endif
 
-//On-the-way&cascading (11)? or within&no-cascading (00)
 #ifndef PROXY_ROUTING
-  #define PROXY_ROUTING 1 // 0: Within proxy, 1: On-the-way, 2: Nearest
+  #define PROXY_ROUTING 4 //  1: On-the-wayCascading,  3: Within+NoCascading, 4:Within+SelectiveCascading, 5:Within+AllCascading
 #endif
-#ifndef CASCADE_WRITEBACK
-  #define CASCADE_WRITEBACK 1
+
+#if PROXY_ROUTING==1
+  #define dest_pcache_writeback() (3)
+#else
+  #define dest_pcache_writeback() (2)
 #endif
 
 #define DRAIN_PROXY 1
-// Whethet an update to the proxy data would be sent to the true owner directly
-#define WRITE_THROUGH 0
+
+// Whether an update to the proxy data would be sent if lower than the current value
+#ifndef WRITE_THROUGH
+  #define WRITE_THROUGH 0
+#endif
 
 #if WRITE_THROUGH==1
   #define need_flush_pcache(global_cid)(false)
@@ -270,7 +316,9 @@ const u_int32_t uncontested_noc = 3;
 const u_int32_t write_queue_max_occupancy = 4;
 
 #define get_qid() (dest_qid)
-
+#define double_to_long(d) ((u_int64_t)d)
+#define noc_to_pu_cy(noc_cycle) (double_to_long((noc_cycle) * noc_to_pu_ratio))
+#define pu_to_noc_cy(pu_cycle) (double_to_long((pu_cycle) * pu_to_noc_ratio))
 
 // PRINT: verbosity level
 #ifndef PRINT
@@ -278,6 +326,12 @@ const u_int32_t write_queue_max_occupancy = 4;
 #endif
 #ifndef ASSERT_MODE
   #define ASSERT_MODE 1
+#endif
+
+#if ASSERT_MODE
+  #define ASSERT_MSG(cond, msg) ({if (!(cond)){std::cout << "ERROR: " << msg << std::endl << std::flush; assert(cond);} })
+#else
+  #define ASSERT_MSG(cond, msg)  // No-op if ASSERT_MODE is not defined
 #endif
 
 
@@ -292,7 +346,7 @@ const u_int32_t write_queue_max_occupancy = 4;
 
 //PERFORMANCE REPORTING PARAMETERS
 #define LOCAL_COUNTERS 11
-#define GLOBAL_COUNTERS 22
+#define GLOBAL_COUNTERS 24
   typedef enum {  
    TASK1 = 0,
    TASK2 = 1,
@@ -315,7 +369,9 @@ const u_int32_t write_queue_max_occupancy = 4;
    MSG_1_LAT = 18,
    MSG_2_LAT = 19,
    MSG_3_LAT = 20,
-   ROUTER_ACTIVE = 21
+   ROUTER_ACTIVE = 21,
+   MEM_WAIT = 22,
+   FLOPS = 23
    } counters_enum;
 
 

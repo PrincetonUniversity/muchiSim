@@ -7,6 +7,7 @@ u_int64_t * prev_timer;
 u_int64_t * span_timer;
 bool * isActive;
 u_int64_t * router_timer;
+string dataset_filename, binary_filename;
 
 // SYNCHRONIZATION VARIABLES
 std::atomic<int> global_router_active;
@@ -50,6 +51,7 @@ u_int32_t frontier_list_len;
 u_int32_t fr_head_offset, fr_tail_offset;
 int * frontier_list;
 bool * epoch_has_work;
+bool * epoch_pcache_busy;
 
 // Dataset storage per core
 u_int64_t data_footprint_in_words=0;
@@ -78,16 +80,16 @@ u_int32_t pcache_occupancy[GRID_SIZE];
 u_int16_t * pcache_freq[PROXY_FACTOR*PROXY_FACTOR];
 u_int64_t * pcache_tags[GRID_SIZE];
 u_int32_t pcache_last_evicted[GRID_SIZE];
-u_int64_t pcache_misses = 0,pcache_hits = 0,pcache_evictions = 0;
 #endif
+u_int64_t pcache_misses = 0,pcache_hits = 0,pcache_evictions = 0;
 
 #if DCACHE
 u_int16_t * dcache_freq;
 u_int64_t * dcache_tags[GRID_SIZE];
 u_int32_t dcache_occupancy[GRID_SIZE];
 u_int32_t dcache_last_evicted[GRID_SIZE];
-u_int64_t dcache_hits=0, dcache_misses=0, dcache_evictions=0;
 #endif
+u_int64_t dcache_hits=0, dcache_misses=0, dcache_evictions=0;
 
 u_int32_t board_arbitration_N[BOARDS*BOARD_BUSES];
 u_int32_t board_arbitration_S[BOARDS*BOARD_BUSES];
@@ -95,4 +97,4 @@ u_int32_t board_arbitration_E[BOARDS*BOARD_BUSES];
 u_int32_t board_arbitration_W[BOARDS*BOARD_BUSES];
 
 #include <map>
-std::map<std::string, double> area;
+std::map<std::string, double> vars;

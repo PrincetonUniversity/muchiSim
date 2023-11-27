@@ -24,6 +24,7 @@ void intialize_sync_structures(){
   numEdgesProcessed  = (u_int64_t *) calloc(COLUMNS, sizeof(u_int64_t));
 
   epoch_has_work = (bool *) calloc(COLUMNS, sizeof(bool));
+  epoch_pcache_busy = (bool *) calloc(COLUMNS, sizeof(bool));
   isActive = (bool *) calloc(GRID_SIZE, sizeof(bool));
   for (u_int32_t i=0; i<GRID_SIZE; i++){
     isActive[i] = true;
@@ -40,6 +41,7 @@ void destroy_sync_structures(){
   free(core_timer); free(prev_timer); free(span_timer); free(numEdgesProcessed); free(numFrontierNodesPushed);
   free (isActive); free(router_timer);
   free(epoch_has_work);
+  free(epoch_pcache_busy);
 }
 
 void initialize_cache_structures(){

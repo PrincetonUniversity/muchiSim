@@ -1,19 +1,22 @@
-using namespace std;
 #include "common/macros.h"
+#include <omp.h>
 // System Configuration Parameters
 #include "configs/config_system.h"
 #include "configs/config_queue.h"
 // Global structures and defined parameters
 #include "common/global.h"
 #include "mem/memory_util.h"
-#if APP<6
+#if APP<ALTERNATIVE
   #include "dataset_loaders/graph_loader.h"
 #else
   #include "dataset_loaders/no_loader.h"
 #endif
-graph_loader * graph;
+graph_loader * graph = NULL;
 #include "network/router.h"
+#include "common/calc_area.h"
+#include "common/calc_cost.h"
 #include "common/util_stats.h"
+#include "common/calc_stats.h"
 #include "mem/memory_system.h"
 #include "apps/frontier_common.h"
 #include "configs/config_app.h"
@@ -31,19 +34,27 @@ int main(int argc, char** argv) {
   #endif
 
   // ==== ALLOCATE Memory for the DATASET =====
-  string dataset_filename;
+  dataset_filename = "datasets/Kron16/";
+  binary_filename = "0";
+  bool dry_run = false;
   if (argc >= 2) dataset_filename = argv[1];
-  else dataset_filename = "datasets/Kron16/";
+  if (argc >= 3) binary_filename = argv[2];
+  if (argc >= 4) dry_run = (bool) atoi(argv[3]);
+  cout << "Dataset: " << dataset_filename << endl;
+  cout << "Dry run: " << dry_run << endl;
   // ==== CONFIGURATIONS ====
   config_dataset(dataset_filename);
   config_app();
   config_queue();
 
-  // ==== CALCULATE STORAGE AND AREA ====
+  // ==== CALCULATE STORAGE, AREA and COST ====
+  // NOTE: Don't change the order of these functions as there are values that are used in the next ones
   calculate_storage_per_tile();
+  print_configuration(cout);
   area_calculation();
-  
-  print_configuration();
+  cost_calculation();
+  if (dry_run) return 0;
+
   init_perf_counters(); cout << "Perf counters initialized\n"<<flush;
   connect_mesh(); cout << "Mesh connected\n"<<flush;
 
@@ -63,12 +74,13 @@ int main(int argc, char** argv) {
   }
   auto end = std::chrono::system_clock::now();
   chrono::duration<double> elapsed_seconds = end-start;
-  cout << "\nSimulation time: " << elapsed_seconds.count() << "s\n";
+  double sim_time = elapsed_seconds.count();
 
   // ==== PRINT THE PERFORMANCE COUNTERS and RESULTS ====
-  print_stats_acum(true);
-  bool result_correct = (argc >= 3) ? result_correct = compare_out(argv[2]) : true;
-  
+  print_stats_acum(true, sim_time);
+  bool result_correct = (argc >= 5) ? result_correct = compare_out(argv[4]) : true;
+  cout << "\nVersion 31\n\n";
+
   // ==== FREE MEMORY ALLOCATED ====
   destroy_cache_structures();
   destroy_dataset_structures();

@@ -39,6 +39,18 @@ u_int32_t getHeadFlit(int qid, u_int64_t data){
    return flit;
 }
 
+u_int32_t XYHeadFlit(int tX, int tY){
+   // To compensate the conversion that happens in the router for Mesh
+   #if TORUS==0
+      if ((tY%2)==1) tX = GRID_Xm1 - tX;
+   #endif
+   #if ASSERT_MODE
+      assert(tX < GRID_X);
+      assert(tY < GRID_Y);
+   #endif
+   u_int32_t flit = (tY << GRID_X_LOG2) | tX;
+   return flit;
+}
 
 class RouterModel
 {
@@ -216,7 +228,7 @@ int RouterModel::check_queues_occupancy()
          if (output_q[dir]!=NULL) acc += output_q[dir][q].occupancy();
          // We consider the input queue as empty if it has less than 2 elements (for 'wide' two-flit NoC) or zero elements for single-fit NoC
          // REVISIT to make this code more general to any width, right now it only supports 32 and 64 bit flits
-         input_empty[dir][q] = (wide_noc(q)) ? (iq_occ < 2) : (iq_occ == 0);
+         input_empty[dir][q] = (iq_occ == 0);
       }
    }
    #if MUX_BUS > 1
@@ -237,12 +249,12 @@ char RouterModel::print_dest_route(int origin, int qid, u_int64_t router_timer){
    bool valid;
 
    dest = '_';
-   bool is_empty = wide_noc(qid) ? input_q[origin][qid].occupancy() < 2 : input_q[origin][qid].is_empty();
+   bool is_empty = input_q[origin][qid].is_empty();
    if (!is_empty){
       dest = '=';
       Msg msg = input_q[origin][qid].peek();
-
-      if ((msg.type <= HEAD) && (router_timer>=msg.time)){
+      u_int64_t msg_time = pu_to_noc_cy(msg.time);
+      if ((msg.type <= HEAD) && (router_timer >= msg_time)){
             bool switch_Y_board, switch_X_board, route_to_core, exact_Y, exact_X;
             bool Y_routing_pri, dnorth, dsouth, dwest, deast;
             int abs_diff_Y, abs_diff_X;
@@ -261,7 +273,7 @@ char RouterModel::print_dest_route(int origin, int qid, u_int64_t router_timer){
             else assert(0);
          }
 
-      } else if (router_timer>=msg.time){
+      } else if (router_timer >= msg_time){
          // assert(msg.type != HEAD);
          if (origin == open[C][qid]) return 'C';
          if (origin == open[PX][qid]) return 'X';
@@ -351,53 +363,32 @@ void RouterModel::get_dst(u_int32_t msg_data, int & dst_X, int & dst_Y){
 
 void RouterModel::comp_destXY(int qid, uint16_t orig, u_int32_t msg_data, int & dst_X, int & dst_Y, bool & route_to_core, bool & exact_x, bool & exact_y, bool & switch_X_board, bool & switch_Y_board){
    get_dst(msg_data, dst_X, dst_Y);
-   // Only for Task3bis
-   if (qid == 3){
-      int dst_rep_X = (id_X / PROXY_W);
-      int dst_rep_Y = (id_Y / PROXY_H);
-      int offset_in_rep_X = (dst_X % PROXY_W);
-      int offset_in_rep_Y = (dst_Y % PROXY_H);
-      // Truncate the destination to the nearest Proxy
-      int x_within = dst_rep_X * PROXY_W + offset_in_rep_X;
-      int y_within = dst_rep_Y * PROXY_H + offset_in_rep_Y;
-
-      #if PROXY_ROUTING==2
-         int x_prior = (dst_rep_X-1) * PROXY_W + offset_in_rep_X;
-         int x_next = (dst_rep_X+1) * PROXY_W + offset_in_rep_X;
-         int y_prior = (dst_rep_Y-1) * PROXY_H + offset_in_rep_Y;
-         int y_next = (dst_rep_Y+1) * PROXY_H + offset_in_rep_Y;
-         // dst_X as the closest x to id_X between x_within, x_prior, x_next
-         if (abs(x_within-id_X) < abs(x_prior-id_X)){
-            if (abs(x_within-id_X) < abs(x_next-id_X)) dst_X = x_within;
-            else dst_X = x_next;
-         } else {
-            if (abs(x_prior-id_X) < abs(x_next-id_X)) dst_X = x_prior;
-            else dst_X = x_next;
-         }
-         // dst_Y as the closest y to id_Y between y_within, y_prior, y_next
-         if (abs(y_within-id_Y) < abs(y_prior-id_Y)){
-            if (abs(y_within-id_Y) < abs(y_next-id_Y)) dst_Y = y_within;
-            else dst_Y = y_next;
-         } else { // y_within is not the closest
-            if (abs(y_prior-id_Y) < abs(y_next-id_Y)) dst_Y = y_prior;
-            else dst_Y = y_next;
-         }
-      #elif PROXY_ROUTING==0 || PROXY_ROUTING==4
+   
+   #if PROXY_FACTOR>1 && PROXY_ROUTING>=3 // Route Within proxy region
+      if (qid == 3){
+         int dst_rep_X = (id_X / PROXY_W);
+         int dst_rep_Y = (id_Y / PROXY_H);
+         int offset_in_rep_X = (dst_X % PROXY_W);
+         int offset_in_rep_Y = (dst_Y % PROXY_H);
+         // Truncate the destination to the nearest Proxy
+         int x_within = dst_rep_X * PROXY_W + offset_in_rep_X;
+         int y_within = dst_rep_Y * PROXY_H + offset_in_rep_Y;
          dst_X = x_within;
          dst_Y = y_within;
-      #endif
-   }
+      }
+   #endif
 
    // The flit should go to the Core
    exact_y = (dst_Y == id_Y);
    exact_x = (dst_X == id_X);
 
+   // With Cascade Writeback mode, find proxy tiles on the way to the true owner
+   #if PROXY_FACTOR>1
    #if PROXY_ROUTING==1
       if (qid == 3){
          #if BOARD_W < GRID_X
             // The following code is used to calculate the destination coordinates of a certain element
             // based on its current ID and the dimensions of the board it is placed on.
-
             // First, we calculate the row (dst_board_Y) and column (dst_board_X) that the element's ID corresponds to on the board.
             int dst_board_X = (id_X / BOARD_W);
             int dst_board_Y = (id_Y / BOARD_H);
@@ -427,30 +418,38 @@ void RouterModel::comp_destXY(int qid, uint16_t orig, u_int32_t msg_data, int & 
                {exact_y |= is_proxy_y; exact_x |= is_proxy_x;}
          }
       }
-   #endif
-
-
-#if PROXY_ROUTING==4
-   if (qid == 2){
-      // Route to Proxy that is on the way to the real owner
-      bool is_proxy_y = ( (dst_Y % PROXY_H) == (id_Y % PROXY_H) );
-      bool is_proxy_x = ( (dst_X % PROXY_W) == (id_X % PROXY_W) );
-      // route to the proxy tile unless it's a proxy tile and it's coming from the core (avoid endless loop)
-      if (!(is_proxy_y && is_proxy_x && (orig==C)) ){
+   #elif PROXY_ROUTING>=4 // Proxy_routing=3 never cascades
+      if (qid == 2){
+         // Route to Proxy that is on the way to the real owner
+         bool is_proxy_y = ( (dst_Y % PROXY_H) == (id_Y % PROXY_H) );
+         bool is_proxy_x = ( (dst_X % PROXY_W) == (id_X % PROXY_W) );
+         // route to the proxy tile unless it's a proxy tile and it's coming from the core (avoid endless loop)
+         if (!(is_proxy_y && is_proxy_x && (orig==C)) ){
             uint16_t dest = (dst_Y < id_Y ? N : (dst_Y > id_Y ? S : (dst_X < id_X ? W : E)));
-            // If the port on the way to the true owner is empty we take that path
-            // Otherwise we can check if it's a proxy
-            bool port_is_not_empty = !output_q[dest][2].is_empty();
-            if (port_is_not_empty){
-               if (is_proxy_y && is_proxy_x){
-                  bool core_queue_not_full = output_q[C][3].more_than_half_free() && input_q[C][3].more_than_half_free();
-                  exact_y |= core_queue_not_full;
-                  exact_x |= core_queue_not_full;
-               }
+            // Check if it's a proxy
+            if (is_proxy_y && is_proxy_x){
+               // We want that: (a) coalesce a#if PROXY_ROUTING==4 lot while not in drain mode (b) coalesce a little while in drain mode
+               // Go into the proxy if more than half the queue is free
+
+               bool sink_into_proxy = true;
+               #if PROXY_ROUTING==4 // extra selection
+                  bool into_core_not_full = !output_q[C][3].cannot_fit_two();
+                  //bool in_drain = (input_q[C][3].occupancy() < 4) && (input_q[C][2].occupancy() < 4) && (input_q[C][1].occupancy() < 4);
+                  bool trajectory_has_something = !output_q[dest][2].is_empty();
+                  bool trajectory_nearly_full = output_q[dest][2].cannot_fit_two();
+                  bool into_core_not_too_busy = output_q[C][3].more_than_half_free();// && input_q[C][3].more_than_half_free();
+                  // I sink if the trajectory is full, or
+                  // The input to the core is not too busy in drain mode if my current path is busy, or I sink in normal mode if the destination queue is not busy
+                  bool select_to_sink = into_core_not_full && trajectory_nearly_full || into_core_not_too_busy;// && (in_drain && trajectory_has_something || !in_drain);
+                  sink_into_proxy = select_to_sink;
+               #endif
+               exact_y |= sink_into_proxy;
+               exact_x |= sink_into_proxy;
             }
+         }
       }
-   }
-#endif
+   #endif
+   #endif
 
    // Steal region means that a in-transit task message can be stolen by a core that is in the same region
    #if STEAL_W > 1
@@ -538,7 +537,7 @@ void RouterModel::find_dest(int qid, uint16_t orig, u_int32_t msg_data, int & ab
    #endif
 }
 
-uint64_t RouterModel::calc_inp4out(bool * drain_X,bool * drain_Y, int qid, u_int64_t router_timer, u_int16_t * next_inp4out, u_int32_t & collisions){
+uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_int64_t router_timer, u_int16_t * next_inp4out, u_int32_t & collisions){
    int want_to_move_accum = 0;
    //reset next_inp4out
    for (int d = 0; d < DIRECTIONS; d++){
@@ -574,7 +573,8 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X,bool * drain_Y, int qid, u_int
          // If it's not a head we don't check the dst. We also check the time!
          // We will not have the case where cores run ahead of routers and put newer data in front of older data,
          // because the Core-output router wouldn't let the new messages progress until the router is caught up!
-         if ((msg.type <= HEAD) && (router_timer>=msg.time) && !board_congestion){
+         u_int64_t msg_time = pu_to_noc_cy(msg.time);
+         if ((msg.type <= HEAD) && (router_timer >= msg_time) && !board_congestion){
             // Therse variables are set inside find_dest
             bool switch_Y_board = false, switch_X_board = false, route_to_core = false;
             bool exact_Y = false, exact_X = false;
@@ -668,7 +668,7 @@ int RouterModel::check_border_traffic(int dest, int qid, bool * already_routed){
          inter_board_traffic[board_id]++;
          // Mark all the other links as already routed
          for (int p = 0; p < PHY_NOCS; p++) already_routed[dest*PHY_NOCS+p] = true;
-         return inter_board_latency_ns;
+         return inter_board_latency_ns*noc_freq;
       }
    #endif
 
@@ -683,7 +683,7 @@ int RouterModel::check_border_traffic(int dest, int qid, bool * already_routed){
          #if PACK_W < BOARD_W
             if (is_crossing_die(dest,W,E,is_origin_pack_X, is_end_pack_X) || is_crossing_die(dest,N,S,is_origin_pack_Y, is_end_pack_Y)){
                inter_pack_traffic[pack_id]++;
-               latency = inter_pack_latency_ns;
+               latency = inter_pack_latency_ns*noc_freq;
             }
          #endif
 
@@ -695,7 +695,7 @@ int RouterModel::check_border_traffic(int dest, int qid, bool * already_routed){
          //Wide Noc but serialized into 32bit link
          #if NOC_CONF==1 || NOC_CONF==2
             // It assumes the link is pipelined, so it adds one cycle
-            // FIXME: to be precise, the next cycle should still use the port (add contention)
+            // To be precise, the next cycle should still use the port (add contention)
             if (wide_noc(qid)) latency++;
          #endif
          return latency;
@@ -744,79 +744,75 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
       moved[qid] = 0;
       u_int32_t collisions = 0;
       // Process all directions inside calc_inp4out
-      want_to_move_accum+=calc_inp4out(drain_X,drain_Y, qid,router_timer, &next_inp4out[0], collisions);
+      want_to_move_accum += calc_inp4out(drain_X,drain_Y, qid, router_timer, &next_inp4out[0], collisions);
       input_collision[qid] = collisions;
       output_collision[qid] = 0;
 
       // Loop to iterate over the outputs ports
       for (int d = 0; d < DIRECTIONS; d++){
+         // Cannot fit two is there for the case where we have a wide noc and we are trying to route two.
          output_full[qid][d] = (output_q[d] != NULL) && output_q[d][qid].cannot_fit_two();
 
          // Determine the input that an output (d) route should pop from
          if ( (output_q[d] != NULL) && !output_full[qid][d] && !already_routed[phy_noc(d,qid)] ){
 
             origin = open[d][qid];
-            if (origin < DIR_NONE){ // A certain input (origin) is currently open to flow to an output (d)
-
+            // A certain input (origin) is currently open to flow to an output (d)
+            if (origin < DIR_NONE){
+               R_queue<Msg> * iq = input_q[origin];
                //There is an extra collision if some input head was granted this (d)irection
-               if (next_inp4out[d] < DIR_NONE){
-                  input_collision[qid]++;
-               }
+               if (next_inp4out[d] < DIR_NONE) input_collision[qid]++;
 
                //If the route is open, messages come back to back, so no need to check time
                //If we use a single NOC, it might be that a route is open but messages don't come back to back
                // But flits of different messages within the same channel shouldn't interleave 
                if (!input_empty[origin][qid]){
-                  #if ASSERT_MODE
-                     // With Wide NOC the messages should be routing in one shot, so no route open!
-                     assert(!wide_noc(qid));
-                  #endif
-
-                  Msg msg = input_q[origin][qid].dequeue();
+                  Msg msg = iq[qid].dequeue();
+                  ASSERT_MSG(msg.type != HEAD, "Head on open route qid: " << qid);
                   output_q[d][qid].enqueue(msg); moved[qid]++;
                   // Ignore latency result since time is carried by the HEAD flit
                   check_border_traffic(d,qid,&already_routed[0]);
+                  if (wide_noc(qid) && (msg.type != TAIL) && (!iq[qid].is_empty()) ){
+                     msg = iq[qid].dequeue();
+                     output_q[d][qid].enqueue(msg); moved[qid]++;
+                     check_border_traffic(d,qid,&already_routed[0]);
+                  }
+                  // Close the route
+                  if (msg.type == TAIL) open[d][qid]=DIR_NONE;
                   // Bump the priority channel id
                   next_q = (qid+1)%NUM_QUEUES;
-
-                  if (msg.type == HEAD){
-                     cout << "Head on open route qid:"<<qid<<"\n"<<std::flush;
-                     assert(msg.type != HEAD);
-                  }// If the route is open, the Msg cannot be a HEAD
-                  
-                  if (msg.type == TAIL){
-                     // Close the route
-                     open[d][qid]=DIR_NONE;
-                  }
-                  #if ASSERT_MODE && STEAL_W==1
-                     // ASSERT ONLY WITHOUT STEAL REGION
-                     else if (qid == 1 && d==C){ //MID flit
-                        u_int32_t base = global(id_X, id_Y) * task_chunk_size[qid];
-                        assert(base <= msg.data); 
-                        assert((base + task_chunk_size[qid]) >= msg.data); 
-                     }
-                  #endif
                } 
             } else { //Not Open Route
                origin = next_inp4out[d];
                // If someone (origin) requested to be routed to this output (d)
                if (origin < DIR_NONE){
                   //If the origin input wants to be routed to a specific d(estination)
-                  #if ASSERT_MODE
-                     assert(!input_empty[origin][qid]);
-                  #endif
+                  ASSERT_MSG(!input_empty[origin][qid], "Must not be empty");
                   
-                  bool t3_to_core = (qid==2 || qid==3) && (d==C);
-                  if (!t3_to_core || input_q[origin][qid].occupancy() > 1){
+                  bool t3_oq_not_full = true;
+                  #if PROXY_FACTOR == 1
+                     bool t3_to_core = false;
+                  #else
+                     bool t3_to_core = (qid==2 || qid==3) && (d==C); // T3' to Core or T3 to Core, need to check due to proxy
+                     #if PROXY_ROUTING==5
+                     if (t3_to_core){
+                        Msg pre_msg = input_q[origin][qid].peek();
+                        int dst_X, dst_Y; get_dst(pre_msg.data, dst_X, dst_Y);
+                        bool owner_core = (dst_X == id_X && dst_Y == id_Y) && !output_q[C][2].cannot_fit_two();
+                        if (!owner_core) t3_oq_not_full = !output_q[C][3].cannot_fit_two();
+                     }
+                     #endif
+                  #endif
 
+                  R_queue<Msg> * iq = input_q[origin];
+                  // t3_to_core move should move all the flits at once
+                  if (!t3_to_core || (iq[qid].occupancy() > 1) && t3_oq_not_full){
                      u_int16_t hop_latency = check_border_traffic(d,qid,&already_routed[0]);
-                     Msg msg = input_q[origin][qid].dequeue();
-                     msg.time=router_timer+hop_latency;
-
-                     // bool inter_die = is_crossing_die(dest,W,E,is_origin_die_X, is_end_die_X) || is_crossing_die(dest,N,S,is_origin_die_Y, is_end_die_Y))
+                     Msg msg = iq[qid].dequeue();
+                     msg.time = noc_to_pu_cy(router_timer+hop_latency);
 
                      u_int16_t qid_dest = qid;
-                     if (t3_to_core){
+                     if (t3_to_core){ // input occupancy must have been more than 1
                         int dst_X, dst_Y;
                         get_dst(msg.data, dst_X, dst_Y);
                         // If it was coming from T3' but T3 IQ is full, then it goes to T3' even though it's the owner. That's okay because the owner could also be a proxy of itself!
@@ -824,30 +820,22 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
                         // if it's the real dest then qid=2, else qid=3
                         if (owner_core) qid_dest = 2;
                         else qid_dest = 3; // If coming from ch-2 then check that ch-3 is not busy!
+                        ASSERT_MSG(!output_q[C][qid_dest].cannot_fit_two(), "Must be able to fit in output queue");
+                        ASSERT_MSG(msg.type != TAIL, "Msg cannot be TAIL");
+                        ASSERT_MSG(!iq[qid].is_empty(), "IQ cannot be empty");
                      }
 
-                     output_q[d][qid_dest].enqueue(msg);
-                     moved[qid]++;
+                     output_q[d][qid_dest].enqueue(msg); moved[qid]++;
 
                      // Update Round Robin for both Nocs and Input Ports (origin qid)
-                     next_d[qid] = (d+1)%DIRECTIONS;
-                     next_q = (qid+1)%NUM_QUEUES;
+                     next_d[qid] = (d+1)%DIRECTIONS; next_q = (qid+1)%NUM_QUEUES;
 
-                     if (wide_noc(qid) || t3_to_core){
-                        #if ASSERT_MODE
-                           assert(!output_q[d][qid].is_full() );
-                        #endif
-                        Msg msg2 = input_q[origin][qid].dequeue();
-                        output_q[d][qid_dest].enqueue(msg2);
-                        moved[qid]++;
-                        
-                     } else{ // No WIDE NOC
-                        #if ASSERT_MODE && STEAL_W==1
-                           if (qid==1 && d==C) assert(global(id_X,id_Y)*task_chunk_size[1] <= task2_dequeue(msg.data));
-                           assert(msg.type <= HEAD); // If route is not open is because the new Msg is a HEAD
-                        #endif
-                        if (msg.type == HEAD) open[d][qid]=origin; //Open route if HEAD but not MONO
+                     if (t3_to_core || (wide_noc(qid) && (msg.type != TAIL) && !iq[qid].is_empty()) ){
+                        msg = iq[qid].dequeue();
+                        output_q[d][qid_dest].enqueue(msg); moved[qid]++;
+                        if (msg.type == MID) open[d][qid]=origin;
                      }
+                     else if (msg.type == HEAD) open[d][qid]=origin; //Open route if HEAD, but not MONO
 
                   } // end of If enough messages
                }
@@ -879,8 +867,8 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
    msgcol(1,total_out_collisions);
    msgcol(2,end_collisions);
 
-   moved_accum += moved[2]+moved[3];
-   if (moved_accum > 0) active[0]++;
+   moved_accum += moved[2] + moved[3];
+   if (moved_accum > 0) active[0] += 1;
    
    return want_to_move_accum + total_out_collisions;
 }

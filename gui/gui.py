@@ -8,8 +8,9 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 import imageio.v2 as imageio
+from datetime import datetime
 
-directory = "dlxsim/"
+directory = "sim_logs/"
 lista = []
 matrix_perf_counters = ['FMCollision In','FMCollision Out','FMCollision End','FMTask1','FMTask2','FMTask3','FMCore Active','FMRouter Active']
 average_perf_counters = ['Avg. Transactions','Avg. Latency']
@@ -18,13 +19,19 @@ statistic_options = ['Heatmap','Boxplot','Average', 'Maximum', 'Minimum', 'Stand
 apps = ['SSSP','PageRank',"BFS","WCC","SPMV","Histo","Multi"]
 sizes = ['8','16','32','64','128','256','512','1024']
 
+default_metric = 'FMRouter Active'
+default_plot = 'Heatmap'
+default_size = '64'
+default_app = 5
+default_name = 'HEAT64'
+
 image_labels = []
 movies = []
 
 average_perf_counters = ['Avg. Transactions:', 'Avg. Latency:', 'DHit Rate (hit/miss):']
 options = matrix_perf_counters + average_perf_counters
 
-dataset = "Kron"
+dataset = "Kron22"
 
 def parseAverage(configuration, application, size):
     path = directory + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
@@ -85,7 +92,7 @@ class MainWindow(QMainWindow):
         self.list_widget = QListWidget()
         self.list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.list_widget.addItems(options)
-        items = self.list_widget.findItems('FMCore Active', Qt.MatchExactly)
+        items = self.list_widget.findItems(default_metric, Qt.MatchExactly)
         self.list_widget.setCurrentItem(items[0])
         self.list_widget.setFixedHeight(100)  # Set fixed height
         self.main_layout.addWidget(self.list_widget)
@@ -94,7 +101,7 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(QLabel("Stats:", self))
         self.stats_dropdown = QComboBox()
         self.stats_dropdown.addItems(statistic_options)
-        self.stats_dropdown.setCurrentText('Average')
+        self.stats_dropdown.setCurrentText(default_plot)
         stats_layout.addWidget(self.stats_dropdown)
         self.main_layout.addLayout(stats_layout)
 
@@ -103,7 +110,7 @@ class MainWindow(QMainWindow):
         stats_layout.addWidget(QLabel("Size:", self))
         self.size_dropdown = QComboBox()
         self.size_dropdown.addItems(sizes)
-        self.size_dropdown.setCurrentText('8')
+        self.size_dropdown.setCurrentText(default_size)
         stats_layout.addWidget(self.size_dropdown)
         self.main_layout.addLayout(stats_layout)
 
@@ -113,6 +120,7 @@ class MainWindow(QMainWindow):
 
         self.config_input = QLineEdit(self)
         self.config_input.setPlaceholderText("Enter configuration here")
+        self.config_input.setText(default_name)
 
         stats_layout.addWidget(self.config_input)
         self.main_layout.addLayout(stats_layout)
@@ -123,7 +131,7 @@ class MainWindow(QMainWindow):
         self.app_dropdown = QComboBox()
         self.app_dropdown.addItems(apps)
         # Multi is 6, SPMV is 4
-        self.app_dropdown.setCurrentIndex(4)
+        self.app_dropdown.setCurrentIndex(default_app)
         stats_layout.addWidget(self.app_dropdown)
         self.main_layout.addLayout(stats_layout)
 
@@ -235,25 +243,31 @@ class MainWindow(QMainWindow):
                 image_labels.append(new_image_label)
 
             elif stat == "Heatmap":
+                # Create a folder with the current timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                os.makedirs(timestamp, exist_ok=True)
+
                 filenames = []
                 for frame_number, frame in enumerate(data[item]):
                     plt.figure()
                     heatmap_data = np.array(frame[1:])
-                    # Make the heatmap legend fixed from 0 to 100, where 0 is light blue and 100 is dark blue
                     plt.imshow(heatmap_data, cmap='Blues', interpolation='nearest', vmin=0, vmax=100)
                     plt.title(f"Heatmap for {item} - Frame {frame_number}")
+                    #plt.title(f"Heatmap for Router Activity - Frame {frame_number}")
                     plt.colorbar()
-
-                    # Save each heatmap as a PNG file
-                    filename = f'heatmap_{item}_frame_{frame_number}.png'
-                    plt.savefig(filename)
+                    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
+                    item_name = item.replace(" ", "_")
+                    # Save each heatmap in the created folder
+                    filename = f'{timestamp}/heatmap_{item_name}_frame_{frame_number}.png'
+                    plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
                     filenames.append(filename)
                     plt.close()
-                    print(f"Saved heatmap for {item} - Frame {frame_number} as {filename}")
+                    print(f"Saved heatmap for {item_name} - Frame {frame_number} as {filename}")
+
                 # Create a GIF from the saved heatmaps
                 if filenames:
                     images = [imageio.imread(filename) for filename in filenames]
-                    gif_path = f'heatmap_animation.gif'
+                    gif_path = f'{timestamp}/heatmap_animation.gif'
                     imageio.mimsave(gif_path, images, duration=1)
                     print("GIF created successfully!")
 
@@ -264,7 +278,7 @@ class MainWindow(QMainWindow):
                     movies.append(new_movie_label)
                     movie.start()
 
-                    # Remove temporary PNG files
+                    # Uncomment this part if you want to remove the temporary PNG files
                     # for filename in filenames:
                     #     os.remove(filename)
 

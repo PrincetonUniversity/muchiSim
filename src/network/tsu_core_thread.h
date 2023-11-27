@@ -1,15 +1,17 @@
 void update_timer(u_int32_t global_cid, int delay, u_int64_t compute_cycles){
+  // Update the sample period wrt to task delay
   if (delay>sample_time) sample_time*=2;
-  u_int32_t base = global_cid*smt_per_tile;
-  core_timer[base]+=delay;
-  assert(compute_cycles<delay);
 
-  // Add compute cycles to all core_timers
+  u_int32_t base = global_cid*smt_per_tile;
+  // Add delay to the pu_cycles of the current thread
+  core_timer[base]+=delay;
+
+  // Add compute cycles to all threads since it's a shared resource
   for (int i=1; i<smt_per_tile; i++){
     core_timer[base+i]+=compute_cycles;
   }
 
-  //Calculate min from all core_timer[global_cid]
+  //Calculate min from all thread timers
   u_int64_t min = core_timer[base];
   int min_index = 0;
   for (int i=1; i<smt_per_tile; i++){
@@ -24,9 +26,10 @@ void update_timer(u_int32_t global_cid, int delay, u_int64_t compute_cycles){
 }
 
 void count_delay(u_int32_t * counter, u_int32_t global_cid, int task_id, int delay, u_int64_t compute_cycles){
-  #if QUEUE_PRIO==3
+  #if QUEUE_PRIO==3 // ASIC MODE
     delay=1;
   #endif
+  // Increase the count of Task Invocations
   counter[T1+task_id]++;
   if (task_id>2) task_id--;
   counter[TASK1+task_id]+=delay;
@@ -61,6 +64,9 @@ struct task_entry
   int (*task)(int, int, u_int64_t, u_int64_t &);
 };
 
+#define EXPLORE_FRONTIER_ID 16
+#define DRAIN_PCACHE_ID 1
+
 void tsu_core_thread(u_int32_t wtid){
   // A thread is assigned to advance a number of columns, and each column has 'GRID_Y' cores
   u_int32_t cores_samples = 0;
@@ -80,11 +86,13 @@ void tsu_core_thread(u_int32_t wtid){
 
   bool current_epoch_ongoing = true;
   while (current_epoch_ongoing){
-    cout << "TASK INIT epoch: " << epoch_counter << endl << flush;
-    for (u_int32_t cid = 0; cid < CORES_PER_TH; cid++){
-      u_int32_t x = wtid*COLUMNS_PER_TH + cid%COLUMNS_PER_TH;
-      u_int32_t y = cid/COLUMNS_PER_TH;
-      task_init(x,y);
+    LK; cout << "INIT epoch: " << epoch_counter << endl << flush; ULK;
+    if (epoch_counter <= num_kernels){
+      for (u_int32_t cid = 0; cid < CORES_PER_TH; cid++){
+        u_int32_t x = wtid*COLUMNS_PER_TH + cid%COLUMNS_PER_TH;
+        u_int32_t y = cid/COLUMNS_PER_TH;
+        task_init(x,y);
+      }
     }
 
     while(global_router_active){
@@ -95,17 +103,18 @@ void tsu_core_thread(u_int32_t wtid){
         u_int32_t global_cid = global(x,y);
 
         // Check what's the localtimer of the core after executing the previous task
-        u_int64_t timer = core_timer[global_cid*smt_per_tile];
-        if (timer <= router_timer[wtid]){
+        u_int64_t pu_cycles = core_timer[global_cid*smt_per_tile];
+        u_int64_t noc_equivalent_cy = noc_to_pu_cy(router_timer[wtid]);
+        if (pu_cycles <= noc_equivalent_cy){
 
-          u_int32_t current_sample = (timer / sample_time);
+          u_int32_t current_sample = (pu_cycles / sample_time);
           //SAMPLING EVERY TIMESTEP, cores can only enter here once regardless of Thread count
           if (current_sample > last_sample[cid]){
             last_sample[cid]=current_sample;
             // Cycles spanned since last sample
-            span_timer[global_cid] = timer - prev_timer[global_cid];
+            span_timer[global_cid] = pu_cycles - prev_timer[global_cid];
             // Update Previous timestamp
-            prev_timer[global_cid] = timer;
+            prev_timer[global_cid] = pu_cycles;
 
             // Update Print and Frame Counters
             if ((x < PRINT_X) && (y < PRINT_Y)){
@@ -137,9 +146,9 @@ void tsu_core_thread(u_int32_t wtid){
 
                   LK;
                     print_stats_frame();
-                    print_stats_acum(false);
+                    print_stats_acum(false, 0);
 
-                    cout << "\n\n\n===Core Utilization Total=== CORE-S:"<<current_sample<<";; TIME K cy:"<<timer/1000<<" ;; Nodes Proc: "<< numFrontierNodesPushed[wtid] << " -- Edges Proc: "<< numEdgesProcessed[wtid] << "\n" << std::flush;
+                    cout << "\n\n\n===Core Utilization Total=== CORE-S:"<<current_sample<<";; TIME K cy:"<<pu_cycles/1000<<" ;; Nodes Proc: "<< numFrontierNodesPushed[wtid] << " -- Edges Proc: "<< numEdgesProcessed[wtid] << "\n" << std::flush;
 
                     if (is_cold) cout << "======== IT IS COLD ======= Only "<< count_active <<" Tiles active\n";
                     else cool_down_time = get_final_time();
@@ -173,12 +182,7 @@ void tsu_core_thread(u_int32_t wtid){
           #if WRITE_THROUGH==1
             tasks[3].runnable = tasks[3].invokable && (core_writeq[2].capacity() > num_task_params[2]);
           #else
-            #if CASCADE_WRITEBACK
-              int dest_pcache_writeback = 3;
-            #else
-              int dest_pcache_writeback = 2;
-            #endif
-            tasks[3].runnable = tasks[3].invokable && (!proxys_cached || (core_writeq[dest_pcache_writeback].capacity() > num_task_params[2]) );
+            tasks[3].runnable = tasks[3].invokable && (!proxys_cached || (core_writeq[dest_pcache_writeback()].capacity() > num_task_params[2]) );
           #endif
 
 
@@ -188,17 +192,22 @@ void tsu_core_thread(u_int32_t wtid){
             iqueue123_active |= tasks[i].iqueue_active;
             oqueue123_active |= tasks[i].oqueue_active;
           }
-          bool wants_to_flush_cache = !oqueue123_active && !iqueue123_active && (router_collision==0);
 
           bool frontier_active = calculate_frontier_occ(global_cid) > 0;
+          bool pcache_active = need_flush_pcache(global_cid);
 
           #if GLOBAL_BARRIER>=1 // look at whether it's the beginning of the frontier
-            frontier_active  = frontier_active && (epoch_begin[cid]>0);
-          #else
-            if (wants_to_flush_cache) epoch_begin[cid]++;
+            // Only mark the frontier as active if we just started the new epoch
+            frontier_active  = frontier_active && (epoch_begin[cid]>=EXPLORE_FRONTIER_ID);
+            #if GLOBAL_BARRIER==2
+              pcache_active = pcache_active && (epoch_begin[cid]>=DRAIN_PCACHE_ID);
+            #endif
+          #else // If not Barrier
+            bool pu_idle = !oqueue123_active && !iqueue123_active && (router_collision==0);
+            if (pu_idle) epoch_begin[cid]++;
             else epoch_begin[cid] = 0;
           #endif
-          isActive[global_cid] = oqueue123_active|| iqueue123_active || frontier_active || need_flush_pcache(global_cid);
+          isActive[global_cid] = oqueue123_active|| iqueue123_active || frontier_active || pcache_active;
 
           // T1 high priority if its OQ is empty, AND if the IQ of T2 is not full
           // Only prioritize task2 over task3 if task3 has enough space in its input queue
@@ -218,27 +227,33 @@ void tsu_core_thread(u_int32_t wtid){
             i++;
           }
           
-          int delay; u_int64_t compute_cycles = 0;
+          #if GLOBAL_BARRIER==2
+            bool drain_pcache_now = (core_writeq[dest_pcache_writeback()].capacity() > num_task_params[2]);
+          #else
+            bool drain_pcache_now = !iqueue123_active && !oqueue123_active;
+            //bool drain_pcache_now = !iqueue123_active && (!tasks[1].oqueue_active) && (!tasks[3].oqueue_active) && core_writeq[2].occupancy() < 2;
+          #endif
 
+          int delay; u_int64_t compute_cycles = 0;
           if (next>=0){
-            if (!tasks[next].local) count_msg_latency(x,y,next-1, timer);
-            delay = tasks[next].task(x,y,timer,compute_cycles);
+            if (!tasks[next].local) count_msg_latency(x,y,next-1, pu_cycles);
+            delay = tasks[next].task(x,y,pu_cycles,compute_cycles);
             count_delay(frame_counters[x][y], global_cid, next, delay, compute_cycles);
           } 
-          else if (need_flush_pcache(global_cid) && !oqueue123_active){
+          else if (pcache_active && drain_pcache_now){
             // No task to execute, drain pcache (done in the background in hardware)
-            drain_pcache(x,y, timer);
-            update_timer(global_cid, 1, compute_cycles);
+            drain_pcache(x,y, pu_cycles);
+            update_timer(global_cid, 1, compute_cycles); //delay
             // Wait for 16 totally idle cycles to start exploring the frontier
-          }else if (frontier_active && epoch_begin[cid]>16){
-            delay = tasks[4].task(x,y,timer,compute_cycles);
+          }else if (frontier_active && epoch_begin[cid]>=EXPLORE_FRONTIER_ID){
+            delay = tasks[4].task(x,y,pu_cycles,compute_cycles);
             count_delay(frame_counters[x][y], global_cid, 4, delay, compute_cycles);
-            epoch_begin[cid] = 0;
+            epoch_begin[cid] = 0; // Marked frontier as explored
           }else{
             int delay = 1;
             // Advance many cycles if the entire column is idle
             // REVISIT should make sure that the tile will not receive a task in the next 10 cycles
-            if (!column_active[wtid]) delay = 10;
+            if (!column_active[wtid]) delay = 1; //10;
 
             frame_counters[x][y][IDLE]+=delay;
             // if the entire network is idle, see the diff between this tile and the most recent active tile
@@ -253,17 +268,23 @@ void tsu_core_thread(u_int32_t wtid){
 
     // UPDATE LOCAL ACTIVITY STATUS
     bool any_cid_active = false;
+    bool any_pcache_busy = false;
     for (u_int32_t cid = 0; cid < CORES_PER_TH; cid++){
       u_int32_t x = wtid*COLUMNS_PER_TH + cid%COLUMNS_PER_TH;
       u_int32_t y = cid/COLUMNS_PER_TH;
-      epoch_begin[cid] = UINT32_MAX;
+
       int frontier_size = calculate_frontier_occ(global(x,y));
       bool cid_active = (frontier_size > 0) || (epoch_counter < num_kernels);
+      bool tile_pcache_busy = need_flush_pcache(global(x,y));
+      any_pcache_busy |= tile_pcache_busy;
+      cid_active |= tile_pcache_busy;
       any_cid_active |= cid_active;
       // Need to set isActive for next epoch, because otherwise the router may quickly set global_router_active to 0
       isActive[cid] = cid_active;
     }
+
     epoch_has_work[wtid] = any_cid_active;
+    epoch_pcache_busy[wtid] = any_pcache_busy;
 
     { // BARRIER AMONG ALL THREADS
       std::unique_lock<std::mutex> lock2(all_threads_mutex2);
@@ -273,9 +294,27 @@ void tsu_core_thread(u_int32_t wtid){
     }
     
     // ONCE WE HAVE SYNCHRONIZED, WE CAN CHECK THE FRONTIER OF EVERYONE ELSE
+    bool current_epoch_pcache_busy = false;
     for (u_int32_t t = 0; t < COLUMNS; t++){
       current_epoch_ongoing |= epoch_has_work[t];
+      current_epoch_pcache_busy |= epoch_pcache_busy[t];
     }
+    
+    u_int32_t next_epoch_begin = current_epoch_pcache_busy ? DRAIN_PCACHE_ID : EXPLORE_FRONTIER_ID;
+    
+    u_int32_t pu_penalty = noc_to_pu_cy(barrier_penalty);
+    for (u_int32_t cid = 0; cid < CORES_PER_TH; cid++){
+      epoch_begin[cid] = next_epoch_begin;
+      u_int32_t x = wtid*COLUMNS_PER_TH + cid%COLUMNS_PER_TH;
+      u_int32_t y = cid/COLUMNS_PER_TH;
+      u_int32_t global_cid = global(x,y);
+      for (int i=0; i<smt_per_tile; i++){
+        
+        core_timer[global_cid*smt_per_tile+i] += pu_penalty;
+        frame_counters[x][y][IDLE] += pu_penalty;
+      }
+    }
+
     if (wtid == 0){ // ONLY THREAD 0 WILL PRINT
         u_int64_t edgesEpoch=0,nodesEpoch=0;
         for (u_int32_t i=0; i<COLUMNS; i++){
@@ -283,7 +322,9 @@ void tsu_core_thread(u_int32_t wtid){
           nodesEpoch += numFrontierNodesPushed[i];
         }
         print_lock.workerEpochDone(epoch_counter++, nodesEpoch, edgesEpoch, get_final_time());
+        //LK; cout << "PCACHE BUSY: " << current_epoch_pcache_busy << endl << flush; ULK;
     }
+
     {   // BARRIER AMONG ALL THREADS
         std::unique_lock<std::mutex> lock(all_threads_mutex);
         waiting_threads++;

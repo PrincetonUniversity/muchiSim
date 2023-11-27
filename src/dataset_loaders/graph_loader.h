@@ -150,7 +150,7 @@ uint64_t graph_loader::read_edges_traversed(string name){
   if(reader) {
     cout << "Open Edge Count File succesfully\n";
   } else {
-    cout << "Couldn't open the graph file "<<name<<"\n"; 
+    cout << "Couldn't open the Count File "<<name<<"\n"; 
     exit(1);
   }
   reader >> edges_trav;
@@ -270,12 +270,10 @@ graph_loader::graph_loader(string base, int binary){
   graph_name = base;
   auto start = chrono::system_clock::now();
 
-  edges_traversed = read_edges_traversed(base);
-  cout << "Edges Traversed BFS: " << edges_traversed << endl;
-
-
   uint32_t orig_nodes;
   if (binary){
+    edges_traversed = read_edges_traversed(base);
+    cout << "Edges Traversed BFS: " << edges_traversed << endl;
     ifstream nodes_edges_file(base + "num_nodes_edges.txt", ios::in );
     nodes_edges_file >> orig_nodes >> edges;
     nodes_edges_file.close();
@@ -319,7 +317,9 @@ graph_loader::graph_loader(string base, int binary){
 
   } else{ // NOT BINARY: Tab Separated Value (TSV)
 
-    base = base+"Kron16.tsv";
+    //remove last / if exists
+    if (base[base.size()-1]=='/') base.erase(base.size()-1);
+    base += ".tsv";
     fstream reader(base,fstream::in);
     if(reader) {
       cout << "Open Graph succesfully\n";
@@ -334,6 +334,9 @@ graph_loader::graph_loader(string base, int binary){
     reader >> comment >> edges >> orig_nodes;
 
     uint32_t padded_nodes = build_nodes_edges(orig_nodes);
+    cout << "Original Nodes: " << orig_nodes << endl;
+    cout << "Padded Nodes: " << padded_nodes << endl;
+    cout << "Edges: " << edges << endl;
 
     node_array = (uint32_t*) malloc(sizeof(uint32_t) * (nodes + 1));
     edge_array = (uint32_t*) malloc(sizeof(uint32_t) * (edges));
@@ -342,20 +345,20 @@ graph_loader::graph_loader(string base, int binary){
     uint32_t node_ptr = 0;
     node_array[0] = 0;
     uint32_t vertex, edge_idx, edge_value;
+    double edge_value_d;
+
     uint64_t prev_idx = 0;
     for(uint32_t i = 0; i < edges; i++ ) {
-      // if (i % 100000 == 0) {
-      //   printf("reading %% %.2f finished\r", (float(i)/float(edges)) * 100);
-      //   fflush(stdout);
-      // }
-      reader >> vertex >> edge_idx >> edge_value;
-
+      reader >> vertex >> edge_idx >> edge_value_d;
+      // Convert the edge values to integers
+      edge_value = (uint32_t) abs(edge_value_d*1000);
+      //cout << "Vertex " << vertex << ", idx " << edge_idx << ", value " << edge_value << endl;
       while (node_ptr != vertex) {
-        // #if ASSERT_MODE
-        //   uint64_t len = (i - prev_idx);
-        //   prev_idx = i;
-        //   if (len>max_degree){max_degree=len; max_vertex=i;}
-        // #endif
+        #if ASSERT_MODE
+          uint64_t len = (i - prev_idx);
+          prev_idx = i;
+          if (len>max_degree){max_degree=len; max_vertex=node_ptr;}
+        #endif
         node_array[++node_ptr] = i;
       }
 
@@ -372,15 +375,7 @@ graph_loader::graph_loader(string base, int binary){
     printf("reading %% 100.00 finished\n");
   } // END OF IF FORMAT TYPE
 
-  #if APP==HISTO
-    // Generate the Histogram dataset
-    nodes = nodes / HISTO_NODE_REDUCER;
-    for (uint32_t i=0; i<edges; i++) edge_array[i] = ((edge_array[i] + edge_values[i])) % nodes;
-    free(edge_values);
-    dataset_has_edge_val = 0;
-  #else // At least 16 nodes per tile
-    assert(nodes>=(16*GRID_SIZE));
-  #endif
+  assert(nodes>=(2*GRID_SIZE));
 
   nodePerTile = (nodes+GRID_SIZE-1)/GRID_SIZE;
   edgePerTile  = (edges+GRID_SIZE-1)/GRID_SIZE;

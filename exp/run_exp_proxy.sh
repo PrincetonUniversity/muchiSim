@@ -6,56 +6,72 @@ else
   apps=$1
 fi
 
-#datasets="Kron22 wikipedia"
-datasets="wikipedia"
+if [ -z "$4" ]; then
+  echo "Default grid_w=64"
+  let grid_w=64
+else
+  let grid_w=$4
+  echo "grid_w=$grid_w"
+fi
+if [ -z "$5" ]; then
+  echo "All datasets by default"
+  datasets="Kron22 wikipedia"
+else
+  echo "Dataset $5"
+  datasets="$5"
+fi
+
 declare -A options
 declare -A strings
 
-th=16
+th=32
 verbose=1
 assert=0
-exp="PROXY"
+exp="NPROXY"
 
-i=0
-let sram_memory=256*1536
+let noc_conf=1
+let dcache=0
+let ruche=0
+let torus=1
 
-let mesh_w=64
-let chiplet_w=16
+let chiplet_w=$grid_w
+let board_w=$grid_w #Specify board so that the package has the same size as the board
 
-let proxy_routing=4
-let cascading=0
 
-let noc_conf=2
-let shuffle=0
-let dcache=1
 
-# Run on Della:0 (need to be logged into della), run on Chai:1
 local_run=0
 
-sufix="-v $verbose -r $assert -t $th -u $noc_conf -m $mesh_w -c $chiplet_w -w $sram_memory -z $proxy_routing -j $cascading -x $shuffle -y $dcache -s $local_run"
+sufix="-v $verbose -r $assert -t $th -u $noc_conf -m $grid_w -c $chiplet_w -k $board_w -l $ruche -o $torus -y $dcache -s $local_run"
+i=0
+let proxy_w=$grid_w
+strings[$i]="${exp}${proxy_w}"
+options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
+let i=$i+1
 
-let proxy_w=$mesh_w/8
-# P == MESH/8
+let proxy_w=32
 strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w $sufix"
 let i=$i+1
 
-# P == MESH/4
-let proxy_w=$proxy_w*2
+let proxy_w=16
 strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
 let i=$i+1
 
-# P == MESH/2
-let proxy_w=$proxy_w*2
+let proxy_w=8
 strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
 let i=$i+1
 
-# P == MESH
-let proxy_w=$proxy_w*2
-strings[$i]="${exp}${proxy_w}"
-options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
+####
+let proxy_w=16
+strings[$i]="${exp}${proxy_w}F"
+options[$i]="-n ${strings[$i]} -e $proxy_w -f 4 $sufix"
+let i=$i+1
+
+let proxy_w=8
+strings[$i]="${exp}${proxy_w}F"
+options[$i]="-n ${strings[$i]} -e $proxy_w -f 16 $sufix"
 let i=$i+1
 
 

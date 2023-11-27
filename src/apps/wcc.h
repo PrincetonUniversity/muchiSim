@@ -42,20 +42,22 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   int64_t startInd, endEdgeIndex, label;
   R_queue<Msg> * queue = routers[tX][tY]->output_q[C];
   int64_t node_base = nodePerTile*global(tX,tY);
-  int penalty = 3; // beq + LD*2
-  load(2); 
+  int penalty = 1; // beq
+  load_mem_wait(1); // Load for global_params[3]
 
   if (global_params[3]) {
       global_params[3] = 0;
       startInd = global_params[0];
       endEdgeIndex = global_params[1];
       label = global_params[2];
-      load(3); store(1); penalty+=4;
+      load_mem_wait(3);
+      store(1); penalty+=1;
   } else {
     int64_t node;
     Msg msg = queue[0].peek();
     u_int64_t time_fetched = msg.time; //META
-    penalty+=3; // LD, beq, jmp
+    penalty+=2; // beq, jmp
+    load_mem_wait(1); // LD for global_params[4]
 
     if (global_params[4]>=0){ //Still exploring seeds
       msg = queue[0].dequeue(); //MOV
@@ -69,7 +71,7 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       // Only iterate over nodes that have not been visited yet (equal to -1)
       while (node<endNodeInd && (ret[node]!=proxy_default) ){ // 3 CMP + BEQ
         node++; 
-        penalty+=5; // LD, ADD, 3 CMP, BEQ 
+        penalty+=5; // ADD, 3 CMP, BEQ 
         penalty+=check_dcache(tX,tY,ret,node, timer+penalty, time_fetched, time_prefetch, prefetch_tag);
       }
 
@@ -77,18 +79,17 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       queue[0].enqueue(Msg(node - node_base, MONO,timer+penalty) ); //MOV
       label = node; //MOV 
       ret[node] = node; // ST
-      store(1);load(1);penalty+=6;
+      store(1); penalty += 5;
+      load_mem_wait(1);
 
     } else { //Receiving from other tiles
-      #if ASSERT_MODE
-        assert(queue[0].occupancy()>0);
-      #endif
-      node = task3_dequeue(msg.data); //LD from Q
+      node = task3_dequeue(msg.data);
       #if ASSERT_MODE
         assert(node<graph->nodes);
       #endif
       label = ret[node];
-      load(2); penalty+=5; // beq, LD*4
+      load_mem_wait(1);
+      penalty+=1; // beq
     }
 
     penalty+=check_dcache(tX,tY,graph->node_array,node, timer+penalty, msg.time);
@@ -114,7 +115,7 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   u_int32_t start_index = task2_dequeue(msg.data);
   u_int32_t end_index   = queue[1].dequeue().data;
   int label = queue[1].dequeue().data;
-  load(3);
+
   #if ASSERT_MODE && STEAL_W == 1
     check_range(tX,tY,start_index,end_index);
   #endif
@@ -153,10 +154,8 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
 int task3_kernel(int tX, int tY, u_int64_t timer, u_int64_t & compute_cycles){
   R_queue<Msg> * queue = routers[tX][tY]->output_q[C];
   Msg msg = queue[2].dequeue();
-  u_int32_t neighbor = task3_dequeue(msg.data); //LD from Q
-  u_int32_t label = queue[2].dequeue().data; //LD from Q
-  load(2);
-  int penalty;
+  u_int32_t neighbor = task3_dequeue(msg.data);
+  u_int32_t label = queue[2].dequeue().data;
 
   #if PROXY_FACTOR==1 && ASSERT_MODE
     u_int32_t node_base = nodePerTile*global(tX,tY);
@@ -164,10 +163,10 @@ int task3_kernel(int tX, int tY, u_int64_t timer, u_int64_t & compute_cycles){
   #endif
 
   int ret_neighbor = ret[neighbor];
-  penalty = check_dcache(tX,tY,ret,neighbor,timer, msg.time);
+  int penalty = check_dcache(tX,tY,ret,neighbor,timer, msg.time);
 
   // Take the MIN of the label and current stored
-  bool min_cond = label < ret_neighbor;
+  bool min_cond = label < ret_neighbor; flop(1);
   penalty+=4; //CMP, BEQ, JMP
   
   if (min_cond) {
@@ -188,14 +187,13 @@ return penalty;
 int task3bis_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   R_queue<Msg> * queue = routers[tX][tY]->output_q[C];
   Msg msg = queue[3].dequeue();
-  u_int64_t neighbor = task3_dequeue(msg.data); //LD from Q
-  u_int32_t label = queue[3].dequeue().data; //LD from Q
-  load(2);
-  int penalty;
+  u_int64_t neighbor = task3_dequeue(msg.data);
+  u_int32_t label = queue[3].dequeue().data;
+  int penalty = 0;
 
   // Default from proxy cache (if not present) should be -1 or inf, so we visit it
-  int ret_neighbor = check_pcache(tX,tY,neighbor,timer);
-  bool min_cond = label < ret_neighbor;
+  int ret_neighbor = check_pcache(tX,tY,neighbor,penalty,timer);
+  bool min_cond = label < ret_neighbor; flop(1);
   penalty = 6; //Load, 2 CMP, OR, BEQ, JMP
   if (min_cond) {
     update_pcache(tX,tY,neighbor,label);

@@ -54,7 +54,7 @@ u_int64_t cache_tag(void * addr) {
   return word_index >> dcache_words_in_line_log2;
 }
 
-#if APP<=5
+#if APP<ALTERNATIVE
   u_int64_t cache_tag(void * addr, u_int64_t index) {
     // ret is [0, nodes] for all
     // edge array is [nodes, nodes+edges] (histo is out already)
@@ -108,105 +108,115 @@ void write_dcache(int tX,int tY, T * array, T elem){
 // A new requests will get contention if the cycle # that is issues is > #transactions
 template<typename T>
 T get_dcache(int tX,int tY, T * array, u_int64_t & penalty, u_int64_t timer){
+  u_int64_t pu_delay = 0;
   int64_t time = timer + penalty;
   int64_t time_fetched = time;
   #if DCACHE<=4
     time_fetched -= hbm_read_latency;
   #endif
-  load(1);
 
-#if DCACHE>=1
-  #if DCACHE==1 // Enable dache if data doesn't fit in scratchpad
-  if (dataset_cached){
-  #elif DCACHE>=2 // Always force cache to be enabled
-  {
-  #endif
-      // freq is the number of hits of a per-neighbour element
-      u_int32_t tileid = global(tX,tY);
-      // Tags that are currently in the per-tile dcache
-      u_int64_t * tags = dcache_tags[tileid];
+  #if DCACHE>=1
+    #if DCACHE==1 // Enable dache if data doesn't fit in scratchpad
+    if (dataset_cached){
+    #elif DCACHE>=2 // Always force cache to be enabled
+    {
+    #endif
+        // freq is the number of hits of a per-neighbour element
+        u_int32_t tileid = global(tX,tY);
+        // Tags that are currently in the per-tile dcache
+        u_int64_t * tags = dcache_tags[tileid];
 
-      // the tag is a global tag (not within the dcache)
-      u_int64_t elem_tag = cache_tag(array);
-      
-      #if DCACHE<=5 // If we allow some type of data hits
-      // dcache_freq is a global array (not per tile)
-      if (dcache_freq[elem_tag] > 0){
-        // ==== CACHE HIT ====
-        dcache_hits++;
-        penalty += sram_read_latency;
-      } else{
-      #else
-      {
-      #endif
-        // ==== CACHE MISS ====
-        dcache_misses++;
-        u_int16_t mc_queue_id = die_id(tX,tY)*hbm_channels + (tY*DIE_W+tX)%hbm_channels;
-        int64_t trans_count = (int64_t)mc_transactions[mc_queue_id];
-        // Fetched when the last request has satisfied
-        if (trans_count > time_fetched) time_fetched = trans_count;
-
-        // May be a negative number!
-        int64_t fetch_cycles_ahead = (time - time_fetched);
-
-        int64_t read_latency = 0;
-        if (fetch_cycles_ahead < hbm_read_latency) read_latency = (hbm_read_latency-fetch_cycles_ahead);
-        //  if (fetch_cycles_ahead < 0) cout << "MC:"<<mc_queue_id<<" latency: " << read_latency << endl;
-        mc_transactions[mc_queue_id] = trans_count + 1;
-        mc_latency[mc_queue_id] += read_latency;
-        penalty += read_latency;
-        #if DCACHE==3 // On prefetching modes we add the latency of accessing the specific level
-          penalty += sram_read_latency;
-        #elif DCACHE==4
-          penalty += l2_read_latency;
-        #endif
-
-        u_int16_t set_empty_lines = 0;
-        int evict_dcache_idx = dcache_replacement_policy(tileid, tags, elem_tag, set_empty_lines);
-        #if ASSERT_MODE && DCACHE<=5 // If we allow some type of data hits
-          assert(dcache_freq[elem_tag]==0);
-          assert(evict_dcache_idx < dcache_size);
-        #endif
-
-        u_int64_t evict_tag = tags[evict_dcache_idx];
+        // the tag is a global tag (not within the dcache)
+        u_int64_t elem_tag = cache_tag(array);
         
-        if (set_empty_lines == 0){// IF CACHE SET FULL
-          // Evict Line
-          dcache_evictions++;
-          #if ASSERT_MODE
-            assert(evict_tag < UINT64_MAX);
+        #if DCACHE<=5 // If we allow some type of data hits
+        // dcache_freq is a global array (not per tile)
+        if (dcache_freq[elem_tag] > 0){
+          // ==== CACHE HIT ====
+          dcache_hits++;
+          pu_delay += sram_read_latency;
+        } else{
+        #else
+        {
+        #endif
+          // ==== CACHE MISS ====
+          dcache_misses++;
+          u_int16_t mc_queue_id = die_id(tX,tY)*hbm_channels + (tY*DIE_W+tX)%hbm_channels;
+
+          // Number of transactions that have been fetched from the HBM channel since the beggining of the program
+          // Assume that the Mem. controller channel can take one request per HBM cycle
+          int64_t trans_count = (int64_t)mc_transactions[mc_queue_id];
+          mc_transactions[mc_queue_id] = trans_count + 1;
+          int64_t pu_cy_last_mc_trans = ceil_macro(trans_count*pu_mem_ratio);
+          // Fetched when the last request has satisfied
+          if (pu_cy_last_mc_trans > time_fetched) time_fetched = pu_cy_last_mc_trans;
+
+          // Number of cycles ahead of the usage that we fetched. May be a negative number if the HBM channel is clogged.
+          int64_t fetch_cycles_ahead = (time - time_fetched);
+
+          // If cycles ahead is smaller than HBM latency, then we calculate the real latency
+          int64_t read_latency = 0;
+          int hbm_lat = (int) hbm_read_latency;
+          if (fetch_cycles_ahead < hbm_lat) read_latency = (hbm_lat - fetch_cycles_ahead);
+          mc_latency[mc_queue_id] += read_latency;
+          pu_delay += read_latency;
+          #if DCACHE==3 // On prefetching modes we add the latency of accessing the specific level
+            pu_delay += sram_read_latency;
+          #elif DCACHE==4
+            pu_delay += l2_read_latency;
           #endif
-          // Mark the previous element as evicted (dcache_freq = 0)
-          bool is_dirty = dcache_freq[evict_tag] > 1;
-          dcache_freq[evict_tag] = 0;
-          //Writeback only if dirty!
-          if (is_dirty){
-            mc_writebacks[mc_queue_id]++;
-            mc_transactions[mc_queue_id]++;
+
+          u_int16_t set_empty_lines = 0;
+          int evict_dcache_idx = dcache_replacement_policy(tileid, tags, elem_tag, set_empty_lines);
+          #if ASSERT_MODE && DCACHE<=5 // If we allow some type of data hits
+            assert(dcache_freq[elem_tag]==0);
+            assert(evict_dcache_idx < dcache_size);
+          #endif
+
+          u_int64_t evict_tag = tags[evict_dcache_idx];
+          
+          if (set_empty_lines == 0){// IF CACHE SET FULL
+            // Evict Line
+            dcache_evictions++;
+            #if ASSERT_MODE
+              assert(evict_tag < UINT64_MAX);
+            #endif
+            // Mark the previous element as evicted (dcache_freq = 0)
+            bool is_dirty = dcache_freq[evict_tag] > 1;
+            dcache_freq[evict_tag] = 0;
+            //Writeback only if dirty!
+            if (is_dirty){
+              mc_writebacks[mc_queue_id]++;
+              mc_transactions[mc_queue_id]++;
+            }
+
+          } else{ // IF CACHE NOT FULL
+            // Increase the occupancy count
+            #if ASSERT_MODE
+              assert(evict_tag == UINT64_MAX);
+            #endif
+            dcache_occupancy[tileid]++;
           }
 
-        } else{ // IF CACHE NOT FULL
-          // Increase the occupancy count
-          #if ASSERT_MODE
-            assert(evict_tag == UINT64_MAX);
-          #endif
-          dcache_occupancy[tileid]++;
+          // Update the dcache tag with the new elem
+          tags[evict_dcache_idx] = elem_tag;
+          dcache_freq[elem_tag]++;
         }
 
-        // Update the dcache tag with the new elem
-        tags[evict_dcache_idx] = elem_tag;
-        dcache_freq[elem_tag]++;
-      }
-
-      #if DIRECT_MAPPED==0
-        // If the elem was not in the dcache, it's 1 now. If it was in the dcache, freq is incremented by 1.
-        dcache_freq[elem_tag]++;
-        u_int32_t set = set_id_dcache(elem_tag);
-        check_freq(dcache_freq, tags, set, elem_tag);
-      #endif
-  }
-#endif
-
+        #if DIRECT_MAPPED==0
+          // If the elem was not in the dcache, it's 1 now. If it was in the dcache, freq is incremented by 1.
+          dcache_freq[elem_tag]++;
+          u_int32_t set = set_id_dcache(elem_tag);
+          check_freq(dcache_freq, tags, set, elem_tag);
+        #endif
+    }
+  #endif
+  load(1);
+  #if ASSERT_MODE
+    assert(pu_delay > 0);
+  #endif
+  mem_wait_add(pu_delay);
+  penalty += pu_delay;
   return array[0];
 }
 
@@ -214,109 +224,115 @@ T get_dcache(int tX,int tY, T * array, u_int64_t & penalty, u_int64_t timer){
 // LEGACY VERSION WHERE THE FUNCTION THAT ONLY RETURN THE PENALTY
 // Next-line prefetching only
 int check_dcache(int tX,int tY, void * array, u_int64_t timer, u_int64_t & time_fetched, u_int64_t & time_prefetched, u_int64_t & prefetch_tag){
-  load(1);
-  int penalty = sram_read_latency;
-#if DCACHE==1
-  #if DCACHE==1
-  if (dataset_cached){
-  #elif DCACHE>=2
-  {
-  #endif
-      // freq is the number of hits of a per-neighbour element
-      u_int32_t tileid = global(tX,tY);
-      // Tags that are currently in the per-tile dcache
-      u_int64_t * tags = dcache_tags[tileid];
+  int pu_penalty = sram_read_latency;
+  #if DCACHE>=1
+    #if DCACHE==1
+    if (dataset_cached){
+    #elif DCACHE>=2
+    {
+    #endif
+        // freq is the number of hits of a per-neighbour element
+        u_int32_t tileid = global(tX,tY);
+        // Tags that are currently in the per-tile dcache
+        u_int64_t * tags = dcache_tags[tileid];
 
-      // the tag is a global tag (not within the dcache)
-      u_int64_t elem_tag = cache_tag(array);
-      
-      #if DCACHE<=4
-        // If the data I'm fetching was prefetched, then update the time_fetched, and we issue next prefetch now
-        if (elem_tag == prefetch_tag){
-          time_fetched = time_prefetched;
-          time_prefetched = timer;
-          prefetch_tag++;
-        }
-      #else
-        time_fetched = timer;
-      #endif
-      
-      #if DCACHE<=5 // If we allow some type of data hits
-      // dcache_freq is a global array (not per tile)
-      if (dcache_freq[elem_tag] > 0){
-        // ==== CACHE HIT ====
-        dcache_hits++;
-      } else{
-      #else
-      {
-      #endif
-        // ==== CACHE MISS ====
-        dcache_misses++;
-        u_int16_t mc_queue_id = die_id(tX,tY)*hbm_channels + (tY*DIE_W+tX)%hbm_channels;
-        u_int64_t trans_count = mc_transactions[mc_queue_id];
-        // Fetched when the last request has satisfied
-        if (trans_count > time_fetched) time_fetched = trans_count;
-
-        // May be a negative number!
-        int fetch_cycles_ahead = (int64_t)timer - (int64_t)time_fetched;
-        // if (fetch_cycles_ahead < 0) cout << "fetch_cycles_ahead: " << fetch_cycles_ahead << endl;
-        // If cycles ahead is smaller than HBM latency, then we calculate the real latency
-        u_int64_t read_latency = 0;
-        if (fetch_cycles_ahead < hbm_read_latency) read_latency = (hbm_read_latency-fetch_cycles_ahead);
-        //  if (fetch_cycles_ahead < 0) cout << "MC:"<<mc_queue_id<<" latency: " << read_latency << endl;
-        mc_transactions[mc_queue_id] = trans_count + 1;
-        mc_latency[mc_queue_id] += read_latency;
-        penalty += read_latency;
-
-        u_int16_t set_empty_lines = 0;
-        int evict_dcache_idx = dcache_replacement_policy(tileid, tags, elem_tag, set_empty_lines);
-        #if ASSERT_MODE && DCACHE<=5
-          assert(dcache_freq[elem_tag]==0);
-          assert(evict_dcache_idx < dcache_size);
+        // the tag is a global tag (not within the dcache)
+        u_int64_t elem_tag = cache_tag(array);
+        
+        #if DCACHE<=4
+          // If the data I'm fetching was prefetched, then update the time_fetched, and we issue next prefetch now
+          if (elem_tag == prefetch_tag){
+            time_fetched = time_prefetched;
+            time_prefetched = timer;
+            prefetch_tag++;
+          }
+        #else
+          time_fetched = timer;
         #endif
-        u_int64_t evict_tag = tags[evict_dcache_idx];
         
-        // An eviction occurs when dcache_freq (valid bit) is 0, but a tag is already in the dcache
-        // FIXME: A local Dcache can have evictions by collision of tags since the address space is not aligned locally (e.g. a dcache with 100 lines may get evictions even if its footprint is only 10 vertices and 40 edges, since we don't consider the local address space)
-        
-        if (set_empty_lines == 0){// IF CACHE SET FULL
-          // Evict Line
-          dcache_evictions++;
-          #if ASSERT_MODE
-            assert(evict_tag < UINT64_MAX);
+        #if DCACHE<=5 // If we allow some type of data hits
+        // dcache_freq is a global array (not per tile)
+        if (dcache_freq[elem_tag] > 0){
+          // ==== CACHE HIT ====
+          dcache_hits++;
+        } else{
+        #else
+        {
+        #endif
+          // ==== CACHE MISS ====
+          dcache_misses++;
+          u_int16_t mc_queue_id = die_id(tX,tY)*hbm_channels + (tY*DIE_W+tX)%hbm_channels;
+          // Number of transactions that have been fetched from the HBM channel since the beggining of the program
+          // Assume that the Mem. controller channel can take one request per HBM cycle
+          int64_t trans_count = (int64_t)mc_transactions[mc_queue_id];
+          mc_transactions[mc_queue_id] = trans_count + 1;
+          int64_t pu_cy_last_mc_trans = ceil_macro(trans_count*pu_mem_ratio);
+          // Fetched when the last request has satisfied
+          if (pu_cy_last_mc_trans > time_fetched) time_fetched = pu_cy_last_mc_trans;
+
+          // May be a negative number!
+          int fetch_cycles_ahead = (int64_t)timer - (int64_t)time_fetched;
+
+          // If cycles ahead is smaller than HBM latency, then we calculate the real latency
+          int read_latency = 0;
+          int hbm_lat = (int) hbm_read_latency;
+          if (fetch_cycles_ahead < hbm_lat) read_latency = (hbm_lat - fetch_cycles_ahead);
+          mc_latency[mc_queue_id] += read_latency;
+          pu_penalty += read_latency;
+
+          u_int16_t set_empty_lines = 0;
+          int evict_dcache_idx = dcache_replacement_policy(tileid, tags, elem_tag, set_empty_lines);
+          #if ASSERT_MODE && DCACHE<=5
+            assert(dcache_freq[elem_tag]==0);
+            assert(evict_dcache_idx < dcache_size);
           #endif
-          // Mark the previous element as evicted (dcache_freq = 0)
-          dcache_freq[evict_tag] = 0;
-          //Writeback only if dirty!
-          if (is_dirty(evict_tag)){
-            //cout << "Writeback: " << evict_tag << endl;
-            mc_writebacks[mc_queue_id]++;
-            mc_transactions[mc_queue_id]++;
+          u_int64_t evict_tag = tags[evict_dcache_idx];
+          
+          // An eviction occurs when dcache_freq (valid bit) is 0, but a tag is already in the dcache
+          // FIXME: A local Dcache can have evictions by collision of tags since the address space is not aligned locally (e.g. a dcache with 100 lines may get evictions even if its footprint is only 10 vertices and 40 edges, since we don't consider the local address space)
+          
+          if (set_empty_lines == 0){// IF CACHE SET FULL
+            // Evict Line
+            dcache_evictions++;
+            #if ASSERT_MODE
+              assert(evict_tag < UINT64_MAX);
+            #endif
+            // Mark the previous element as evicted (dcache_freq = 0)
+            dcache_freq[evict_tag] = 0;
+            //Writeback only if dirty!
+            if (is_dirty(evict_tag)){
+              //cout << "Writeback: " << evict_tag << endl;
+              mc_writebacks[mc_queue_id]++;
+              mc_transactions[mc_queue_id]++;
+            }
+
+          } else{ // IF CACHE NOT FULL
+            // Increase the occupancy count
+            #if ASSERT_MODE
+              assert(evict_tag == UINT64_MAX);
+            #endif
+            dcache_occupancy[tileid]++;
           }
 
-        } else{ // IF CACHE NOT FULL
-          // Increase the occupancy count
-          #if ASSERT_MODE
-            assert(evict_tag == UINT64_MAX);
-          #endif
-          dcache_occupancy[tileid]++;
+          // Update the dcache tag with the new elem
+          tags[evict_dcache_idx] = elem_tag;
+          dcache_freq[elem_tag]++;
         }
 
-        // Update the dcache tag with the new elem
-        tags[evict_dcache_idx] = elem_tag;
-        dcache_freq[elem_tag]++;
-      }
-
-      #if DIRECT_MAPPED==0
-        // If the elem was not in the dcache, it's 1 now. If it was in the dcache, freq is incremented by 1.
-        dcache_freq[elem_tag]++;
-        u_int32_t set = set_id_dcache(elem_tag);
-        check_freq(dcache_freq, tags, set, elem_tag);
-      #endif
-  }
-#endif
-
-  return penalty;
+        #if DIRECT_MAPPED==0
+          // If the elem was not in the dcache, it's 1 now. If it was in the dcache, freq is incremented by 1.
+          dcache_freq[elem_tag]++;
+          u_int32_t set = set_id_dcache(elem_tag);
+          check_freq(dcache_freq, tags, set, elem_tag);
+        #endif
+    }
+  #endif
+  load(1);
+  #if ASSERT_MODE
+    assert(pu_penalty > 0);
+  #endif
+  mem_wait_add(pu_penalty);
+  return pu_penalty;
 }
 
 // LEGACY CODE FOR DALOREX APPS

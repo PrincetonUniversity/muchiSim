@@ -76,17 +76,19 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   union float_int newR;
 
   int penalty = 2; // beq + ld
-  load(1); 
+  load_mem_wait(1);
   if (global_params[3]) {
       global_params[3] = 0;
       startInd = global_params[0];
       endEdgeIndex = global_params[1];
       newR.int_val = global_params[2];
-      load(3); store(1); penalty+=4;
+      load_mem_wait(3);
+      store(1); penalty+=1;
   } else {//not parked
 
       int64_t iterative_phase = global_params[4]; //LD
-      load(1); penalty+=2; // ld, beq
+      load_mem_wait(1);
+      penalty+=1; // ld, beq
       int node;
       Msg msg = IQ(0).peek(); //META
       if (iterative_phase>=0){
@@ -97,11 +99,12 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
           local_node++; // ADD
           store(1); penalty+=3;
           IQ(0).enqueue(Msg(local_node, MONO, timer+penalty)); //MOV
-          load(1); penalty+=4; // LD, CMP, ST
-          if (local_node > (nodePerTile-1) || node == (graph->nodes-1) ){ global_params[4] = -1; store(1); penalty+1;}
+          load_mem_wait(1);
+          penalty+=3; // CMP, ST
+          if (local_node > (nodePerTile-1) || node == (graph->nodes-1) ){ global_params[4] = -1; store(1); penalty+=1;}
       } else {
           node = task3_dequeue(msg.data); //LD from Q
-          load(1);penalty+=1; 
+          load_mem_wait(1);
       }
 
       startInd = graph->node_array[node]; //LD
@@ -117,13 +120,13 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
       penalty+=check_dcache(tX,tY,ret,node, timer+penalty, msg.time);
       penalty+=check_dcache(tX,tY,in_r,node,timer+penalty, msg.time);
       float val = in_r[node]; //LD
-      ret[node] += val; // LD, OP, ST
+      ret[node] += val; flop(1); // LD, OP, ST
 
       int64_t nodeDegree = (endEdgeIndex - startInd); // OP
       #if ASSERT_MODE
         assert(nodeDegree>0);
       #endif
-      newR.float_val = val*alpha / (float)nodeDegree; // 2 op
+      newR.float_val = val*alpha / (float)nodeDegree; flop(2); // 2 op
       in_r[node]= 0.0; // ST
 
       store(2); penalty+=3;
@@ -141,7 +144,7 @@ int task2_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   u_int32_t start_index = task2_dequeue(msg.data);
   u_int32_t end_index   = IQ(1).dequeue().data;
   int new_R  = IQ(1).dequeue().data;
-  load(3);
+
   #if ASSERT_MODE && STEAL_W == 1
     check_range(tX,tY,start_index,end_index);
   #endif
@@ -180,7 +183,6 @@ int task3_kernel(int tX, int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(2).dequeue();
   u_int32_t neighbor = task3_dequeue(msg.data);
   newR.int_val = IQ(2).dequeue().data;
-  load(2);
 
   #if PROXY_FACTOR==1 && ASSERT_MODE
     u_int32_t node_base = nodePerTile*global(tX,tY);
@@ -191,7 +193,7 @@ int task3_kernel(int tX, int tY, u_int64_t timer, u_int64_t & compute_cycles){
 
   int penalty = check_dcache(tX,tY,in_r, neighbor,timer, msg.time);
   float val_neighbor = in_r[neighbor];
-  val_neighbor += newR.float_val; //ADDI [neighbor], newR
+  val_neighbor += newR.float_val; flop(1); //ADDI [neighbor], newR
   in_r[neighbor] = val_neighbor; //STORE
   
   penalty+=3; //COMP, BEQ, JMP
@@ -209,12 +211,13 @@ int task3bis_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
   Msg msg = IQ(3).dequeue();
   u_int32_t neighbor = task3_dequeue(msg.data);
   newR.int_val = IQ(3).dequeue().data;
-  load(2);
 
   // ADDI [neighbor], newR
   union float_int val_neighbor;
-  val_neighbor.int_val = check_pcache(tX,tY,neighbor,timer);
-  val_neighbor.float_val += newR.float_val; //ADD
+  int penalty = 1;
+  val_neighbor.int_val = check_pcache(tX,tY,neighbor,penalty,timer);
+  val_neighbor.float_val += newR.float_val; flop(1); //ADD
+  flop(1);
   update_pcache(tX,tY, neighbor, val_neighbor.int_val); //STORE
-  return 2;
+  return penalty;
 }

@@ -97,9 +97,8 @@ int process_nodes(int tX,int tY, int i, u_int32_t bitmap_base, u_int64_t timer){
 
 int task4_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_time){
   u_int32_t sum=0;
-  int penalty = 2; //load + beq
-  load(1);
-  // 3 loads, done in HW
+  int penalty = 3; //loads
+  load(3); // loads for tail/head, done in HW, no penalty on critical path
   u_int32_t tile_id = global(tX,tY);
   u_int32_t bitmap_base = bitmap_len*tile_id;
   u_int32_t frontier_list_base = frontier_list_len*tile_id;
@@ -190,7 +189,8 @@ int add_to_frontier(int tX, int tY, u_int32_t neighbor_index, u_int64_t timer){
     #if ASSERT_MODE
       assert(vector > 0);
     #endif
-    load(3); store(3);
+    load_mem_wait(3);
+    store(3);
   #else
     // No Coalescing
     penalty+=add_to_frontier_list(tX, tY, local_idx, timer+penalty);
