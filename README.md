@@ -32,7 +32,7 @@ The simulator has many configuration parameters inside `src/configs`. Other para
 
 `doall` contain the sequential or doall implementations of some of the applications included as benchmarks inside this simulator.
 
-`dlxsim` is the folder where simulation traces are generated into.
+`sim_logs` is the folder where simulation traces are generated into.
 
 `bin` contains the binary files created by the compilation of different experiments.
 
@@ -47,3 +47,10 @@ The simulator has many configuration parameters inside `src/configs`. Other para
 ## More information
 
 More information about muchiSim concepts are found on `src/README.md`
+
+## Research using MuchiSim
+
+MuchiSim has helped evaluating ["Tascade: Hardware Support for Atomic-free, Asynchronous and Efficient Reduction Trees
+"](https://arxiv.org/pdf/2311.15810.pdf), and ["DCRA: A Distributed Chiplet-based Reconfigurable Architecture for Irregular Applications"](https://arxiv.org/abs/2311.15443).
+
+The artifacts are available for both [Tascade](https://github.com/morenes/tascade) and [DCRA](https://github.com/morenes/dcra).
