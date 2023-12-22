@@ -1,0 +1,290 @@
+Dataset:  Kron22/
+Dry run: 0
+Open Edge Count File succesfully
+Edges Traversed BFS: 128309848
+Found Vertices: 4194304, Edges: 128311436
+avg degree 31
+Array  Kron22/node_array.bin found
+Malloc array of size 16777220 bytes
+Readin array of size 16777216 bytes
+Finished Reading Array Bytes
+No reordering Array 32bit
+Array  Kron22/edge_array.bin found
+Malloc array of size 513245744 bytes
+Readin array of size 513245744 bytes
+Finished Reading Array Bytes
+No reordering Array 32bit
+Array  Kron22/edge_values.bin found
+Malloc array of size 513245744 bytes
+Readin array of size 513245744 bytes
+Finished Reading Array Bytes
+No reordering Array 32bit
+Reading graph elapsed time: 0.280677s
+
+Dataset Footprint: 522 MiB
+Dataset Footprint per Board: 4385.14 Mb
+Dataset injection time (ms): 0.133824
+Max Dataset Footprint: 1026 MiB
+
+Dataset footprint per tile: 130 KiB
+Proxys footprint per tile: 0 KiB
+Reserved SRAM per tile: 15 KiB
+
+Ideal SRAM per tile: 145 KiB
+reserved_words_for_dataset:25428
+dataset_words_per_tile:33456
+remaining_sram_words:127142
+min_dcache_sram_words_required:33456
+dataset_words_per_tile:33456
+min_pcache_sram_words_required:0
+proxys_words_per_tile:0
+Dcache footprint ratio: 1
+Dataset Cached: 0
+DCache: 33456 words, lines: 2091, sets: 2091
+Proxys Cached: 0
+Pcache: 0 words, sets: 0
+Node per tile: 1,024
+Edge per tile: 31,327
+GRID_X: 64
+GRID_SIZE: 4,096
+smt_per_tile: 1
+noc_freq: 1
+pu_freq: 1
+RUCHE_X: 0
+PROXY_W: 64
+DIE_W: 64
+DIE_H: 64
+DIES: 1
+BORDER_TILES_PER_DIE: 256
+PACK_W: 64
+PACK_H: 64
+DIES_PACK_FACTOR: 1
+DIES_PER_PACK: 1
+PACKAGES: 1
+BOARD_W: 64
+BOARD_H: 64
+BOARDS: 1
+MUX_BUS: 1
+DCACHE: 1
+PCACHE: 0
+PROXY_FACTOR: 1
+CACHE_WAYS: 1
+TORUS: 1
+PHY_NOCS: 1
+WIDE_NOC_ID: 0
+NOC_CONF: 1
+noc_width: 32
+hbm_channel_bit_width: 512
+ld_st_op_byte_width: 4
+PROXY_ROUTING: 0
+WRITE_THROUGH: 1
+ASSERT_MODE: 0
+GLOBAL_BARRIER: 0
+OQ flits: 36 ; 384 ; 2
+IQ flits: 288 ; 3,072 ; 2
+OQ messages: 12 ; 192 ; 1
+IQ messages: 96 ; 1,536 ; 1
+max_task2 size: 64
+io_factor_t2: 8
+io_factor_t3: 8
+io_factor_t3b: 8
+
+Active SRAM Storage per tile: 146 KiB
+Total SRAM Storage per tile: 512 KiB
+Agreggated SRAM Storage: 2,048 MiB
+
+Active DRAM Storage per tile: 0 MiB
+Total DRAM Storage per tile: 2 MiB
+Agreggated DRAM Storage: 8 GiB
+
+Inter-Die #links: 2,048
+Inter-Die (Gbits): 65,536
+Inter-Die (Gbits/mm): 545.588
+Bisection BW of Board (Gbits): 16,384
+Border IO #Dies: 4
+Border IO Die BW (Gbits): 8,192
+Off-Board BW Total (Gbits): 32,768
+Off-Board BW Density (Gbits/mm): 247
+Die side: 30.03 mm
+Die border wire density: 545.59 Gbits/mm
+HBM wire density: 136.40 Gbits/mm
+
+Tiles per Die: 4,096 (64x64)
+Tile Area: 0.19 mm2, side: 0.44 mm
+- Core/Rout Area: 0.05 mm2
+- SRAM Area: 0.14 mm2
+- SRAM/Logic Ratio: 2.80x
+
+Dies per Package: 1 (1x1)
+Die Area: 901.80 mm2, side: 30.03 mm
+- Tiles Area: 797.82 mm2
+- PHY Area: 94.98 mm2
+- MC Area: 9.00 mm2
+
+Packages per Board: 1 (1x1)
+Package Area: 1,091.80 mm2, side: 33.04 mm
+- IOdie Area: 80.00 mm2
+- Dies Area: 901.80 mm2
+- HBM Area: 110.00 mm2
+
+Boards: 1 (1x1)
+Board Area: 1,091.80 mm2
+Total Area: 1,091.80 mm2
+
+
+
+ESTIMATED COST OF SILICON AND PACKAGING. ONLY VARIABLE, NO FIXED COSTS
+Good dies per wafer 3d: 34
+Good dies per wafer 2d: 41
+--Dies 3D Cost: 177.85 $
+--Dies 2.5D Cost: 147.49 $
+--Dies 2D Cost: 147.49 $
+--HBM Cost: 60.00 $
+--IOdie Cost: 8.44 $
+--Packaging Cost 3d: 35.32 $
+--Packaging Cost 2.5d: 75.01 $
+--Packaging Cost 2d: 23.39 $
+SiP Cost 3d: 281.61 $
+SiP Cost 2.5d: 290.94 $
+SiP Cost 2d: 179.32 $
+--Board Cost: 1.09 $
+Total SiPs Cost 3d: 282.70 $
+Total SiPs Cost 2.5d: 292.03 $
+Total SiPs Cost 2d: 180.41 $
+
+Perf counters initialized
+Mesh connected
+Cache structures initialized
+Replicas initialized
+Allocated Frontier List
+Dataset structures initialized
+
+
+Starting Simulation
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+Epoch Done Router: 1
+Epoch Done Router: 2
+Epoch Done Router: 3
+Epoch Done Router: 0
+##EPOCH## 1 COMPLETED at Time (K cy): 1,020
+Nodes processed until now: 3,974,614
+Edges processed until now: 156,461,810
+Program Done Worker Thread: 0
+Program Done Router Thread: 1
+Program Done Worker Thread: 1
+Program Done Router Thread: 2
+Program Done Router Thread: 3
+Program Done Worker Thread: 2
+Program Done Worker Thread: 3
+Program Done Router Thread: 0
+
+===PRINTING ACUM STATS at pu_cycles: 1,020,432
+
+ACollision In Avg:67, SD:17, Max:144, Min:22
+ACollision Out Avg:84, SD:23, Max:151, Min:22
+ACollision End Avg:11, SD:11, Max:73, Min:0
+ATask1 Avg:2, SD:0, Max:8, Min:2
+ATask2 Avg:5, SD:1, Max:7, Min:3
+ATask3 Avg:12, SD:4, Max:64, Min:6
+ACore Active Avg:20, SD:4, Max:77, Min:13
+ARouter Active Avg:69, SD:2, Max:75, Min:64
+T1 invocations: 2,999,674
+T2 invocations: 4,725,299
+T3 invocations: 156,461,810
+T3b invocations: 0
+Total3 invocations: 156,461,810
+Total4 invocations: 248,655
+
+T3/T2 ratio: 33
+T3b/T3 ratio: 0
+
+T1 avg ex cycles: 31
+T2 avg ex cycles: 40
+T3&b avg ex cycles: 3
+T4 avg ex cycles: 108
+Avg. hops NOC1: 7
+Avg. latency NOC1 (T2): 21,058
+Avg. hops NOC2: 33
+Avg. latency NOC2 (T3): 1,321
+
+Runtime at program end in K cycles: 1,020
+Runtime before cooldown in K cycles: 1,020
+
+
+Number of K Nodes Processed: 3,974
+Number of K Edges Processed: 156,461
+Node Re-explore factor: 0.95
+Edge Re-explore factor: 1.22
+Nodes/cy: 4
+Edges/cy: 153
+TEPS: 126
+
+---DCache---
+DCache Size: 33,456
+DRAM words: 0
+  DHits: 0
+  DMisses: 0
+
+---Energy---
+Leakage Energy (nJ): 406,809
+PU Dyn E (nJ): 9,441,107
+Mem Dyn E (nJ): 27,978,960
+Route Dyn E (nJ): 32,495,920
+Dynamic Energy (nJ): 69,915,988
+Ratio of Dyn/Leak: 172
+Total Energy (nJ): 70,322,797
+Total Energy (nJ) 3D: 76,075,165
+Cores Energy (nJ): 9,452,467
+Route Energy (nJ): 32,509,973
+Route Energy (nJ) 3D: 38,262,341
+Mem Energy   (nJ): 28,360,357
+Mem Energy   (nJ) 3D: 28,360,357
+Avg. Power (mW): 68,914.73
+Power Density (mW/mm2): 63.12
+
+---Runtime---
+Runtime in K cycles: 1,020.43
+Microseconds: 1,020.43
+Time per iteration (ms): 1.02
+
+---Inst---
+K Loads: 670,242
+K Stores: 671,811
+K Instructions: 820,393
+
+---Throughput---
+GOP/s (aka OPS/ns): 803.97
+GOP/s per core: 0.20
+GFLOP/s: 306.66
+GFLOP/s per core: 0.07
+Max Peak GFLOP/s: 4,096.00
+Avg. BW GB/s: 5,260.73
+Max BW GB/s: 16,384.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 1,024.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 10,218.33, per-link: 2.49
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 10,427,110,247
+Arith. Intensity FLOP/Loads: 0.47
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 1.22
+Arith. Intensity OPS/Msgs: 0.08
+
+Simulation time: 741.90
+Sim time / DUT time: 177.50
+Sim noc_cy/s: 1,375.43
+Sim Msg/s: 14,054,643.88
+
+Version 31
+

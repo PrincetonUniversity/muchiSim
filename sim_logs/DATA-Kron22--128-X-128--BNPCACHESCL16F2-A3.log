@@ -1,0 +1,3836 @@
+Dataset:  Kron22/
+Dry run: 0
+Open Edge Count File succesfully
+Edges Traversed BFS: 128309848
+Found Vertices: 4194304, Edges: 128311436
+avg degree 31
+Array  Kron22/node_array.bin found
+Malloc array of size 16777220 bytes
+Readin array of size 16777216 bytes
+Finished Reading Array Bytes
+No reordering Array 32bit
+Array  Kron22/edge_array.bin found
+Malloc array of size 513245744 bytes
+Readin array of size 513245744 bytes
+Finished Reading Array Bytes
+No reordering Array 32bit
+Reading graph elapsed time: 0.150465s
+
+Dataset Footprint: 525 MiB
+Dataset Footprint per Board: 4404.02 Mb
+Dataset injection time (ms): 0.0672
+Max Dataset Footprint: 1027 MiB
+
+Dataset footprint per tile: 32 KiB
+Proxys footprint per tile: 64 KiB
+Reserved SRAM per tile: 22 KiB
+
+Ideal SRAM per tile: 118 KiB
+reserved_words_for_dataset:25082
+dataset_words_per_tile:8400
+remaining_sram_words:125414
+min_dcache_sram_words_required:8400
+dataset_words_per_tile:8400
+min_pcache_sram_words_required:8
+proxys_words_per_tile:16384
+Dcache footprint ratio: 1
+Pcache footprint ratio: 3
+Dataset Cached: 0
+DCache: 8400 words, lines: 525, sets: 525
+Proxys Cached: 1
+Pcache: 7711 words, sets: 7711
+Node per tile: 256
+Edge per tile: 7,832
+GRID_X: 128
+GRID_SIZE: 16,384
+smt_per_tile: 1
+noc_freq: 1
+pu_freq: 1
+RUCHE_X: 0
+PROXY_W: 16
+DIE_W: 128
+DIE_H: 128
+DIES: 1
+BORDER_TILES_PER_DIE: 512
+PACK_W: 128
+PACK_H: 128
+DIES_PACK_FACTOR: 1
+DIES_PER_PACK: 1
+PACKAGES: 1
+BOARD_W: 128
+BOARD_H: 128
+BOARDS: 1
+MUX_BUS: 1
+DCACHE: 0
+PCACHE: 1
+PROXY_FACTOR: 8
+CACHE_WAYS: 1
+TORUS: 1
+PHY_NOCS: 1
+WIDE_NOC_ID: 0
+NOC_CONF: 1
+noc_width: 32
+hbm_channel_bit_width: 512
+ld_st_op_byte_width: 4
+PROXY_ROUTING: 4
+WRITE_THROUGH: 1
+ASSERT_MODE: 0
+GLOBAL_BARRIER: 0
+OQ flits: 36 ; 192 ; 384
+IQ flits: 288 ; 1,536 ; 3,072
+OQ messages: 12 ; 96 ; 192
+IQ messages: 96 ; 768 ; 1,536
+max_task2 size: 64
+io_factor_t2: 8
+io_factor_t3: 8
+io_factor_t3b: 8
+
+Active SRAM Storage per tile: 86 KiB
+Total SRAM Storage per tile: 512 KiB
+Agreggated SRAM Storage: 8,192 MiB
+
+Inter-Die #links: 4,096
+Inter-Die (Gbits): 131,072
+Inter-Die (Gbits/mm): 563.524
+Bisection BW of Board (Gbits): 32,768
+Border IO #Dies: 4
+Border IO Die BW (Gbits): 16,384
+Off-Board BW Total (Gbits): 65,536
+Off-Board BW Density (Gbits/mm): 278
+Die side: 58.15 mm
+Die border wire density: 563.52 Gbits/mm
+HBM wire density: 70.44 Gbits/mm
+
+Tiles per Die: 16,384 (128x128)
+Tile Area: 0.19 mm2, side: 0.44 mm
+- Core/Rout Area: 0.05 mm2
+- SRAM Area: 0.14 mm2
+- SRAM/Logic Ratio: 2.80x
+
+Dies per Package: 1 (1x1)
+Die Area: 3,381.23 mm2, side: 58.15 mm
+- Tiles Area: 3,191.28 mm2
+- PHY Area: 189.96 mm2
+- MC Area: 0.00 mm2
+
+Packages per Board: 1 (1x1)
+Package Area: 3,461.23 mm2, side: 58.83 mm
+- IOdie Area: 80.00 mm2
+- Dies Area: 3,381.23 mm2
+- HBM Area: 0.00 mm2
+
+Boards: 1 (1x1)
+Board Area: 3,461.23 mm2
+Total Area: 3,461.23 mm2
+
+
+
+ESTIMATED COST OF SILICON AND PACKAGING. ONLY VARIABLE, NO FIXED COSTS
+Good dies per wafer 3d: 5
+Good dies per wafer 2d: 6
+--Dies 3D Cost: 1,209.40 $
+--Dies 2.5D Cost: 1,007.83 $
+--Dies 2D Cost: 1,007.83 $
+--HBM Cost: 60.00 $
+--IOdie Cost: 8.44 $
+--Packaging Cost 3d: 233.07 $
+--Packaging Cost 2.5d: 505.18 $
+--Packaging Cost 2d: 152.44 $
+SiP Cost 3d: 1,510.91 $
+SiP Cost 2.5d: 1,581.46 $
+SiP Cost 2d: 1,168.71 $
+--Board Cost: 3.46 $
+Total SiPs Cost 3d: 1,514.37 $
+Total SiPs Cost 2.5d: 1,584.92 $
+Total SiPs Cost 2d: 1,172.18 $
+
+Perf counters initialized
+Mesh connected
+Cache structures initialized
+Allocated proxys
+Replicas initialized
+Allocated Frontier List
+Dataset structures initialized
+
+
+Starting Simulation
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+INIT epoch: 1
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:172, SD:58, Max:384, Min:8
+FCollision Out Avg:92, SD:34, Max:195, Min:0
+FCollision End Avg:2, SD:10, Max:86, Min:0
+FTask1 Avg:39, SD:17, Max:100, Min:3
+FTask2 Avg:11, SD:10, Max:61, Min:0
+FTask3 Avg:50, SD:19, Max:95, Min:0
+FCore Active Avg:100, SD:1, Max:100, Min:83
+FRouter Active Avg:95, SD:5, Max:100, Min:70
+T1 invocations: 370,808
+T2 invocations: 137,390
+T3 invocations: 241,253
+T3b invocations: 2,161,798
+Total3 invocations: 2,403,051
+Total4 invocations: 0
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 8
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 52
+Avg. latency NOC1 (T2): 3,042
+Avg. hops NOC2: 30
+Avg. latency NOC2 (T3): 3,122
+
+===PRINTING ACUM STATS at pu_cycles: 10,161
+
+ACollision In Avg:172, SD:58, Max:384, Min:8
+ACollision Out Avg:92, SD:34, Max:195, Min:0
+ACollision End Avg:2, SD:10, Max:86, Min:0
+ATask1 Avg:39, SD:17, Max:100, Min:3
+ATask2 Avg:11, SD:10, Max:61, Min:0
+ATask3 Avg:50, SD:19, Max:95, Min:0
+ACore Active Avg:100, SD:1, Max:100, Min:83
+ARouter Active Avg:95, SD:5, Max:100, Min:70
+T1 invocations: 1,543,268
+T2 invocations: 613,816
+T3 invocations: 961,590
+T3b invocations: 8,002,500
+Total3 invocations: 8,964,090
+Total4 invocations: 0
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 8
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 9
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 36
+Avg. latency NOC1 (T2): 2,852
+Avg. hops NOC2: 34
+Avg. latency NOC2 (T3): 3,497
+Number of K Nodes Processed: 491
+Number of K Edges Processed: 16,891
+Node Re-explore factor: 0.12
+Edge Re-explore factor: 0.13
+Nodes/cy: 48
+Edges/cy: 1,662
+TEPS: 12,628
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 3,239,356
+  PMisses: 4,847,684
+  PHit Rate (hit/miss): 40%
+  PEvictions: 202,181
+  PEviction Rate (evict/misses): 4%
+
+---Energy---
+Leakage Energy (nJ): 9,661
+PU Dyn E (nJ): 903,910
+Mem Dyn E (nJ): 2,903,244
+Route Dyn E (nJ): 2,125,429
+Dynamic Energy (nJ): 5,932,583
+Ratio of Dyn/Leak: 614
+Total Energy (nJ): 5,942,244
+Total Energy (nJ) 3D: 6,130,364
+Cores Energy (nJ): 904,362
+Route Energy (nJ): 2,125,690
+Route Energy (nJ) 3D: 2,313,810
+Mem Energy   (nJ): 2,912,192
+Mem Energy   (nJ) 3D: 2,912,192
+Avg. Power (mW): 584,808.99
+Power Density (mW/mm2): 168.96
+
+---Runtime---
+Runtime in K cycles: 10.16
+Microseconds: 10.16
+Time per iteration (ms): 0.01
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,995.41
+GOP/s per core: 0.98
+FLOP/s: 882.21
+FLOP/s per core: 0.05
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 51,495.54
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 66,959.09, per-link: 4.09
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 680,371,356
+Arith. Intensity FLOP/Loads: 0.15
+Arith. Intensity FLOP/Msgs: 0.01
+Arith. Intensity OPS/Loads: 2.79
+Arith. Intensity OPS/Msgs: 0.24
+
+
+
+===Core Utilization Total=== CORE-S:1;; TIME K cy:10 ;; Nodes Proc: 60,566 -- Edges Proc: 2,107,289
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:226, SD:68, Max:440, Min:18
+FCollision Out Avg:154, SD:45, Max:305, Min:12
+FCollision End Avg:3, SD:13, Max:101, Min:0
+FTask1 Avg:14, SD:15, Max:74, Min:0
+FTask2 Avg:9, SD:10, Max:64, Min:0
+FTask3 Avg:66, SD:20, Max:100, Min:1
+FCore Active Avg:89, SD:15, Max:100, Min:13
+FRouter Active Avg:93, SD:6, Max:101, Min:68
+T1 invocations: 132,366
+T2 invocations: 107,251
+T3 invocations: 662,548
+T3b invocations: 2,808,222
+Total3 invocations: 3,470,770
+Total4 invocations: 0
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 4
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 33
+T3&b avg ex cycles: 8
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 26
+Avg. latency NOC1 (T2): 8,697
+Avg. hops NOC2: 24
+Avg. latency NOC2 (T3): 5,857
+
+===PRINTING ACUM STATS at pu_cycles: 20,145
+
+ACollision In Avg:198, SD:58, Max:372, Min:28
+ACollision Out Avg:123, SD:35, Max:243, Min:9
+ACollision End Avg:2, SD:10, Max:88, Min:0
+ATask1 Avg:26, SD:13, Max:60, Min:1
+ATask2 Avg:10, SD:8, Max:49, Min:0
+ATask3 Avg:58, SD:15, Max:97, Min:10
+ACore Active Avg:94, SD:8, Max:100, Min:54
+ARouter Active Avg:94, SD:4, Max:100, Min:73
+T1 invocations: 2,050,089
+T2 invocations: 986,658
+T3 invocations: 3,977,527
+T3b invocations: 19,207,904
+Total3 invocations: 23,185,431
+Total4 invocations: 0
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 5
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 35
+T3&b avg ex cycles: 8
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 29
+Avg. latency NOC1 (T2): 5,203
+Avg. hops NOC2: 29
+Avg. latency NOC2 (T3): 5,314
+Number of K Nodes Processed: 1,372
+Number of K Edges Processed: 27,314
+Node Re-explore factor: 0.33
+Edge Re-explore factor: 0.21
+Nodes/cy: 68
+Edges/cy: 1,356
+TEPS: 6,369
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 9,516,633
+  PMisses: 9,752,439
+  PHit Rate (hit/miss): 49%
+  PEvictions: 790,278
+  PEviction Rate (evict/misses): 8%
+
+---Energy---
+Leakage Energy (nJ): 19,154
+PU Dyn E (nJ): 1,823,544
+Mem Dyn E (nJ): 5,848,036
+Route Dyn E (nJ): 4,387,050
+Dynamic Energy (nJ): 12,058,632
+Ratio of Dyn/Leak: 630
+Total Energy (nJ): 12,077,786
+Total Energy (nJ) 3D: 12,466,079
+Cores Energy (nJ): 1,824,442
+Route Energy (nJ): 4,387,567
+Route Energy (nJ) 3D: 4,775,861
+Mem Energy   (nJ): 5,865,777
+Mem Energy   (nJ) 3D: 5,865,777
+Avg. Power (mW): 599,542.61
+Power Density (mW/mm2): 173.22
+
+---Runtime---
+Runtime in K cycles: 20.14
+Microseconds: 20.14
+Time per iteration (ms): 0.02
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,263.38
+GOP/s per core: 0.93
+FLOP/s: 1,150.93
+FLOP/s per core: 0.07
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 51,847.21
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 70,134.72, per-link: 4.28
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 1,412,863,914
+Arith. Intensity FLOP/Loads: 0.19
+Arith. Intensity FLOP/Msgs: 0.02
+Arith. Intensity OPS/Loads: 2.57
+Arith. Intensity OPS/Msgs: 0.22
+
+
+
+===Core Utilization Total=== CORE-S:2;; TIME K cy:20 ;; Nodes Proc: 169,174 -- Edges Proc: 3,416,570
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:211, SD:80, Max:469, Min:3
+FCollision Out Avg:160, SD:58, Max:320, Min:0
+FCollision End Avg:3, SD:15, Max:138, Min:0
+FTask1 Avg:10, SD:14, Max:83, Min:0
+FTask2 Avg:4, SD:6, Max:72, Min:0
+FTask3 Avg:68, SD:21, Max:100, Min:3
+FCore Active Avg:81, SD:20, Max:100, Min:14
+FRouter Active Avg:84, SD:9, Max:101, Min:55
+T1 invocations: 92,362
+T2 invocations: 62,582
+T3 invocations: 589,604
+T3b invocations: 3,128,778
+Total3 invocations: 3,718,382
+Total4 invocations: 0
+
+T3/T2 ratio: 9
+T3b/T3 ratio: 5
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 24
+T3&b avg ex cycles: 8
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 32
+Avg. latency NOC1 (T2): 11,716
+Avg. hops NOC2: 17
+Avg. latency NOC2 (T3): 10,415
+
+===PRINTING ACUM STATS at pu_cycles: 30,161
+
+ACollision In Avg:202, SD:60, Max:369, Min:34
+ACollision Out Avg:135, SD:39, Max:248, Min:14
+ACollision End Avg:2, SD:11, Max:92, Min:0
+ATask1 Avg:21, SD:9, Max:44, Min:1
+ATask2 Avg:8, SD:6, Max:32, Min:0
+ATask3 Avg:61, SD:14, Max:98, Min:14
+ACore Active Avg:90, SD:10, Max:100, Min:48
+ARouter Active Avg:91, SD:5, Max:100, Min:75
+T1 invocations: 2,351,635
+T2 invocations: 1,220,196
+T3 invocations: 6,263,463
+T3b invocations: 32,871,130
+Total3 invocations: 39,134,593
+Total4 invocations: 0
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 5
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 33
+T3&b avg ex cycles: 8
+T4 avg ex cycles: -nan
+Avg. hops NOC1: 28
+Avg. latency NOC1 (T2): 6,919
+Avg. hops NOC2: 24
+Avg. latency NOC2 (T3): 7,332
+Number of K Nodes Processed: 1,869
+Number of K Edges Processed: 32,062
+Node Re-explore factor: 0.45
+Edge Re-explore factor: 0.25
+Nodes/cy: 62
+Edges/cy: 1,063
+TEPS: 4,254
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 18,214,171
+  PMisses: 14,733,264
+  PHit Rate (hit/miss): 55%
+  PEvictions: 1,810,723
+  PEviction Rate (evict/misses): 12%
+
+---Energy---
+Leakage Energy (nJ): 28,677
+PU Dyn E (nJ): 2,745,717
+Mem Dyn E (nJ): 8,550,046
+Route Dyn E (nJ): 6,069,289
+Dynamic Energy (nJ): 17,365,052
+Ratio of Dyn/Leak: 606
+Total Energy (nJ): 17,393,729
+Total Energy (nJ) 3D: 17,930,916
+Cores Energy (nJ): 2,747,060
+Route Energy (nJ): 6,070,063
+Route Energy (nJ) 3D: 6,607,250
+Mem Energy   (nJ): 8,576,606
+Mem Energy   (nJ) 3D: 8,576,606
+Avg. Power (mW): 576,696.04
+Power Density (mW/mm2): 166.62
+
+---Runtime---
+Runtime in K cycles: 30.16
+Microseconds: 30.16
+Time per iteration (ms): 0.03
+
+---Throughput---
+GOP/s (aka OPS/ns): 14,789.90
+GOP/s per core: 0.90
+FLOP/s: 1,297.52
+FLOP/s per core: 0.08
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 50,100.74
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 65,260.34, per-link: 3.98
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 1,968,317,094
+Arith. Intensity FLOP/Loads: 0.22
+Arith. Intensity FLOP/Msgs: 0.02
+Arith. Intensity OPS/Loads: 2.52
+Arith. Intensity OPS/Msgs: 0.23
+
+
+
+===Core Utilization Total=== CORE-S:3;; TIME K cy:30 ;; Nodes Proc: 228,686 -- Edges Proc: 3,902,719
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:121, SD:72, Max:396, Min:1
+FCollision Out Avg:84, SD:55, Max:283, Min:0
+FCollision End Avg:2, SD:11, Max:101, Min:0
+FTask1 Avg:15, SD:17, Max:75, Min:0
+FTask2 Avg:5, SD:7, Max:75, Min:0
+FTask3 Avg:76, SD:20, Max:100, Min:5
+FCore Active Avg:96, SD:10, Max:100, Min:16
+FRouter Active Avg:87, SD:6, Max:100, Min:63
+T1 invocations: 145,380
+T2 invocations: 110,816
+T3 invocations: 434,355
+T3b invocations: 3,683,592
+Total3 invocations: 4,117,947
+Total4 invocations: 29
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 8
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 19
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 362
+Avg. hops NOC1: 32
+Avg. latency NOC1 (T2): 12,654
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 9,320
+
+===PRINTING ACUM STATS at pu_cycles: 40,627
+
+ACollision In Avg:182, SD:58, Max:360, Min:29
+ACollision Out Avg:122, SD:39, Max:246, Min:11
+ACollision End Avg:2, SD:10, Max:92, Min:0
+ATask1 Avg:19, SD:6, Max:34, Min:1
+ATask2 Avg:7, SD:5, Max:26, Min:0
+ATask3 Avg:65, SD:11, Max:98, Min:25
+ACore Active Avg:92, SD:9, Max:100, Min:50
+ARouter Active Avg:90, SD:4, Max:99, Min:75
+T1 invocations: 2,841,150
+T2 invocations: 1,631,360
+T3 invocations: 8,162,558
+T3b invocations: 47,900,581
+Total3 invocations: 56,063,139
+Total4 invocations: 35
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 6
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 31
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 359
+Avg. hops NOC1: 26
+Avg. latency NOC1 (T2): 9,236
+Avg. hops NOC2: 21
+Avg. latency NOC2 (T3): 7,870
+Number of K Nodes Processed: 2,315
+Number of K Edges Processed: 38,531
+Node Re-explore factor: 0.55
+Edge Re-explore factor: 0.30
+Nodes/cy: 57
+Edges/cy: 948
+TEPS: 3,158
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 27,849,269
+  PMisses: 20,119,885
+  PHit Rate (hit/miss): 58%
+  PEvictions: 3,329,291
+  PEviction Rate (evict/misses): 17%
+
+---Energy---
+Leakage Energy (nJ): 38,628
+PU Dyn E (nJ): 3,775,658
+Mem Dyn E (nJ): 11,580,074
+Route Dyn E (nJ): 7,737,817
+Dynamic Energy (nJ): 23,093,550
+Ratio of Dyn/Leak: 598
+Total Energy (nJ): 23,132,178
+Total Energy (nJ) 3D: 23,817,045
+Cores Energy (nJ): 3,777,467
+Route Energy (nJ): 7,738,859
+Route Energy (nJ) 3D: 8,423,726
+Mem Energy   (nJ): 11,615,852
+Mem Energy   (nJ) 3D: 11,615,852
+Avg. Power (mW): 569,379.43
+Power Density (mW/mm2): 164.50
+
+---Runtime---
+Runtime in K cycles: 40.63
+Microseconds: 40.63
+Time per iteration (ms): 0.04
+
+---Throughput---
+GOP/s (aka OPS/ns): 14,877.06
+GOP/s per core: 0.91
+FLOP/s: 1,379.95
+FLOP/s per core: 0.08
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 50,095.25
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 62,076.96, per-link: 3.79
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 2,522,000,465
+Arith. Intensity FLOP/Loads: 0.23
+Arith. Intensity FLOP/Msgs: 0.02
+Arith. Intensity OPS/Loads: 2.51
+Arith. Intensity OPS/Msgs: 0.24
+
+
+
+===Core Utilization Total=== CORE-S:4;; TIME K cy:40 ;; Nodes Proc: 286,525 -- Edges Proc: 4,458,697
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:38, SD:43, Max:289, Min:1
+FCollision Out Avg:29, SD:34, Max:217, Min:0
+FCollision End Avg:1, SD:6, Max:101, Min:0
+FTask1 Avg:14, SD:18, Max:81, Min:0
+FTask2 Avg:5, SD:10, Max:88, Min:0
+FTask3 Avg:79, SD:21, Max:100, Min:0
+FCore Active Avg:98, SD:5, Max:100, Min:32
+FRouter Active Avg:87, SD:6, Max:101, Min:67
+T1 invocations: 133,668
+T2 invocations: 89,412
+T3 invocations: 419,656
+T3b invocations: 3,800,744
+Total3 invocations: 4,220,400
+Total4 invocations: 609
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 23
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 366
+Avg. hops NOC1: 37
+Avg. latency NOC1 (T2): 9,949
+Avg. hops NOC2: 14
+Avg. latency NOC2 (T3): 6,570
+
+===PRINTING ACUM STATS at pu_cycles: 50,988
+
+ACollision In Avg:153, SD:50, Max:337, Min:24
+ACollision Out Avg:103, SD:35, Max:233, Min:9
+ACollision End Avg:2, SD:8, Max:92, Min:0
+ATask1 Avg:18, SD:3, Max:29, Min:1
+ATask2 Avg:7, SD:5, Max:33, Min:0
+ATask3 Avg:68, SD:8, Max:96, Min:28
+ACore Active Avg:93, SD:7, Max:100, Min:54
+ARouter Active Avg:89, SD:4, Max:98, Min:73
+T1 invocations: 3,359,406
+T2 invocations: 2,041,636
+T3 invocations: 9,950,155
+T3b invocations: 63,123,774
+Total3 invocations: 73,073,929
+Total4 invocations: 1,014
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 6
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 29
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 386
+Avg. hops NOC1: 26
+Avg. latency NOC1 (T2): 10,330
+Avg. hops NOC2: 20
+Avg. latency NOC2 (T3): 7,631
+Number of K Nodes Processed: 2,786
+Number of K Edges Processed: 45,246
+Node Re-explore factor: 0.66
+Edge Re-explore factor: 0.35
+Nodes/cy: 55
+Edges/cy: 887
+TEPS: 2,516
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 38,248,804
+  PMisses: 25,493,241
+  PHit Rate (hit/miss): 60%
+  PEvictions: 5,276,548
+  PEviction Rate (evict/misses): 21%
+
+---Energy---
+Leakage Energy (nJ): 48,480
+PU Dyn E (nJ): 4,819,803
+Mem Dyn E (nJ): 14,651,345
+Route Dyn E (nJ): 9,283,019
+Dynamic Energy (nJ): 28,754,168
+Ratio of Dyn/Leak: 593
+Total Energy (nJ): 28,802,648
+Total Energy (nJ) 3D: 29,624,279
+Cores Energy (nJ): 4,822,074
+Route Energy (nJ): 9,284,327
+Route Energy (nJ) 3D: 10,105,958
+Mem Energy   (nJ): 14,696,247
+Mem Energy   (nJ) 3D: 14,696,247
+Avg. Power (mW): 564,890.71
+Power Density (mW/mm2): 163.20
+
+---Runtime---
+Runtime in K cycles: 50.99
+Microseconds: 50.99
+Time per iteration (ms): 0.05
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,013.94
+GOP/s per core: 0.92
+FLOP/s: 1,433.16
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 50,293.91
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 59,573.13, per-link: 3.64
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 3,037,514,841
+Arith. Intensity FLOP/Loads: 0.24
+Arith. Intensity FLOP/Msgs: 0.02
+Arith. Intensity OPS/Loads: 2.51
+Arith. Intensity OPS/Msgs: 0.25
+
+
+
+===Core Utilization Total=== CORE-S:5;; TIME K cy:50 ;; Nodes Proc: 344,785 -- Edges Proc: 5,337,710
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:29, SD:38, Max:260, Min:0
+FCollision Out Avg:30, SD:35, Max:190, Min:0
+FCollision End Avg:1, SD:7, Max:101, Min:0
+FTask1 Avg:4, SD:9, Max:69, Min:0
+FTask2 Avg:6, SD:14, Max:85, Min:0
+FTask3 Avg:88, SD:17, Max:100, Min:0
+FCore Active Avg:98, SD:5, Max:100, Min:38
+FRouter Active Avg:90, SD:5, Max:101, Min:70
+T1 invocations: 42,679
+T2 invocations: 50,324
+T3 invocations: 444,143
+T3b invocations: 4,033,978
+Total3 invocations: 4,478,121
+Total4 invocations: 645
+
+T3/T2 ratio: 9
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 41
+T2 avg ex cycles: 46
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 411
+Avg. hops NOC1: 39
+Avg. latency NOC1 (T2): 6,839
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 4,052
+
+===PRINTING ACUM STATS at pu_cycles: 61,096
+
+ACollision In Avg:132, SD:43, Max:284, Min:23
+ACollision Out Avg:91, SD:30, Max:206, Min:7
+ACollision End Avg:2, SD:7, Max:87, Min:0
+ATask1 Avg:16, SD:3, Max:27, Min:1
+ATask2 Avg:7, SD:5, Max:31, Min:0
+ATask3 Avg:71, SD:7, Max:94, Min:35
+ACore Active Avg:94, SD:6, Max:100, Min:57
+ARouter Active Avg:89, SD:4, Max:97, Min:74
+T1 invocations: 3,581,585
+T2 invocations: 2,284,326
+T3 invocations: 11,800,766
+T3b invocations: 79,311,760
+Total3 invocations: 91,112,526
+Total4 invocations: 2,688
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 7
+
+T1 avg ex cycles: 43
+T2 avg ex cycles: 30
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 435
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 10,305
+Avg. hops NOC2: 19
+Avg. latency NOC2 (T3): 7,071
+Number of K Nodes Processed: 3,449
+Number of K Edges Processed: 52,530
+Node Re-explore factor: 0.82
+Edge Re-explore factor: 0.41
+Nodes/cy: 56
+Edges/cy: 860
+TEPS: 2,100
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 49,738,733
+  PMisses: 30,326,720
+  PHit Rate (hit/miss): 62%
+  PEvictions: 7,471,105
+  PEviction Rate (evict/misses): 25%
+
+---Energy---
+Leakage Energy (nJ): 58,090
+PU Dyn E (nJ): 5,882,386
+Mem Dyn E (nJ): 17,914,702
+Route Dyn E (nJ): 10,927,571
+Dynamic Energy (nJ): 34,724,659
+Ratio of Dyn/Leak: 598
+Total Energy (nJ): 34,782,749
+Total Energy (nJ) 3D: 35,749,938
+Cores Energy (nJ): 5,885,107
+Route Energy (nJ): 10,929,138
+Route Energy (nJ) 3D: 11,896,327
+Mem Energy   (nJ): 17,968,505
+Mem Energy   (nJ) 3D: 17,968,505
+Avg. Power (mW): 569,313.04
+Power Density (mW/mm2): 164.48
+
+---Runtime---
+Runtime in K cycles: 61.10
+Microseconds: 61.10
+Time per iteration (ms): 0.06
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,166.08
+GOP/s per core: 0.93
+FLOP/s: 1,491.30
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 51,184.44
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 58,685.69, per-link: 3.58
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 3,585,461,071
+Arith. Intensity FLOP/Loads: 0.25
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.49
+Arith. Intensity OPS/Msgs: 0.26
+
+
+
+===Core Utilization Total=== CORE-S:6;; TIME K cy:60 ;; Nodes Proc: 421,697 -- Edges Proc: 6,296,675
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:34, SD:41, Max:228, Min:1
+FCollision Out Avg:34, SD:39, Max:224, Min:0
+FCollision End Avg:2, SD:8, Max:101, Min:0
+FTask1 Avg:3, SD:7, Max:54, Min:0
+FTask2 Avg:6, SD:14, Max:76, Min:0
+FTask3 Avg:89, SD:16, Max:100, Min:16
+FCore Active Avg:98, SD:7, Max:100, Min:17
+FRouter Active Avg:92, SD:5, Max:101, Min:72
+T1 invocations: 26,890
+T2 invocations: 47,615
+T3 invocations: 455,578
+T3b invocations: 4,035,439
+Total3 invocations: 4,491,017
+Total4 invocations: 470
+
+T3/T2 ratio: 10
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 51
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 459
+Avg. hops NOC1: 36
+Avg. latency NOC1 (T2): 6,709
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 3,646
+
+===PRINTING ACUM STATS at pu_cycles: 71,102
+
+ACollision In Avg:118, SD:37, Max:253, Min:20
+ACollision Out Avg:83, SD:27, Max:193, Min:6
+ACollision End Avg:2, SD:6, Max:75, Min:0
+ATask1 Avg:14, SD:2, Max:25, Min:1
+ATask2 Avg:7, SD:5, Max:33, Min:0
+ATask3 Avg:74, SD:7, Max:94, Min:40
+ACore Active Avg:94, SD:5, Max:100, Min:58
+ARouter Active Avg:89, SD:3, Max:97, Min:74
+T1 invocations: 3,700,568
+T2 invocations: 2,480,594
+T3 invocations: 13,676,719
+T3b invocations: 95,491,905
+Total3 invocations: 109,168,624
+Total4 invocations: 4,167
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 7
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 31
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 457
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 10,089
+Avg. hops NOC2: 18
+Avg. latency NOC2 (T3): 6,565
+Number of K Nodes Processed: 4,253
+Number of K Edges Processed: 60,348
+Node Re-explore factor: 1.01
+Edge Re-explore factor: 0.47
+Nodes/cy: 60
+Edges/cy: 849
+TEPS: 1,805
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 62,084,953
+  PMisses: 34,155,099
+  PHit Rate (hit/miss): 65%
+  PEvictions: 9,544,983
+  PEviction Rate (evict/misses): 28%
+
+---Energy---
+Leakage Energy (nJ): 67,604
+PU Dyn E (nJ): 6,939,683
+Mem Dyn E (nJ): 21,243,599
+Route Dyn E (nJ): 12,670,566
+Dynamic Energy (nJ): 40,853,849
+Ratio of Dyn/Leak: 604
+Total Energy (nJ): 40,921,453
+Total Energy (nJ) 3D: 42,042,913
+Cores Energy (nJ): 6,942,850
+Route Energy (nJ): 12,672,389
+Route Energy (nJ) 3D: 13,793,849
+Mem Energy   (nJ): 21,306,215
+Mem Energy   (nJ) 3D: 21,306,215
+Avg. Power (mW): 575,531.67
+Power Density (mW/mm2): 166.28
+
+---Runtime---
+Runtime in K cycles: 71.10
+Microseconds: 71.10
+Time per iteration (ms): 0.07
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,279.64
+GOP/s per core: 0.93
+FLOP/s: 1,535.38
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 52,073.64
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 58,562.34, per-link: 3.57
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 4,163,899,652
+Arith. Intensity FLOP/Loads: 0.25
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.48
+Arith. Intensity OPS/Msgs: 0.26
+
+
+
+===Core Utilization Total=== CORE-S:7;; TIME K cy:70 ;; Nodes Proc: 520,203 -- Edges Proc: 7,173,161
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:37, SD:45, Max:234, Min:1
+FCollision Out Avg:44, SD:47, Max:254, Min:0
+FCollision End Avg:2, SD:9, Max:101, Min:0
+FTask1 Avg:3, SD:7, Max:46, Min:0
+FTask2 Avg:5, SD:12, Max:80, Min:0
+FTask3 Avg:88, SD:16, Max:100, Min:11
+FCore Active Avg:96, SD:9, Max:100, Min:17
+FRouter Active Avg:89, SD:6, Max:101, Min:69
+T1 invocations: 27,751
+T2 invocations: 37,600
+T3 invocations: 425,161
+T3b invocations: 4,048,993
+Total3 invocations: 4,474,154
+Total4 invocations: 630
+
+T3/T2 ratio: 11
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 38
+T2 avg ex cycles: 52
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 476
+Avg. hops NOC1: 37
+Avg. latency NOC1 (T2): 6,290
+Avg. hops NOC2: 14
+Avg. latency NOC2 (T3): 3,801
+
+===PRINTING ACUM STATS at pu_cycles: 81,059
+
+ACollision In Avg:108, SD:34, Max:221, Min:18
+ACollision Out Avg:78, SD:25, Max:193, Min:5
+ACollision End Avg:2, SD:6, Max:78, Min:0
+ATask1 Avg:13, SD:2, Max:25, Min:1
+ATask2 Avg:6, SD:5, Max:37, Min:0
+ATask3 Avg:75, SD:7, Max:95, Min:44
+ACore Active Avg:95, SD:5, Max:100, Min:60
+ARouter Active Avg:89, SD:3, Max:97, Min:74
+T1 invocations: 3,806,536
+T2 invocations: 2,656,267
+T3 invocations: 15,494,290
+T3b invocations: 111,807,892
+Total3 invocations: 127,302,182
+Total4 invocations: 6,143
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 7
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 32
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 468
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 9,818
+Avg. hops NOC2: 18
+Avg. latency NOC2 (T3): 6,208
+Number of K Nodes Processed: 5,047
+Number of K Edges Processed: 67,651
+Node Re-explore factor: 1.20
+Edge Re-explore factor: 0.53
+Nodes/cy: 62
+Edges/cy: 835
+TEPS: 1,583
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 74,835,743
+  PMisses: 37,629,754
+  PHit Rate (hit/miss): 67%
+  PEvictions: 11,640,028
+  PEviction Rate (evict/misses): 31%
+
+---Energy---
+Leakage Energy (nJ): 77,071
+PU Dyn E (nJ): 7,992,800
+Mem Dyn E (nJ): 24,530,275
+Route Dyn E (nJ): 14,342,921
+Dynamic Energy (nJ): 46,865,996
+Ratio of Dyn/Leak: 608
+Total Energy (nJ): 46,943,067
+Total Energy (nJ) 3D: 48,212,546
+Cores Energy (nJ): 7,996,410
+Route Energy (nJ): 14,344,999
+Route Energy (nJ) 3D: 15,614,478
+Mem Energy   (nJ): 24,601,659
+Mem Energy   (nJ) 3D: 24,601,659
+Avg. Power (mW): 579,122.21
+Power Density (mW/mm2): 167.32
+
+---Runtime---
+Runtime in K cycles: 81.06
+Microseconds: 81.06
+Time per iteration (ms): 0.08
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,359.33
+GOP/s per core: 0.94
+FLOP/s: 1,570.49
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 52,675.79
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 58,235.06, per-link: 3.55
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 4,720,476,053
+Arith. Intensity FLOP/Loads: 0.25
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.47
+Arith. Intensity OPS/Msgs: 0.26
+
+
+
+===Core Utilization Total=== CORE-S:8;; TIME K cy:80 ;; Nodes Proc: 619,038 -- Edges Proc: 7,950,493
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:45, SD:50, Max:253, Min:1
+FCollision Out Avg:52, SD:50, Max:280, Min:0
+FCollision End Avg:3, SD:11, Max:101, Min:0
+FTask1 Avg:3, SD:7, Max:57, Min:0
+FTask2 Avg:6, SD:13, Max:79, Min:0
+FTask3 Avg:85, SD:16, Max:100, Min:10
+FCore Active Avg:95, SD:10, Max:100, Min:10
+FRouter Active Avg:89, SD:7, Max:101, Min:68
+T1 invocations: 32,440
+T2 invocations: 46,584
+T3 invocations: 410,625
+T3b invocations: 4,031,525
+Total3 invocations: 4,442,150
+Total4 invocations: 682
+
+T3/T2 ratio: 9
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 37
+T2 avg ex cycles: 49
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 449
+Avg. hops NOC1: 35
+Avg. latency NOC1 (T2): 6,746
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,222
+
+===PRINTING ACUM STATS at pu_cycles: 91,070
+
+ACollision In Avg:101, SD:33, Max:210, Min:18
+ACollision Out Avg:75, SD:24, Max:190, Min:5
+ACollision End Avg:2, SD:6, Max:74, Min:0
+ATask1 Avg:11, SD:2, Max:23, Min:1
+ATask2 Avg:6, SD:5, Max:35, Min:0
+ATask3 Avg:77, SD:6, Max:93, Min:46
+ACore Active Avg:95, SD:5, Max:100, Min:65
+ARouter Active Avg:89, SD:3, Max:97, Min:74
+T1 invocations: 3,929,558
+T2 invocations: 2,864,098
+T3 invocations: 17,198,207
+T3b invocations: 128,294,086
+Total3 invocations: 145,492,293
+Total4 invocations: 8,542
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 7
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 33
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 471
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 9,536
+Avg. hops NOC2: 17
+Avg. latency NOC2 (T3): 5,909
+Number of K Nodes Processed: 5,739
+Number of K Edges Processed: 76,231
+Node Re-explore factor: 1.37
+Edge Re-explore factor: 0.59
+Nodes/cy: 63
+Edges/cy: 837
+TEPS: 1,409
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 87,879,919
+  PMisses: 41,045,111
+  PHit Rate (hit/miss): 68%
+  PEvictions: 13,860,105
+  PEviction Rate (evict/misses): 34%
+
+---Energy---
+Leakage Energy (nJ): 86,590
+PU Dyn E (nJ): 9,044,750
+Mem Dyn E (nJ): 27,866,997
+Route Dyn E (nJ): 16,036,486
+Dynamic Energy (nJ): 52,948,233
+Ratio of Dyn/Leak: 611
+Total Energy (nJ): 53,034,823
+Total Energy (nJ) 3D: 54,454,198
+Cores Energy (nJ): 9,048,806
+Route Energy (nJ): 16,038,821
+Route Energy (nJ) 3D: 17,458,196
+Mem Energy   (nJ): 27,947,196
+Mem Energy   (nJ) 3D: 27,947,196
+Avg. Power (mW): 582,352.29
+Power Density (mW/mm2): 168.25
+
+---Runtime---
+Runtime in K cycles: 91.07
+Microseconds: 91.07
+Time per iteration (ms): 0.09
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,407.14
+GOP/s per core: 0.94
+FLOP/s: 1,597.59
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 53,211.24
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 58,019.70, per-link: 3.54
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 5,283,854,511
+Arith. Intensity FLOP/Loads: 0.25
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.46
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:9;; TIME K cy:90 ;; Nodes Proc: 706,933 -- Edges Proc: 8,936,274
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:49, SD:52, Max:373, Min:1
+FCollision Out Avg:62, SD:54, Max:266, Min:0
+FCollision End Avg:3, SD:13, Max:101, Min:0
+FTask1 Avg:3, SD:7, Max:57, Min:0
+FTask2 Avg:5, SD:13, Max:78, Min:0
+FTask3 Avg:85, SD:15, Max:100, Min:14
+FCore Active Avg:94, SD:10, Max:100, Min:29
+FRouter Active Avg:88, SD:7, Max:101, Min:68
+T1 invocations: 33,277
+T2 invocations: 44,829
+T3 invocations: 393,885
+T3b invocations: 4,016,699
+Total3 invocations: 4,410,584
+Total4 invocations: 684
+
+T3/T2 ratio: 9
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 37
+T2 avg ex cycles: 49
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 438
+Avg. hops NOC1: 33
+Avg. latency NOC1 (T2): 7,505
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 2,833
+
+===PRINTING ACUM STATS at pu_cycles: 101,045
+
+ACollision In Avg:96, SD:32, Max:200, Min:16
+ACollision Out Avg:74, SD:24, Max:198, Min:5
+ACollision End Avg:2, SD:6, Max:77, Min:0
+ATask1 Avg:11, SD:2, Max:22, Min:1
+ATask2 Avg:6, SD:5, Max:37, Min:0
+ATask3 Avg:77, SD:6, Max:93, Min:45
+ACore Active Avg:94, SD:5, Max:100, Min:63
+ARouter Active Avg:89, SD:3, Max:96, Min:74
+T1 invocations: 4,047,903
+T2 invocations: 3,078,101
+T3 invocations: 18,796,473
+T3b invocations: 145,046,513
+Total3 invocations: 163,842,986
+Total4 invocations: 10,759
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 8
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 470
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 9,306
+Avg. hops NOC2: 17
+Avg. latency NOC2 (T3): 5,662
+Number of K Nodes Processed: 6,383
+Number of K Edges Processed: 84,912
+Node Re-explore factor: 1.52
+Edge Re-explore factor: 0.66
+Nodes/cy: 63
+Edges/cy: 840
+TEPS: 1,270
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 101,074,121
+  PMisses: 44,511,078
+  PHit Rate (hit/miss): 69%
+  PEvictions: 16,243,902
+  PEviction Rate (evict/misses): 36%
+
+---Energy---
+Leakage Energy (nJ): 96,074
+PU Dyn E (nJ): 10,098,367
+Mem Dyn E (nJ): 31,216,514
+Route Dyn E (nJ): 17,709,429
+Dynamic Energy (nJ): 59,024,311
+Ratio of Dyn/Leak: 614
+Total Energy (nJ): 59,120,385
+Total Energy (nJ) 3D: 60,687,830
+Cores Energy (nJ): 10,102,867
+Route Energy (nJ): 17,712,020
+Route Energy (nJ) 3D: 19,279,466
+Mem Energy   (nJ): 31,305,498
+Mem Energy   (nJ) 3D: 31,305,498
+Avg. Power (mW): 585,089.66
+Power Density (mW/mm2): 169.04
+
+---Runtime---
+Runtime in K cycles: 101.05
+Microseconds: 101.05
+Time per iteration (ms): 0.10
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,448.24
+GOP/s per core: 0.94
+FLOP/s: 1,621.49
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 53,677.71
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 57,807.54, per-link: 3.53
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 5,841,162,943
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.44
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:10;; TIME K cy:100 ;; Nodes Proc: 786,783 -- Edges Proc: 9,930,154
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:54, SD:53, Max:281, Min:1
+FCollision Out Avg:58, SD:48, Max:253, Min:0
+FCollision End Avg:3, SD:13, Max:145, Min:0
+FTask1 Avg:3, SD:6, Max:57, Min:0
+FTask2 Avg:7, SD:14, Max:79, Min:0
+FTask3 Avg:84, SD:16, Max:100, Min:9
+FCore Active Avg:94, SD:9, Max:100, Min:36
+FRouter Active Avg:90, SD:6, Max:101, Min:68
+T1 invocations: 31,300
+T2 invocations: 57,018
+T3 invocations: 368,930
+T3b invocations: 4,082,443
+Total3 invocations: 4,451,373
+Total4 invocations: 731
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 36
+T2 avg ex cycles: 49
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 406
+Avg. hops NOC1: 31
+Avg. latency NOC1 (T2): 10,417
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 2,746
+
+===PRINTING ACUM STATS at pu_cycles: 111,101
+
+ACollision In Avg:92, SD:31, Max:200, Min:16
+ACollision Out Avg:72, SD:24, Max:201, Min:4
+ACollision End Avg:2, SD:6, Max:79, Min:0
+ATask1 Avg:10, SD:2, Max:22, Min:1
+ATask2 Avg:6, SD:5, Max:37, Min:0
+ATask3 Avg:78, SD:6, Max:93, Min:48
+ACore Active Avg:94, SD:4, Max:100, Min:66
+ARouter Active Avg:89, SD:3, Max:96, Min:75
+T1 invocations: 4,173,019
+T2 invocations: 3,308,062
+T3 invocations: 20,316,788
+T3b invocations: 161,908,859
+Total3 invocations: 182,225,647
+Total4 invocations: 13,248
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 8
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 35
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 469
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 9,162
+Avg. hops NOC2: 17
+Avg. latency NOC2 (T3): 5,449
+Number of K Nodes Processed: 6,965
+Number of K Edges Processed: 94,249
+Node Re-explore factor: 1.66
+Edge Re-explore factor: 0.73
+Nodes/cy: 63
+Edges/cy: 848
+TEPS: 1,155
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 114,574,971
+  PMisses: 47,934,911
+  PHit Rate (hit/miss): 71%
+  PEvictions: 18,723,297
+  PEviction Rate (evict/misses): 39%
+
+---Energy---
+Leakage Energy (nJ): 105,635
+PU Dyn E (nJ): 11,153,591
+Mem Dyn E (nJ): 34,592,026
+Route Dyn E (nJ): 19,406,911
+Dynamic Energy (nJ): 65,152,529
+Ratio of Dyn/Leak: 617
+Total Energy (nJ): 65,258,164
+Total Energy (nJ) 3D: 66,975,852
+Cores Energy (nJ): 11,158,539
+Route Energy (nJ): 19,409,760
+Route Energy (nJ) 3D: 21,127,448
+Mem Energy   (nJ): 34,689,866
+Mem Energy   (nJ) 3D: 34,689,866
+Avg. Power (mW): 587,376.93
+Power Density (mW/mm2): 169.70
+
+---Runtime---
+Runtime in K cycles: 111.10
+Microseconds: 111.10
+Time per iteration (ms): 0.11
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,472.70
+GOP/s per core: 0.94
+FLOP/s: 1,640.18
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 54,056.55
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 57,661.14, per-link: 3.52
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 6,406,210,159
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.43
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:11;; TIME K cy:110 ;; Nodes Proc: 859,235 -- Edges Proc: 11,082,326
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:52, SD:53, Max:274, Min:1
+FCollision Out Avg:54, SD:45, Max:263, Min:0
+FCollision End Avg:3, SD:12, Max:101, Min:0
+FTask1 Avg:3, SD:7, Max:53, Min:0
+FTask2 Avg:7, SD:14, Max:79, Min:0
+FTask3 Avg:83, SD:16, Max:100, Min:8
+FCore Active Avg:94, SD:10, Max:100, Min:50
+FRouter Active Avg:90, SD:7, Max:101, Min:61
+T1 invocations: 39,136
+T2 invocations: 62,572
+T3 invocations: 343,154
+T3b invocations: 4,136,637
+Total3 invocations: 4,479,791
+Total4 invocations: 986
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 36
+T2 avg ex cycles: 47
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 341
+Avg. hops NOC1: 33
+Avg. latency NOC1 (T2): 9,406
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 2,951
+
+===PRINTING ACUM STATS at pu_cycles: 121,047
+
+ACollision In Avg:88, SD:31, Max:195, Min:15
+ACollision Out Avg:71, SD:24, Max:201, Min:4
+ACollision End Avg:2, SD:6, Max:81, Min:0
+ATask1 Avg:9, SD:2, Max:21, Min:1
+ATask2 Avg:6, SD:5, Max:36, Min:0
+ATask3 Avg:78, SD:6, Max:94, Min:52
+ACore Active Avg:94, SD:5, Max:100, Min:69
+ARouter Active Avg:89, SD:3, Max:96, Min:74
+T1 invocations: 4,324,739
+T2 invocations: 3,566,412
+T3 invocations: 21,724,771
+T3b invocations: 178,988,242
+Total3 invocations: 200,713,013
+Total4 invocations: 16,350
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 8
+
+T1 avg ex cycles: 42
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 461
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 9,000
+Avg. hops NOC2: 17
+Avg. latency NOC2 (T3): 5,272
+Number of K Nodes Processed: 7,431
+Number of K Edges Processed: 104,246
+Node Re-explore factor: 1.77
+Edge Re-explore factor: 0.81
+Nodes/cy: 61
+Edges/cy: 861
+TEPS: 1,060
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 128,074,604
+  PMisses: 51,390,323
+  PHit Rate (hit/miss): 71%
+  PEvictions: 21,326,247
+  PEviction Rate (evict/misses): 41%
+
+---Energy---
+Leakage Energy (nJ): 115,092
+PU Dyn E (nJ): 12,209,608
+Mem Dyn E (nJ): 37,989,820
+Route Dyn E (nJ): 21,086,544
+Dynamic Energy (nJ): 71,285,973
+Ratio of Dyn/Leak: 619
+Total Energy (nJ): 71,401,065
+Total Energy (nJ) 3D: 73,267,415
+Cores Energy (nJ): 12,214,998
+Route Energy (nJ): 21,089,648
+Route Energy (nJ) 3D: 22,955,999
+Mem Energy   (nJ): 38,096,419
+Mem Energy   (nJ) 3D: 38,096,419
+Avg. Power (mW): 589,862.33
+Power Density (mW/mm2): 170.42
+
+---Runtime---
+Runtime in K cycles: 121.05
+Microseconds: 121.05
+Time per iteration (ms): 0.12
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,505.15
+GOP/s per core: 0.95
+FLOP/s: 1,658.14
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 54,457.73
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 57,547.93, per-link: 3.51
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 6,966,004,303
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.42
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:12;; TIME K cy:120 ;; Nodes Proc: 916,138 -- Edges Proc: 12,340,113
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:52, SD:52, Max:272, Min:1
+FCollision Out Avg:53, SD:43, Max:230, Min:0
+FCollision End Avg:3, SD:12, Max:101, Min:0
+FTask1 Avg:4, SD:7, Max:46, Min:0
+FTask2 Avg:7, SD:14, Max:82, Min:0
+FTask3 Avg:81, SD:16, Max:100, Min:18
+FCore Active Avg:92, SD:11, Max:100, Min:52
+FRouter Active Avg:89, SD:8, Max:101, Min:58
+T1 invocations: 42,695
+T2 invocations: 69,465
+T3 invocations: 306,178
+T3b invocations: 4,162,122
+Total3 invocations: 4,468,300
+Total4 invocations: 1,465
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 14
+
+T1 avg ex cycles: 35
+T2 avg ex cycles: 44
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 230
+Avg. hops NOC1: 32
+Avg. latency NOC1 (T2): 8,379
+Avg. hops NOC2: 14
+Avg. latency NOC2 (T3): 3,047
+
+===PRINTING ACUM STATS at pu_cycles: 131,080
+
+ACollision In Avg:86, SD:31, Max:191, Min:14
+ACollision Out Avg:69, SD:25, Max:197, Min:4
+ACollision End Avg:2, SD:6, Max:82, Min:0
+ATask1 Avg:9, SD:2, Max:20, Min:1
+ATask2 Avg:6, SD:5, Max:34, Min:0
+ATask3 Avg:79, SD:6, Max:94, Min:55
+ACore Active Avg:94, SD:5, Max:100, Min:71
+ARouter Active Avg:89, SD:4, Max:96, Min:73
+T1 invocations: 4,493,037
+T2 invocations: 3,854,731
+T3 invocations: 22,982,567
+T3b invocations: 196,419,945
+Total3 invocations: 219,402,512
+Total4 invocations: 20,770
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 41
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 435
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 8,827
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 5,118
+Number of K Nodes Processed: 7,785
+Number of K Edges Processed: 114,904
+Node Re-explore factor: 1.86
+Edge Re-explore factor: 0.90
+Nodes/cy: 59
+Edges/cy: 877
+TEPS: 979
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 141,814,526
+  PMisses: 55,107,257
+  PHit Rate (hit/miss): 72%
+  PEvictions: 24,197,309
+  PEviction Rate (evict/misses): 44%
+
+---Energy---
+Leakage Energy (nJ): 124,631
+PU Dyn E (nJ): 13,266,892
+Mem Dyn E (nJ): 41,409,277
+Route Dyn E (nJ): 22,732,476
+Dynamic Energy (nJ): 77,408,645
+Ratio of Dyn/Leak: 621
+Total Energy (nJ): 77,533,276
+Total Energy (nJ) 3D: 79,545,306
+Cores Energy (nJ): 13,272,729
+Route Energy (nJ): 22,735,836
+Route Energy (nJ) 3D: 24,747,867
+Mem Energy   (nJ): 41,524,711
+Mem Energy   (nJ) 3D: 41,524,711
+Avg. Power (mW): 591,495.85
+Power Density (mW/mm2): 170.89
+
+---Runtime---
+Runtime in K cycles: 131.08
+Microseconds: 131.08
+Time per iteration (ms): 0.13
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,518.32
+GOP/s per core: 0.95
+FLOP/s: 1,673.81
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 54,781.21
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 57,337.64, per-link: 3.50
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 7,515,817,770
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.40
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:13;; TIME K cy:130 ;; Nodes Proc: 960,406 -- Edges Proc: 13,707,020
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:51, SD:51, Max:228, Min:1
+FCollision Out Avg:52, SD:42, Max:236, Min:0
+FCollision End Avg:3, SD:11, Max:101, Min:0
+FTask1 Avg:4, SD:7, Max:49, Min:0
+FTask2 Avg:8, SD:14, Max:80, Min:0
+FTask3 Avg:79, SD:16, Max:100, Min:6
+FCore Active Avg:92, SD:12, Max:100, Min:50
+FRouter Active Avg:88, SD:8, Max:101, Min:55
+T1 invocations: 47,103
+T2 invocations: 78,421
+T3 invocations: 267,023
+T3b invocations: 4,188,314
+Total3 invocations: 4,455,337
+Total4 invocations: 2,136
+
+T3/T2 ratio: 3
+T3b/T3 ratio: 16
+
+T1 avg ex cycles: 35
+T2 avg ex cycles: 41
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 197
+Avg. hops NOC1: 33
+Avg. latency NOC1 (T2): 8,213
+Avg. hops NOC2: 14
+Avg. latency NOC2 (T3): 2,961
+
+===PRINTING ACUM STATS at pu_cycles: 141,107
+
+ACollision In Avg:83, SD:31, Max:192, Min:13
+ACollision Out Avg:68, SD:25, Max:188, Min:4
+ACollision End Avg:2, SD:6, Max:83, Min:0
+ATask1 Avg:9, SD:2, Max:20, Min:1
+ATask2 Avg:6, SD:5, Max:32, Min:0
+ATask3 Avg:79, SD:6, Max:95, Min:56
+ACore Active Avg:94, SD:5, Max:100, Min:73
+ARouter Active Avg:89, SD:4, Max:96, Min:72
+T1 invocations: 4,702,771
+T2 invocations: 4,183,589
+T3 invocations: 24,081,220
+T3b invocations: 213,880,805
+Total3 invocations: 237,962,025
+Total4 invocations: 27,545
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 41
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 393
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 8,595
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 4,975
+Number of K Nodes Processed: 8,044
+Number of K Edges Processed: 126,141
+Node Re-explore factor: 1.92
+Edge Re-explore factor: 0.98
+Nodes/cy: 57
+Edges/cy: 894
+TEPS: 909
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 155,319,040
+  PMisses: 59,036,231
+  PHit Rate (hit/miss): 72%
+  PEvictions: 27,270,110
+  PEviction Rate (evict/misses): 46%
+
+---Energy---
+Leakage Energy (nJ): 134,165
+PU Dyn E (nJ): 14,316,705
+Mem Dyn E (nJ): 44,818,712
+Route Dyn E (nJ): 24,337,924
+Dynamic Energy (nJ): 83,473,341
+Ratio of Dyn/Leak: 622
+Total Energy (nJ): 83,607,506
+Total Energy (nJ) 3D: 85,761,634
+Cores Energy (nJ): 14,322,988
+Route Energy (nJ): 24,341,542
+Route Energy (nJ) 3D: 26,495,670
+Mem Energy   (nJ): 44,942,977
+Mem Energy   (nJ) 3D: 44,942,977
+Avg. Power (mW): 592,511.40
+Power Density (mW/mm2): 171.18
+
+---Runtime---
+Runtime in K cycles: 141.11
+Microseconds: 141.11
+Time per iteration (ms): 0.14
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,522.34
+GOP/s per core: 0.95
+FLOP/s: 1,686.39
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,049.45
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 57,069.53, per-link: 3.48
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 8,052,910,580
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.39
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:14;; TIME K cy:140 ;; Nodes Proc: 993,378 -- Edges Proc: 15,101,052
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:51, SD:51, Max:258, Min:1
+FCollision Out Avg:52, SD:45, Max:266, Min:0
+FCollision End Avg:3, SD:11, Max:101, Min:0
+FTask1 Avg:4, SD:8, Max:46, Min:0
+FTask2 Avg:8, SD:14, Max:78, Min:0
+FTask3 Avg:79, SD:16, Max:100, Min:7
+FCore Active Avg:92, SD:11, Max:100, Min:47
+FRouter Active Avg:88, SD:8, Max:101, Min:52
+T1 invocations: 49,945
+T2 invocations: 84,200
+T3 invocations: 241,797
+T3b invocations: 4,284,952
+Total3 invocations: 4,526,749
+Total4 invocations: 2,329
+
+T3/T2 ratio: 3
+T3b/T3 ratio: 18
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 40
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 191
+Avg. hops NOC1: 31
+Avg. latency NOC1 (T2): 7,728
+Avg. hops NOC2: 14
+Avg. latency NOC2 (T3): 2,764
+
+===PRINTING ACUM STATS at pu_cycles: 151,076
+
+ACollision In Avg:81, SD:30, Max:192, Min:12
+ACollision Out Avg:67, SD:25, Max:181, Min:3
+ACollision End Avg:2, SD:5, Max:84, Min:0
+ATask1 Avg:8, SD:2, Max:18, Min:1
+ATask2 Avg:7, SD:5, Max:30, Min:0
+ATask3 Avg:79, SD:6, Max:95, Min:57
+ACore Active Avg:94, SD:5, Max:100, Min:75
+ARouter Active Avg:89, SD:4, Max:96, Min:71
+T1 invocations: 4,927,527
+T2 invocations: 4,537,137
+T3 invocations: 25,069,439
+T3b invocations: 231,446,145
+Total3 invocations: 256,515,584
+Total4 invocations: 36,183
+
+T3/T2 ratio: 6
+T3b/T3 ratio: 9
+
+T1 avg ex cycles: 41
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 354
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 8,349
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 4,835
+Number of K Nodes Processed: 8,241
+Number of K Edges Processed: 137,582
+Node Re-explore factor: 1.96
+Edge Re-explore factor: 1.07
+Nodes/cy: 55
+Edges/cy: 911
+TEPS: 849
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 168,686,922
+  PMisses: 63,165,350
+  PHit Rate (hit/miss): 73%
+  PEvictions: 30,547,317
+  PEviction Rate (evict/misses): 48%
+
+---Energy---
+Leakage Energy (nJ): 143,644
+PU Dyn E (nJ): 15,362,811
+Mem Dyn E (nJ): 48,221,310
+Route Dyn E (nJ): 25,903,474
+Dynamic Energy (nJ): 89,487,596
+Ratio of Dyn/Leak: 623
+Total Energy (nJ): 89,631,240
+Total Energy (nJ) 3D: 91,923,933
+Cores Energy (nJ): 15,369,539
+Route Energy (nJ): 25,907,348
+Route Energy (nJ) 3D: 28,200,041
+Mem Energy   (nJ): 48,354,354
+Mem Energy   (nJ) 3D: 48,354,354
+Avg. Power (mW): 593,285.76
+Power Density (mW/mm2): 171.41
+
+---Runtime---
+Runtime in K cycles: 151.08
+Microseconds: 151.08
+Time per iteration (ms): 0.15
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,526.57
+GOP/s per core: 0.95
+FLOP/s: 1,697.92
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,294.21
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 56,777.15, per-link: 3.47
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 8,577,664,704
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.38
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:15;; TIME K cy:150 ;; Nodes Proc: 1,018,307 -- Edges Proc: 16,541,215
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:52, SD:51, Max:329, Min:1
+FCollision Out Avg:51, SD:44, Max:232, Min:0
+FCollision End Avg:2, SD:11, Max:181, Min:0
+FTask1 Avg:4, SD:8, Max:60, Min:0
+FTask2 Avg:9, SD:14, Max:83, Min:0
+FTask3 Avg:77, SD:16, Max:100, Min:11
+FCore Active Avg:91, SD:12, Max:100, Min:47
+FRouter Active Avg:87, SD:9, Max:101, Min:51
+T1 invocations: 52,857
+T2 invocations: 88,673
+T3 invocations: 224,464
+T3b invocations: 4,265,089
+Total3 invocations: 4,489,553
+Total4 invocations: 2,653
+
+T3/T2 ratio: 3
+T3b/T3 ratio: 19
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 40
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 172
+Avg. hops NOC1: 32
+Avg. latency NOC1 (T2): 6,829
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 2,501
+
+===PRINTING ACUM STATS at pu_cycles: 161,059
+
+ACollision In Avg:79, SD:30, Max:193, Min:12
+ACollision Out Avg:66, SD:25, Max:179, Min:3
+ACollision End Avg:2, SD:5, Max:82, Min:0
+ATask1 Avg:8, SD:2, Max:18, Min:1
+ATask2 Avg:7, SD:5, Max:28, Min:0
+ATask3 Avg:78, SD:6, Max:95, Min:57
+ACore Active Avg:94, SD:5, Max:100, Min:75
+ARouter Active Avg:89, SD:4, Max:96, Min:70
+T1 invocations: 5,175,210
+T2 invocations: 4,914,235
+T3 invocations: 25,977,528
+T3b invocations: 248,975,182
+Total3 invocations: 274,952,710
+Total4 invocations: 46,982
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 40
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 319
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 8,084
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 4,694
+Number of K Nodes Processed: 8,396
+Number of K Edges Processed: 149,300
+Node Re-explore factor: 2.00
+Edge Re-explore factor: 1.16
+Nodes/cy: 52
+Edges/cy: 927
+TEPS: 797
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 181,880,861
+  PMisses: 67,432,320
+  PHit Rate (hit/miss): 73%
+  PEvictions: 33,977,275
+  PEviction Rate (evict/misses): 50%
+
+---Energy---
+Leakage Energy (nJ): 153,135
+PU Dyn E (nJ): 16,403,241
+Mem Dyn E (nJ): 51,610,864
+Route Dyn E (nJ): 27,437,331
+Dynamic Energy (nJ): 95,451,437
+Ratio of Dyn/Leak: 623
+Total Energy (nJ): 95,604,572
+Total Energy (nJ) 3D: 98,033,025
+Cores Energy (nJ): 16,410,413
+Route Energy (nJ): 27,441,461
+Route Energy (nJ) 3D: 29,869,914
+Mem Energy   (nJ): 51,752,699
+Mem Energy   (nJ) 3D: 51,752,699
+Avg. Power (mW): 593,599.69
+Power Density (mW/mm2): 171.50
+
+---Runtime---
+Runtime in K cycles: 161.06
+Microseconds: 161.06
+Time per iteration (ms): 0.16
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,524.07
+GOP/s per core: 0.95
+FLOP/s: 1,707.16
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,489.83
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 56,453.88, per-link: 3.45
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 9,092,406,174
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.36
+Arith. Intensity OPS/Msgs: 0.27
+
+
+
+===Core Utilization Total=== CORE-S:16;; TIME K cy:160 ;; Nodes Proc: 1,037,624 -- Edges Proc: 17,968,496
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:50, SD:52, Max:307, Min:0
+FCollision Out Avg:49, SD:44, Max:222, Min:0
+FCollision End Avg:2, SD:10, Max:128, Min:0
+FTask1 Avg:5, SD:8, Max:48, Min:0
+FTask2 Avg:8, SD:14, Max:84, Min:0
+FTask3 Avg:77, SD:15, Max:100, Min:10
+FCore Active Avg:91, SD:12, Max:100, Min:49
+FRouter Active Avg:86, SD:8, Max:101, Min:50
+T1 invocations: 56,275
+T2 invocations: 89,864
+T3 invocations: 210,495
+T3b invocations: 4,266,944
+Total3 invocations: 4,477,439
+Total4 invocations: 3,086
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 20
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 39
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 170
+Avg. hops NOC1: 31
+Avg. latency NOC1 (T2): 7,122
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 2,181
+
+===PRINTING ACUM STATS at pu_cycles: 171,065
+
+ACollision In Avg:77, SD:30, Max:193, Min:11
+ACollision Out Avg:65, SD:25, Max:178, Min:3
+ACollision End Avg:2, SD:5, Max:77, Min:0
+ATask1 Avg:8, SD:2, Max:17, Min:2
+ATask2 Avg:7, SD:4, Max:27, Min:0
+ATask3 Avg:78, SD:6, Max:95, Min:58
+ACore Active Avg:94, SD:5, Max:100, Min:74
+ARouter Active Avg:89, SD:4, Max:96, Min:69
+T1 invocations: 5,434,991
+T2 invocations: 5,306,502
+T3 invocations: 26,826,240
+T3b invocations: 266,391,546
+Total3 invocations: 293,217,786
+Total4 invocations: 59,933
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 40
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 289
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 7,843
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 4,550
+Number of K Nodes Processed: 8,522
+Number of K Edges Processed: 161,252
+Node Re-explore factor: 2.03
+Edge Re-explore factor: 1.26
+Nodes/cy: 50
+Edges/cy: 943
+TEPS: 750
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 194,904,827
+  PMisses: 71,777,831
+  PHit Rate (hit/miss): 73%
+  PEvictions: 37,528,567
+  PEviction Rate (evict/misses): 52%
+
+---Energy---
+Leakage Energy (nJ): 162,649
+PU Dyn E (nJ): 17,435,310
+Mem Dyn E (nJ): 54,982,903
+Route Dyn E (nJ): 28,955,775
+Dynamic Energy (nJ): 101,373,988
+Ratio of Dyn/Leak: 623
+Total Energy (nJ): 101,536,637
+Total Energy (nJ) 3D: 104,099,486
+Cores Energy (nJ): 17,442,927
+Route Energy (nJ): 28,960,161
+Route Energy (nJ) 3D: 31,523,010
+Mem Energy   (nJ): 55,133,549
+Mem Energy   (nJ) 3D: 55,133,549
+Avg. Power (mW): 593,555.88
+Power Density (mW/mm2): 171.49
+
+---Runtime---
+Runtime in K cycles: 171.06
+Microseconds: 171.06
+Time per iteration (ms): 0.17
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,513.08
+GOP/s per core: 0.95
+FLOP/s: 1,714.07
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,637.75
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 56,131.05, per-link: 3.43
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 9,602,058,536
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.35
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:17;; TIME K cy:170 ;; Nodes Proc: 1,053,334 -- Edges Proc: 19,371,570
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:52, SD:53, Max:281, Min:0
+FCollision Out Avg:49, SD:42, Max:269, Min:0
+FCollision End Avg:2, SD:9, Max:101, Min:0
+FTask1 Avg:6, SD:9, Max:46, Min:0
+FTask2 Avg:9, SD:14, Max:77, Min:0
+FTask3 Avg:73, SD:16, Max:100, Min:6
+FCore Active Avg:89, SD:13, Max:100, Min:54
+FRouter Active Avg:86, SD:9, Max:101, Min:49
+T1 invocations: 66,650
+T2 invocations: 93,362
+T3 invocations: 197,401
+T3b invocations: 4,124,102
+Total3 invocations: 4,321,503
+Total4 invocations: 3,537
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 21
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 38
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 162
+Avg. hops NOC1: 35
+Avg. latency NOC1 (T2): 6,607
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 1,938
+
+===PRINTING ACUM STATS at pu_cycles: 181,070
+
+ACollision In Avg:76, SD:30, Max:192, Min:10
+ACollision Out Avg:64, SD:25, Max:176, Min:3
+ACollision End Avg:2, SD:5, Max:73, Min:0
+ATask1 Avg:8, SD:2, Max:16, Min:3
+ATask2 Avg:7, SD:4, Max:25, Min:0
+ATask3 Avg:78, SD:6, Max:94, Min:58
+ACore Active Avg:93, SD:5, Max:100, Min:73
+ARouter Active Avg:88, SD:4, Max:96, Min:68
+T1 invocations: 5,709,193
+T2 invocations: 5,718,415
+T3 invocations: 27,623,171
+T3b invocations: 283,543,033
+Total3 invocations: 311,166,204
+Total4 invocations: 74,632
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 10
+
+T1 avg ex cycles: 40
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 265
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 7,616
+Avg. hops NOC2: 16
+Avg. latency NOC2 (T3): 4,413
+Number of K Nodes Processed: 8,625
+Number of K Edges Processed: 173,321
+Node Re-explore factor: 2.06
+Edge Re-explore factor: 1.35
+Nodes/cy: 48
+Edges/cy: 957
+TEPS: 709
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 207,681,915
+  PMisses: 76,102,821
+  PHit Rate (hit/miss): 73%
+  PEvictions: 41,092,662
+  PEviction Rate (evict/misses): 54%
+
+---Energy---
+Leakage Energy (nJ): 172,162
+PU Dyn E (nJ): 18,451,629
+Mem Dyn E (nJ): 58,314,104
+Route Dyn E (nJ): 30,451,060
+Dynamic Energy (nJ): 107,216,794
+Ratio of Dyn/Leak: 623
+Total Energy (nJ): 107,388,956
+Total Energy (nJ) 3D: 110,084,151
+Cores Energy (nJ): 18,459,692
+Route Energy (nJ): 30,455,702
+Route Energy (nJ) 3D: 33,150,898
+Mem Energy   (nJ): 58,473,562
+Mem Energy   (nJ) 3D: 58,473,562
+Avg. Power (mW): 593,079.78
+Power Density (mW/mm2): 171.35
+
+---Runtime---
+Runtime in K cycles: 181.07
+Microseconds: 181.07
+Time per iteration (ms): 0.18
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,491.29
+GOP/s per core: 0.95
+FLOP/s: 1,718.49
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,732.21
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 55,801.28, per-link: 3.41
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 10,103,938,347
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.34
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:18;; TIME K cy:180 ;; Nodes Proc: 1,066,196 -- Edges Proc: 20,823,950
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:49, SD:51, Max:276, Min:0
+FCollision Out Avg:48, SD:41, Max:184, Min:0
+FCollision End Avg:2, SD:10, Max:101, Min:0
+FTask1 Avg:5, SD:8, Max:50, Min:0
+FTask2 Avg:8, SD:14, Max:92, Min:0
+FTask3 Avg:70, SD:16, Max:100, Min:6
+FCore Active Avg:85, SD:16, Max:100, Min:44
+FRouter Active Avg:83, SD:11, Max:101, Min:42
+T1 invocations: 62,668
+T2 invocations: 92,753
+T3 invocations: 185,541
+T3b invocations: 3,939,626
+Total3 invocations: 4,125,167
+Total4 invocations: 4,384
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 21
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 131
+Avg. hops NOC1: 34
+Avg. latency NOC1 (T2): 6,222
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 1,826
+
+===PRINTING ACUM STATS at pu_cycles: 191,010
+
+ACollision In Avg:75, SD:30, Max:192, Min:10
+ACollision Out Avg:63, SD:25, Max:172, Min:3
+ACollision End Avg:2, SD:5, Max:69, Min:0
+ATask1 Avg:8, SD:2, Max:17, Min:3
+ATask2 Avg:7, SD:4, Max:24, Min:0
+ATask3 Avg:78, SD:5, Max:94, Min:59
+ACore Active Avg:93, SD:5, Max:100, Min:73
+ARouter Active Avg:88, SD:4, Max:96, Min:67
+T1 invocations: 5,987,162
+T2 invocations: 6,127,695
+T3 invocations: 28,366,256
+T3b invocations: 299,985,148
+Total3 invocations: 328,351,404
+Total4 invocations: 93,627
+
+T3/T2 ratio: 5
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 40
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 239
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 7,395
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 4,287
+Number of K Nodes Processed: 8,712
+Number of K Edges Processed: 184,529
+Node Re-explore factor: 2.08
+Edge Re-explore factor: 1.44
+Nodes/cy: 46
+Edges/cy: 966
+TEPS: 672
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 219,781,651
+  PMisses: 80,279,359
+  PHit Rate (hit/miss): 73%
+  PEvictions: 44,575,124
+  PEviction Rate (evict/misses): 56%
+
+---Energy---
+Leakage Energy (nJ): 181,613
+PU Dyn E (nJ): 19,425,347
+Mem Dyn E (nJ): 61,486,230
+Route Dyn E (nJ): 31,863,241
+Dynamic Energy (nJ): 112,774,818
+Ratio of Dyn/Leak: 621
+Total Energy (nJ): 112,956,431
+Total Energy (nJ) 3D: 115,776,618
+Cores Energy (nJ): 19,433,853
+Route Energy (nJ): 31,868,138
+Route Energy (nJ) 3D: 34,688,324
+Mem Energy   (nJ): 61,654,441
+Mem Energy   (nJ) 3D: 61,654,441
+Avg. Power (mW): 591,363.96
+Power Density (mW/mm2): 170.85
+
+---Runtime---
+Runtime in K cycles: 191.01
+Microseconds: 191.01
+Time per iteration (ms): 0.19
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,444.08
+GOP/s per core: 0.94
+FLOP/s: 1,719.03
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,693.15
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 55,381.68, per-link: 3.38
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 10,578,454,630
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.33
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:19;; TIME K cy:190 ;; Nodes Proc: 1,076,869 -- Edges Proc: 22,068,039
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:46, SD:49, Max:291, Min:0
+FCollision Out Avg:43, SD:40, Max:224, Min:0
+FCollision End Avg:2, SD:9, Max:101, Min:0
+FTask1 Avg:5, SD:8, Max:57, Min:0
+FTask2 Avg:7, SD:14, Max:89, Min:0
+FTask3 Avg:64, SD:18, Max:100, Min:11
+FCore Active Avg:77, SD:20, Max:100, Min:30
+FRouter Active Avg:79, SD:13, Max:101, Min:38
+T1 invocations: 61,369
+T2 invocations: 90,584
+T3 invocations: 167,103
+T3b invocations: 3,591,160
+Total3 invocations: 3,758,263
+Total4 invocations: 5,495
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 21
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 102
+Avg. hops NOC1: 33
+Avg. latency NOC1 (T2): 6,222
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 1,535
+
+===PRINTING ACUM STATS at pu_cycles: 201,015
+
+ACollision In Avg:73, SD:30, Max:190, Min:10
+ACollision Out Avg:62, SD:25, Max:165, Min:2
+ACollision End Avg:2, SD:5, Max:66, Min:0
+ATask1 Avg:7, SD:2, Max:17, Min:3
+ATask2 Avg:7, SD:4, Max:23, Min:0
+ATask3 Avg:77, SD:5, Max:92, Min:59
+ACore Active Avg:92, SD:5, Max:100, Min:73
+ARouter Active Avg:88, SD:4, Max:96, Min:65
+T1 invocations: 6,265,370
+T2 invocations: 6,528,974
+T3 invocations: 29,042,803
+T3b invocations: 315,353,734
+Total3 invocations: 344,396,537
+Total4 invocations: 118,896
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 37
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 210
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 7,196
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 4,166
+Number of K Nodes Processed: 8,785
+Number of K Edges Processed: 194,827
+Node Re-explore factor: 2.09
+Edge Re-explore factor: 1.52
+Nodes/cy: 44
+Edges/cy: 969
+TEPS: 638
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 231,028,028
+  PMisses: 84,292,940
+  PHit Rate (hit/miss): 73%
+  PEvictions: 47,942,318
+  PEviction Rate (evict/misses): 57%
+
+---Energy---
+Leakage Energy (nJ): 191,126
+PU Dyn E (nJ): 20,336,578
+Mem Dyn E (nJ): 64,434,741
+Route Dyn E (nJ): 33,158,901
+Dynamic Energy (nJ): 117,930,221
+Ratio of Dyn/Leak: 617
+Total Energy (nJ): 118,121,347
+Total Energy (nJ) 3D: 121,056,211
+Cores Energy (nJ): 20,345,530
+Route Energy (nJ): 33,164,054
+Route Energy (nJ) 3D: 36,098,918
+Mem Energy   (nJ): 64,611,763
+Mem Energy   (nJ) 3D: 64,611,763
+Avg. Power (mW): 587,624.54
+Power Density (mW/mm2): 169.77
+
+---Runtime---
+Runtime in K cycles: 201.01
+Microseconds: 201.01
+Time per iteration (ms): 0.20
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,351.02
+GOP/s per core: 0.94
+FLOP/s: 1,713.29
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,446.39
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 54,794.17, per-link: 3.34
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 11,014,450,923
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.33
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:20;; TIME K cy:200 ;; Nodes Proc: 1,086,134 -- Edges Proc: 23,215,963
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:42, SD:49, Max:297, Min:0
+FCollision Out Avg:34, SD:37, Max:191, Min:0
+FCollision End Avg:2, SD:7, Max:101, Min:0
+FTask1 Avg:5, SD:8, Max:51, Min:0
+FTask2 Avg:8, SD:13, Max:86, Min:0
+FTask3 Avg:61, SD:14, Max:100, Min:11
+FCore Active Avg:75, SD:18, Max:100, Min:37
+FRouter Active Avg:79, SD:12, Max:101, Min:36
+T1 invocations: 60,593
+T2 invocations: 98,954
+T3 invocations: 150,010
+T3b invocations: 3,496,992
+Total3 invocations: 3,647,002
+Total4 invocations: 6,078
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 23
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 32
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 87
+Avg. hops NOC1: 35
+Avg. latency NOC1 (T2): 5,349
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 1,201
+
+===PRINTING ACUM STATS at pu_cycles: 211,020
+
+ACollision In Avg:72, SD:29, Max:186, Min:9
+ACollision Out Avg:61, SD:25, Max:160, Min:2
+ACollision End Avg:2, SD:5, Max:62, Min:0
+ATask1 Avg:7, SD:2, Max:17, Min:3
+ATask2 Avg:7, SD:3, Max:22, Min:0
+ATask3 Avg:76, SD:5, Max:90, Min:59
+ACore Active Avg:91, SD:5, Max:100, Min:72
+ARouter Active Avg:87, SD:4, Max:96, Min:64
+T1 invocations: 6,537,915
+T2 invocations: 6,924,655
+T3 invocations: 29,649,138
+T3b invocations: 329,379,463
+Total3 invocations: 359,028,601
+Total4 invocations: 150,214
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 8
+T4 avg ex cycles: 182
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 7,004
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 4,047
+Number of K Nodes Processed: 8,845
+Number of K Edges Processed: 204,336
+Node Re-explore factor: 2.11
+Edge Re-explore factor: 1.59
+Nodes/cy: 42
+Edges/cy: 968
+TEPS: 608
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 241,246,040
+  PMisses: 87,971,900
+  PHit Rate (hit/miss): 73%
+  PEvictions: 51,055,510
+  PEviction Rate (evict/misses): 58%
+
+---Energy---
+Leakage Energy (nJ): 200,638
+PU Dyn E (nJ): 21,171,454
+Mem Dyn E (nJ): 67,137,950
+Route Dyn E (nJ): 34,353,260
+Dynamic Energy (nJ): 122,662,665
+Ratio of Dyn/Leak: 611
+Total Energy (nJ): 122,863,303
+Total Energy (nJ) 3D: 125,903,879
+Cores Energy (nJ): 21,180,851
+Route Energy (nJ): 34,358,670
+Route Energy (nJ) 3D: 37,399,246
+Mem Energy   (nJ): 67,323,783
+Mem Energy   (nJ) 3D: 67,323,783
+Avg. Power (mW): 582,235.35
+Power Density (mW/mm2): 168.22
+
+---Runtime---
+Runtime in K cycles: 211.02
+Microseconds: 211.02
+Time per iteration (ms): 0.21
+
+---Throughput---
+GOP/s (aka OPS/ns): 15,214.16
+GOP/s per core: 0.93
+FLOP/s: 1,701.40
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 55,024.65
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 54,099.70, per-link: 3.30
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 11,416,119,212
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.32
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:21;; TIME K cy:210 ;; Nodes Proc: 1,093,688 -- Edges Proc: 24,394,027
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:36, SD:47, Max:291, Min:0
+FCollision Out Avg:27, SD:33, Max:202, Min:0
+FCollision End Avg:1, SD:6, Max:101, Min:0
+FTask1 Avg:5, SD:8, Max:58, Min:0
+FTask2 Avg:7, SD:14, Max:87, Min:0
+FTask3 Avg:53, SD:14, Max:100, Min:6
+FCore Active Avg:66, SD:19, Max:100, Min:27
+FRouter Active Avg:73, SD:15, Max:100, Min:26
+T1 invocations: 59,162
+T2 invocations: 87,699
+T3 invocations: 120,606
+T3b invocations: 3,058,457
+Total3 invocations: 3,179,063
+Total4 invocations: 6,058
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 25
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 32
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 82
+Avg. hops NOC1: 37
+Avg. latency NOC1 (T2): 4,693
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 894
+
+===PRINTING ACUM STATS at pu_cycles: 220,716
+
+ACollision In Avg:70, SD:29, Max:183, Min:9
+ACollision Out Avg:59, SD:24, Max:154, Min:2
+ACollision End Avg:2, SD:4, Max:60, Min:0
+ATask1 Avg:7, SD:1, Max:19, Min:3
+ATask2 Avg:7, SD:3, Max:21, Min:0
+ATask3 Avg:75, SD:5, Max:90, Min:58
+ACore Active Avg:90, SD:5, Max:100, Min:72
+ARouter Active Avg:87, SD:5, Max:95, Min:62
+T1 invocations: 6,746,584
+T2 invocations: 7,234,686
+T3 invocations: 30,122,597
+T3b invocations: 340,389,028
+Total3 invocations: 370,511,625
+Total4 invocations: 182,129
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 161
+Avg. hops NOC1: 24
+Avg. latency NOC1 (T2): 6,861
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,949
+Number of K Nodes Processed: 8,887
+Number of K Edges Processed: 211,475
+Node Re-explore factor: 2.12
+Edge Re-explore factor: 1.65
+Nodes/cy: 40
+Edges/cy: 958
+TEPS: 581
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 249,000,241
+  PMisses: 90,791,525
+  PHit Rate (hit/miss): 73%
+  PEvictions: 53,454,727
+  PEviction Rate (evict/misses): 59%
+
+---Energy---
+Leakage Energy (nJ): 209,857
+PU Dyn E (nJ): 21,824,868
+Mem Dyn E (nJ): 69,245,183
+Route Dyn E (nJ): 35,281,709
+Dynamic Energy (nJ): 126,351,761
+Ratio of Dyn/Leak: 602
+Total Energy (nJ): 126,561,618
+Total Energy (nJ) 3D: 129,684,370
+Cores Energy (nJ): 21,834,697
+Route Energy (nJ): 35,287,367
+Route Energy (nJ) 3D: 38,410,119
+Mem Energy   (nJ): 69,439,555
+Mem Energy   (nJ) 3D: 69,439,555
+Avg. Power (mW): 573,413.88
+Power Density (mW/mm2): 165.67
+
+---Runtime---
+Runtime in K cycles: 220.72
+Microseconds: 220.72
+Time per iteration (ms): 0.22
+
+---Throughput---
+GOP/s (aka OPS/ns): 14,987.44
+GOP/s per core: 0.91
+FLOP/s: 1,678.68
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 54,256.95
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 53,138.81, per-link: 3.24
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 11,728,585,138
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.32
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:22;; TIME K cy:220 ;; Nodes Proc: 1,099,022 -- Edges Proc: 25,298,577
+======== IT IS COLD ======= Only 962 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:29, SD:44, Max:219, Min:0
+FCollision Out Avg:22, SD:32, Max:213, Min:0
+FCollision End Avg:1, SD:5, Max:101, Min:0
+FTask1 Avg:4, SD:8, Max:59, Min:0
+FTask2 Avg:5, SD:13, Max:81, Min:0
+FTask3 Avg:40, SD:13, Max:100, Min:6
+FCore Active Avg:50, SD:20, Max:100, Min:19
+FRouter Active Avg:61, SD:18, Max:100, Min:18
+T1 invocations: 44,296
+T2 invocations: 68,976
+T3 invocations: 80,323
+T3b invocations: 2,318,220
+Total3 invocations: 2,398,543
+Total4 invocations: 4,704
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 29
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 32
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 77
+Avg. hops NOC1: 38
+Avg. latency NOC1 (T2): 4,651
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 658
+
+===PRINTING ACUM STATS at pu_cycles: 230,997
+
+ACollision In Avg:68, SD:29, Max:179, Min:9
+ACollision Out Avg:58, SD:24, Max:148, Min:2
+ACollision End Avg:2, SD:4, Max:58, Min:0
+ATask1 Avg:7, SD:1, Max:20, Min:3
+ATask2 Avg:7, SD:3, Max:20, Min:0
+ATask3 Avg:74, SD:5, Max:88, Min:56
+ACore Active Avg:88, SD:5, Max:100, Min:72
+ARouter Active Avg:85, SD:5, Max:95, Min:61
+T1 invocations: 6,872,490
+T2 invocations: 7,428,635
+T3 invocations: 30,408,062
+T3b invocations: 347,234,484
+Total3 invocations: 377,642,546
+Total4 invocations: 204,615
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 149
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,788
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,886
+Number of K Nodes Processed: 8,912
+Number of K Edges Processed: 216,184
+Node Re-explore factor: 2.12
+Edge Re-explore factor: 1.68
+Nodes/cy: 39
+Edges/cy: 936
+TEPS: 555
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 253,999,898
+  PMisses: 92,632,322
+  PHit Rate (hit/miss): 73%
+  PEvictions: 55,006,309
+  PEviction Rate (evict/misses): 59%
+
+---Energy---
+Leakage Energy (nJ): 219,633
+PU Dyn E (nJ): 22,230,061
+Mem Dyn E (nJ): 70,562,357
+Route Dyn E (nJ): 35,866,119
+Dynamic Energy (nJ): 128,658,538
+Ratio of Dyn/Leak: 586
+Total Energy (nJ): 128,878,171
+Total Energy (nJ) 3D: 132,052,648
+Cores Energy (nJ): 22,240,347
+Route Energy (nJ): 35,872,041
+Route Energy (nJ) 3D: 39,046,519
+Mem Energy   (nJ): 70,765,782
+Mem Energy   (nJ) 3D: 70,765,782
+Avg. Power (mW): 557,921.40
+Power Density (mW/mm2): 161.19
+
+---Runtime---
+Runtime in K cycles: 231.00
+Microseconds: 231.00
+Time per iteration (ms): 0.23
+
+---Throughput---
+GOP/s (aka OPS/ns): 14,581.89
+GOP/s per core: 0.89
+FLOP/s: 1,634.84
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 52,823.52
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 51,624.34, per-link: 3.15
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 11,925,068,540
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.32
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:23;; TIME K cy:230 ;; Nodes Proc: 1,102,069 -- Edges Proc: 25,952,768
+======== IT IS COLD ======= Only 613 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:19, SD:36, Max:221, Min:0
+FCollision Out Avg:14, SD:27, Max:197, Min:0
+FCollision End Avg:1, SD:5, Max:100, Min:0
+FTask1 Avg:2, SD:7, Max:61, Min:0
+FTask2 Avg:4, SD:12, Max:87, Min:0
+FTask3 Avg:27, SD:13, Max:97, Min:2
+FCore Active Avg:34, SD:21, Max:100, Min:6
+FRouter Active Avg:45, SD:23, Max:99, Min:8
+T1 invocations: 30,268
+T2 invocations: 46,088
+T3 invocations: 50,762
+T3b invocations: 1,573,146
+Total3 invocations: 1,623,908
+Total4 invocations: 3,176
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 31
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 77
+Avg. hops NOC1: 42
+Avg. latency NOC1 (T2): 5,127
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 475
+
+===PRINTING ACUM STATS at pu_cycles: 241,052
+
+ACollision In Avg:66, SD:28, Max:175, Min:8
+ACollision Out Avg:56, SD:23, Max:142, Min:2
+ACollision End Avg:2, SD:4, Max:56, Min:0
+ATask1 Avg:7, SD:1, Max:22, Min:3
+ATask2 Avg:7, SD:3, Max:19, Min:0
+ATask3 Avg:72, SD:5, Max:87, Min:55
+ACore Active Avg:86, SD:5, Max:100, Min:70
+ARouter Active Avg:84, SD:5, Max:94, Min:59
+T1 invocations: 6,943,005
+T2 invocations: 7,541,943
+T3 invocations: 30,568,397
+T3b invocations: 351,141,112
+Total3 invocations: 381,709,509
+Total4 invocations: 217,782
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 11
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 143
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,760
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,849
+Number of K Nodes Processed: 8,925
+Number of K Edges Processed: 218,964
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.71
+Nodes/cy: 37
+Edges/cy: 908
+TEPS: 532
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 256,834,897
+  PMisses: 93,648,388
+  PHit Rate (hit/miss): 73%
+  PEvictions: 55,861,996
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 229,193
+PU Dyn E (nJ): 22,461,227
+Mem Dyn E (nJ): 71,320,871
+Route Dyn E (nJ): 36,214,232
+Dynamic Energy (nJ): 129,996,331
+Ratio of Dyn/Leak: 567
+Total Energy (nJ): 130,225,524
+Total Energy (nJ) 3D: 133,430,812
+Cores Energy (nJ): 22,471,961
+Route Energy (nJ): 36,220,412
+Route Energy (nJ) 3D: 39,425,701
+Mem Energy   (nJ): 71,533,151
+Mem Energy   (nJ) 3D: 71,533,151
+Avg. Power (mW): 540,238.31
+Power Density (mW/mm2): 156.08
+
+---Runtime---
+Runtime in K cycles: 241.05
+Microseconds: 241.05
+Time per iteration (ms): 0.24
+
+---Throughput---
+GOP/s (aka OPS/ns): 14,116.63
+GOP/s per core: 0.86
+FLOP/s: 1,583.52
+FLOP/s per core: 0.10
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 51,162.93
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 49,954.94, per-link: 3.05
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,041,739,056
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:24;; TIME K cy:240 ;; Nodes Proc: 1,103,623 -- Edges Proc: 26,332,509
+======== IT IS COLD ======= Only 363 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:9, SD:25, Max:200, Min:0
+FCollision Out Avg:7, SD:17, Max:124, Min:0
+FCollision End Avg:0, SD:3, Max:80, Min:0
+FTask1 Avg:2, SD:6, Max:76, Min:0
+FTask2 Avg:2, SD:9, Max:90, Min:0
+FTask3 Avg:16, SD:12, Max:78, Min:1
+FCore Active Avg:20, SD:19, Max:100, Min:1
+FRouter Active Avg:30, SD:24, Max:99, Min:2
+T1 invocations: 21,175
+T2 invocations: 31,184
+T3 invocations: 28,397
+T3b invocations: 942,842
+Total3 invocations: 971,239
+Total4 invocations: 1,885
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 33
+
+T1 avg ex cycles: 34
+T2 avg ex cycles: 31
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 82
+Avg. hops NOC1: 46
+Avg. latency NOC1 (T2): 4,851
+Avg. hops NOC2: 13
+Avg. latency NOC2 (T3): 331
+
+===PRINTING ACUM STATS at pu_cycles: 250,506
+
+ACollision In Avg:64, SD:27, Max:170, Min:8
+ACollision Out Avg:54, SD:23, Max:136, Min:2
+ACollision End Avg:2, SD:4, Max:53, Min:0
+ATask1 Avg:7, SD:1, Max:24, Min:3
+ATask2 Avg:7, SD:2, Max:18, Min:0
+ATask3 Avg:69, SD:5, Max:85, Min:53
+ACore Active Avg:84, SD:4, Max:99, Min:70
+ARouter Active Avg:82, SD:5, Max:93, Min:57
+T1 invocations: 6,985,294
+T2 invocations: 7,614,358
+T3 invocations: 30,662,186
+T3b invocations: 353,552,322
+Total3 invocations: 384,214,508
+Total4 invocations: 225,917
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 139
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,738
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,826
+Number of K Nodes Processed: 8,932
+Number of K Edges Processed: 220,610
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.72
+Nodes/cy: 36
+Edges/cy: 881
+TEPS: 512
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 258,533,609
+  PMisses: 94,222,313
+  PHit Rate (hit/miss): 73%
+  PEvictions: 56,354,669
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 238,182
+PU Dyn E (nJ): 22,603,268
+Mem Dyn E (nJ): 71,785,458
+Route Dyn E (nJ): 36,431,021
+Dynamic Energy (nJ): 130,819,747
+Ratio of Dyn/Leak: 549
+Total Energy (nJ): 131,057,929
+Total Energy (nJ) 3D: 134,282,405
+Cores Energy (nJ): 22,614,422
+Route Energy (nJ): 36,437,444
+Route Energy (nJ) 3D: 39,661,920
+Mem Energy   (nJ): 72,006,063
+Mem Energy   (nJ) 3D: 72,006,063
+Avg. Power (mW): 523,172.81
+Power Density (mW/mm2): 151.15
+
+---Runtime---
+Runtime in K cycles: 250.51
+Microseconds: 250.51
+Time per iteration (ms): 0.25
+
+---Throughput---
+GOP/s (aka OPS/ns): 13,668.32
+GOP/s per core: 0.83
+FLOP/s: 1,533.75
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 49,553.31
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 48,359.50, per-link: 2.95
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,114,346,122
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:25;; TIME K cy:250 ;; Nodes Proc: 1,104,544 -- Edges Proc: 26,543,529
+======== IT IS COLD ======= Only 263 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:4, SD:17, Max:150, Min:0
+FCollision Out Avg:3, SD:10, Max:82, Min:0
+FCollision End Avg:0, SD:2, Max:72, Min:0
+FTask1 Avg:1, SD:4, Max:78, Min:0
+FTask2 Avg:2, SD:8, Max:92, Min:0
+FTask3 Avg:10, SD:11, Max:68, Min:0
+FCore Active Avg:13, SD:16, Max:100, Min:0
+FRouter Active Avg:19, SD:21, Max:97, Min:1
+T1 invocations: 9,006
+T2 invocations: 18,378
+T3 invocations: 17,459
+T3b invocations: 617,375
+Total3 invocations: 634,834
+Total4 invocations: 1,001
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 35
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 34
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 65
+Avg. hops NOC1: 41
+Avg. latency NOC1 (T2): 4,114
+Avg. hops NOC2: 12
+Avg. latency NOC2 (T3): 322
+
+===PRINTING ACUM STATS at pu_cycles: 260,437
+
+ACollision In Avg:62, SD:26, Max:165, Min:8
+ACollision Out Avg:52, SD:22, Max:131, Min:2
+ACollision End Avg:2, SD:4, Max:51, Min:0
+ATask1 Avg:6, SD:1, Max:23, Min:3
+ATask2 Avg:6, SD:2, Max:18, Min:1
+ATask3 Avg:67, SD:4, Max:83, Min:52
+ACore Active Avg:81, SD:4, Max:99, Min:68
+ARouter Active Avg:79, SD:5, Max:91, Min:55
+T1 invocations: 7,005,383
+T2 invocations: 7,651,026
+T3 invocations: 30,712,078
+T3b invocations: 354,862,823
+Total3 invocations: 385,574,901
+Total4 invocations: 230,210
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 137
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,727
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,814
+Number of K Nodes Processed: 8,936
+Number of K Edges Processed: 221,540
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.73
+Nodes/cy: 34
+Edges/cy: 851
+TEPS: 493
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 259,516,171
+  PMisses: 94,537,490
+  PHit Rate (hit/miss): 73%
+  PEvictions: 56,628,545
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 247,624
+PU Dyn E (nJ): 22,679,789
+Mem Dyn E (nJ): 72,038,278
+Route Dyn E (nJ): 36,546,483
+Dynamic Energy (nJ): 131,264,550
+Ratio of Dyn/Leak: 530
+Total Energy (nJ): 131,512,174
+Total Energy (nJ) 3D: 134,746,870
+Cores Energy (nJ): 22,691,386
+Route Energy (nJ): 36,553,160
+Route Energy (nJ) 3D: 39,787,856
+Mem Energy   (nJ): 72,267,629
+Mem Energy   (nJ) 3D: 72,267,629
+Avg. Power (mW): 504,967.32
+Power Density (mW/mm2): 145.89
+
+---Runtime---
+Runtime in K cycles: 260.44
+Microseconds: 260.44
+Time per iteration (ms): 0.26
+
+---Throughput---
+GOP/s (aka OPS/ns): 13,190.71
+GOP/s per core: 0.81
+FLOP/s: 1,480.49
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 47,831.00
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 46,664.12, per-link: 2.85
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,153,063,460
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:26;; TIME K cy:260 ;; Nodes Proc: 1,105,038 -- Edges Proc: 26,677,752
+======== IT IS COLD ======= Only 84 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:1, SD:11, Max:150, Min:0
+FCollision Out Avg:1, SD:7, Max:71, Min:0
+FCollision End Avg:0, SD:1, Max:23, Min:0
+FTask1 Avg:0, SD:2, Max:57, Min:0
+FTask2 Avg:0, SD:4, Max:75, Min:0
+FTask3 Avg:3, SD:6, Max:83, Min:0
+FCore Active Avg:3, SD:8, Max:100, Min:0
+FRouter Active Avg:5, SD:10, Max:90, Min:0
+T1 invocations: 2,182
+T2 invocations: 5,257
+T3 invocations: 4,383
+T3b invocations: 161,615
+Total3 invocations: 165,998
+Total4 invocations: 254
+
+T3/T2 ratio: 1
+T3b/T3 ratio: 37
+
+T1 avg ex cycles: 33
+T2 avg ex cycles: 30
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 54
+Avg. hops NOC1: 35
+Avg. latency NOC1 (T2): 4,920
+Avg. hops NOC2: 12
+Avg. latency NOC2 (T3): 404
+
+===PRINTING ACUM STATS at pu_cycles: 270,094
+
+ACollision In Avg:59, SD:25, Max:159, Min:7
+ACollision Out Avg:50, SD:21, Max:126, Min:2
+ACollision End Avg:2, SD:4, Max:49, Min:0
+ATask1 Avg:6, SD:1, Max:23, Min:3
+ATask2 Avg:6, SD:2, Max:17, Min:3
+ATask3 Avg:65, SD:4, Max:80, Min:50
+ACore Active Avg:78, SD:4, Max:99, Min:66
+ARouter Active Avg:76, SD:5, Max:88, Min:53
+T1 invocations: 7,010,440
+T2 invocations: 7,660,979
+T3 invocations: 30,723,920
+T3b invocations: 355,182,962
+Total3 invocations: 385,906,882
+Total4 invocations: 231,226
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 137
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,724
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,811
+Number of K Nodes Processed: 8,937
+Number of K Edges Processed: 221,770
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.73
+Nodes/cy: 33
+Edges/cy: 821
+TEPS: 475
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 259,755,902
+  PMisses: 94,612,229
+  PHit Rate (hit/miss): 73%
+  PEvictions: 56,691,892
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 256,806
+PU Dyn E (nJ): 22,698,404
+Mem Dyn E (nJ): 72,099,747
+Route Dyn E (nJ): 36,573,417
+Dynamic Energy (nJ): 131,371,568
+Ratio of Dyn/Leak: 512
+Total Energy (nJ): 131,628,374
+Total Energy (nJ) 3D: 134,865,454
+Cores Energy (nJ): 22,710,431
+Route Energy (nJ): 36,580,342
+Route Energy (nJ) 3D: 39,817,421
+Mem Energy   (nJ): 72,337,603
+Mem Energy   (nJ) 3D: 72,337,603
+Avg. Power (mW): 487,342.83
+Power Density (mW/mm2): 140.80
+
+---Runtime---
+Runtime in K cycles: 270.09
+Microseconds: 270.09
+Time per iteration (ms): 0.27
+
+---Throughput---
+GOP/s (aka OPS/ns): 12,729.29
+GOP/s per core: 0.78
+FLOP/s: 1,428.79
+FLOP/s per core: 0.09
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 46,160.08
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 45,029.24, per-link: 2.75
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,162,128,552
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:27;; TIME K cy:270 ;; Nodes Proc: 1,105,156 -- Edges Proc: 26,682,687
+======== IT IS COLD ======= Only 2 Tiles active
+
+===PRINTING FRAME STATS
+
+FCollision In Avg:0, SD:6, Max:100, Min:0
+FCollision Out Avg:0, SD:2, Max:27, Min:0
+FCollision End Avg:0, SD:0, Max:6, Min:0
+FTask1 Avg:0, SD:2, Max:58, Min:0
+FTask2 Avg:0, SD:1, Max:35, Min:0
+FTask3 Avg:0, SD:1, Max:15, Min:0
+FCore Active Avg:0, SD:3, Max:66, Min:0
+FRouter Active Avg:1, SD:5, Max:68, Min:0
+T1 invocations: 1,754
+T2 invocations: 506
+T3 invocations: 1,011
+T3b invocations: 13,422
+Total3 invocations: 14,433
+Total4 invocations: 173
+
+T3/T2 ratio: 2
+T3b/T3 ratio: 13
+
+T1 avg ex cycles: 35
+T2 avg ex cycles: 26
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 70
+Avg. hops NOC1: 185
+Avg. latency NOC1 (T2): 3,567
+Avg. hops NOC2: 11
+Avg. latency NOC2 (T3): 366
+
+===PRINTING ACUM STATS at pu_cycles: 280,206
+
+ACollision In Avg:57, SD:25, Max:153, Min:7
+ACollision Out Avg:48, SD:20, Max:121, Min:2
+ACollision End Avg:2, SD:3, Max:48, Min:0
+ATask1 Avg:6, SD:1, Max:22, Min:4
+ATask2 Avg:6, SD:2, Max:16, Min:3
+ATask3 Avg:62, SD:4, Max:77, Min:48
+ACore Active Avg:75, SD:4, Max:95, Min:63
+ARouter Active Avg:74, SD:5, Max:86, Min:51
+T1 invocations: 7,012,563
+T2 invocations: 7,665,326
+T3 invocations: 30,730,600
+T3b invocations: 355,342,060
+Total3 invocations: 386,072,660
+Total4 invocations: 231,758
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 137
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,723
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,809
+Number of K Nodes Processed: 8,937
+Number of K Edges Processed: 221,892
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.73
+Nodes/cy: 32
+Edges/cy: 792
+TEPS: 458
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 259,878,212
+  PMisses: 94,648,927
+  PHit Rate (hit/miss): 73%
+  PEvictions: 56,725,397
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 266,421
+PU Dyn E (nJ): 22,707,678
+Mem Dyn E (nJ): 72,130,786
+Route Dyn E (nJ): 36,587,123
+Dynamic Energy (nJ): 131,425,588
+Ratio of Dyn/Leak: 493
+Total Energy (nJ): 131,692,009
+Total Energy (nJ) 3D: 134,930,301
+Cores Energy (nJ): 22,720,155
+Route Energy (nJ): 36,594,307
+Route Energy (nJ) 3D: 39,832,600
+Mem Energy   (nJ): 72,377,547
+Mem Energy   (nJ) 3D: 72,377,547
+Avg. Power (mW): 469,982.83
+Power Density (mW/mm2): 135.78
+
+---Runtime---
+Runtime in K cycles: 280.21
+Microseconds: 280.21
+Time per iteration (ms): 0.28
+
+---Throughput---
+GOP/s (aka OPS/ns): 12,274.82
+GOP/s per core: 0.75
+FLOP/s: 1,377.82
+FLOP/s per core: 0.08
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 44,513.36
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 43,420.67, per-link: 2.65
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,166,733,057
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+
+
+===Core Utilization Total=== CORE-S:28;; TIME K cy:280 ;; Nodes Proc: 1,105,222 -- Edges Proc: 26,682,745
+======== IT IS COLD ======= Only 1 Tiles active
+Epoch Done Router: 4
+Epoch Done Router: 3
+Epoch Done Router: 0
+Epoch Done Router: 5
+Epoch Done Router: 7
+Epoch Done Router: 2
+Epoch Done Router: 6
+Epoch Done Router: 1
+##EPOCH## 1 COMPLETED at Time (K cy): 287
+Nodes processed until now: 8,937,822
+Edges processed until now: 221,917,252
+Program Done Worker Thread: 0
+Program Done Router Thread: 6
+Program Done Worker Thread: 4
+Program Done Router Thread: 7
+Program Done Worker Thread: 1
+Program Done Router Thread: 5
+Program Done Worker Thread: 2
+Program Done Worker Thread: 7
+Program Done Worker Thread: 5
+Program Done Router Thread: 3
+Program Done Router Thread: 1
+Program Done Worker Thread: 3
+Program Done Router Thread: 2
+Program Done Router Thread: 0
+Program Done Worker Thread: 6
+Program Done Router Thread: 4
+
+===PRINTING ACUM STATS at pu_cycles: 287,758
+
+ACollision In Avg:56, SD:24, Max:149, Min:7
+ACollision Out Avg:47, SD:20, Max:118, Min:2
+ACollision End Avg:2, SD:3, Max:46, Min:0
+ATask1 Avg:6, SD:1, Max:21, Min:4
+ATask2 Avg:6, SD:2, Max:16, Min:3
+ATask3 Avg:61, SD:4, Max:75, Min:47
+ACore Active Avg:73, SD:4, Max:93, Min:62
+ARouter Active Avg:72, SD:5, Max:84, Min:49
+T1 invocations: 7,012,913
+T2 invocations: 7,666,657
+T3 invocations: 30,731,955
+T3b invocations: 355,379,404
+Total3 invocations: 386,111,359
+Total4 invocations: 231,869
+
+T3/T2 ratio: 4
+T3b/T3 ratio: 12
+
+T1 avg ex cycles: 39
+T2 avg ex cycles: 36
+T3&b avg ex cycles: 7
+T4 avg ex cycles: 137
+Avg. hops NOC1: 25
+Avg. latency NOC1 (T2): 6,723
+Avg. hops NOC2: 15
+Avg. latency NOC2 (T3): 3,809
+
+Runtime at program end in K cycles: 287
+Runtime before cooldown in K cycles: 211
+
+
+Number of K Nodes Processed: 8,937
+Number of K Edges Processed: 221,917
+Node Re-explore factor: 2.13
+Edge Re-explore factor: 1.73
+Nodes/cy: 31
+Edges/cy: 771
+TEPS: 446
+
+---Pcache---
+Pcache Size: 7,711
+Cached: 1
+  PHits: 259,906,273
+  PMisses: 94,657,362
+  PHit Rate (hit/miss): 73%
+  PEvictions: 56,733,336
+  PEviction Rate (evict/misses): 60%
+
+---Energy---
+Leakage Energy (nJ): 273,601
+PU Dyn E (nJ): 22,709,884
+Mem Dyn E (nJ): 72,138,838
+Route Dyn E (nJ): 36,590,019
+Dynamic Energy (nJ): 131,438,741
+Ratio of Dyn/Leak: 480
+Total Energy (nJ): 131,712,342
+Total Energy (nJ) 3D: 134,950,892
+Cores Energy (nJ): 22,722,697
+Route Energy (nJ): 36,597,396
+Route Energy (nJ) 3D: 39,835,945
+Mem Energy   (nJ): 72,392,250
+Mem Energy   (nJ) 3D: 72,392,250
+Avg. Power (mW): 457,719.13
+Power Density (mW/mm2): 132.24
+
+---Runtime---
+Runtime in K cycles: 287.76
+Microseconds: 287.76
+Time per iteration (ms): 0.29
+
+---Inst---
+K Loads: 1,487,235
+K Stores: 1,631,342
+K Instructions: 3,439,807
+
+---Throughput---
+GOP/s (aka OPS/ns): 11,953.82
+GOP/s per core: 0.73
+FLOP/s: 1,341.79
+FLOP/s per core: 0.08
+Max Peak FLOP/s: 16,384.00
+Avg. BW GB/s: 43,350.01
+Max BW GB/s: 65,536.00
+
+---Traffic---
+In-Die bisection_bytes BW (GB/s): 2,048.00
+Inter-board traffic (msg/ns): 0.00, per-link: 0.00
+Inter-pack traffic (msg/ns): 0.00, per-link: 0.00
+Inter-die traffic (msg/ns): 0.00, per-link: 0.00
+Ruche traffic (msg/ns): 0.00, per-link: 0.00
+All traffic (msg/ns): 42,284.54, per-link: 2.58
+Inter-die reduction wrt all: inf
+Inter-board reduction wrt inter-die: -nan
+
+---Data Movement---
+All traffic (msg): 12,167,714,560
+Arith. Intensity FLOP/Loads: 0.26
+Arith. Intensity FLOP/Msgs: 0.03
+Arith. Intensity OPS/Loads: 2.31
+Arith. Intensity OPS/Msgs: 0.28
+
+Simulation time: 937.30
+Sim noc_cy/s: 307.01
+Sim Msg/s: 12,981,690.35
+
+Version 31
+
