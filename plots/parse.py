@@ -55,11 +55,11 @@ patterns = [
     "Simulation time", #33
     "Arith. Intensity FLOP/Msgs", #34
     "Arith. Intensity FLOP/Loads", #35
-    "FLOP/s", #36
+    "GFLOP/s", #36
     "DHit Rate \(hit/miss\)", #37
     ]
     
-keys = {'bfs':'2', 'wcc':'3', 'pagerank':'1', 'sssp':'0', 'spmv':'4', 'histo':'5', 'fft':'6', 'multi':'7'}
+keys = {'bfs':'2', 'wcc':'3', 'pagerank':'1', 'sssp':'0', 'spmv':'4', 'histo':'5', 'fft':'6', 'spmv_flex':'7', 'spmm':'8','multi':'9'}
 
 def search(folder, dataset, mesh, binary,app):
     found = 0
