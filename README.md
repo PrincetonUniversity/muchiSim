@@ -1,8 +1,19 @@
-# muchiSim
 
-A multi-chip multi-chiplet Simulator for data-centric execution.
-Particularly suited for simulating large compositions of manycore chips with a partitioned global address space (PGAS).
+Muchisim is a Simulation Framework for Design Exploration of Multi-Chip Manycore Systems
+We evaluate Muchisim at simulating systems with up to a million interconnected processing elements (PEs) while modeling data movement and communication in a cycle-accurate manner. In addition to performance, Muchisim reports the energy, area, and cost of the simulated system, and it comes with a benchmark application suite and two data visualization tools. Muchisim supports various parallelization strategies and communication primitives such as task-based parallelization and message passing, making it highly relevant for architectures with software-managed coherence and distributed memory. Via a case study, we show that Muchisim helps users explore the balance between memory and computation units and the constraints related to chiplet integration and inter-chip communication. Muchisim enables scaling up the systems in which new techniques or design parameters are evaluated, opening the gate for further research in this area.
 
+For detailed information, check out our [full paper](https://arxiv.org/abs/2312.10244).
+To cite Muchisim, please use 
+
+    @misc{muchisim,
+          title={Muchisim: A Simulation Framework for Design Exploration of Multi-Chip Manycore Systems}, 
+          author={Marcelo Orenes-Vera and Esin Tureci and Margaret Martonosi and David Wentzlaff},
+          year={2023},
+          note={\url{https://github.com/PrincetonUniversity/muchiSim}},
+          doi={10.48550/arXiv.2312.10244},
+          url={https://doi.org/10.48550/arXiv.2312.10244}
+    }
+    
 <img width="323" alt="muchiSim" src="https://github.com/PrincetonUniversity/muchiSim/assets/55038083/c25721f2-7702-4a78-bc56-ca2d4f39a9ce">
 
 ## Requirements
