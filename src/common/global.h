@@ -60,7 +60,6 @@ u_int64_t dram_active_words=0;
 // ==== WORKLOAD RESULTS ====
 float * in_r = NULL;
 
-
 u_int64_t * mc_transactions;
 u_int64_t * mc_writebacks;
 u_int64_t * mc_latency;

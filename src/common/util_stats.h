@@ -1,3 +1,21 @@
+int print_processor_info() {    
+    FILE *file;
+    char buffer[1024];
+
+    file = fopen("/proc/cpuinfo", "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return EXIT_FAILURE;
+    }
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        printf("%s", buffer);
+    }
+
+    fclose(file);
+    return EXIT_SUCCESS;
+}
+
 
 void init_perf_counters() {
   mc_transactions = (u_int64_t *) calloc(total_hbm_channels, sizeof(u_int64_t));

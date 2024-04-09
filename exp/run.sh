@@ -6,7 +6,7 @@ echo
 echo "Syntax: run.sh [-n name | -a apps | -d datasets | -m grid_conf | -o NOC | -b barrier | -x num_phy_nocs | -q queue_mode | -p dry_run | -s machine_to_run | -t max_threads | -r assert_mode | -v verbose | -c chiplet_width | -e proxy_width | -k board_width | -w SRAM_space | -y dcache | -g large_queue | -i steal | -j write_thru | -u noc_conf | -l ruche | -z proxy_routing]"
 echo "options:"
 echo "n     Name of the experiment."
-echo "a     Application [0:SSSP; 1:PAGE; 2:BFS; 3:WCC; 4:SPMV]"
+echo "a     Application [0:SSSP; 1:PAGE; 2:BFS; 3:WCC; 4:SPMV, 5:Histogram, 6:SPMM"
 echo "d     Datasets to run [Kron16..., amazon-2003 ego-Twitter liveJournal wikipedia]"
 echo "m     Grid size [Powers of 2]"
 echo "o     Noc type [0:mesh, 1:torus]"
@@ -47,6 +47,8 @@ function log2 {
 
 bin="FF"
 
+# module load intel/2021.1.2
+# module load intel-vtune/oneapi
 # Default no print debug, results in folder runs, max number of emulation threads 16
 verbose=0
 assert_mode=0
@@ -61,13 +63,13 @@ let torus=1
 #Ruche channel length, 99 is do not set it based on this option, but whatever is in macros.h by default
 ruche=99
 
-# NOC experiment type.
-# NOC_CONF:0 means 2 NoCS of 32 bits intra die, which get throttled to a shared 32 bits across dies
-# NOC_CONF:1 means 2 NoCS of 32 and 64 bit intra die, which get throttled to a shared 32 bits across dies
-# NOC_CONF:2 means 2 NoCS of 32 and 64 bit intra die, which get throttled to 2 NoCs of 32 and 32 bits across dies
-# NOC_CONF:3 means 2 NoCS of 32 and 64 bit intra and inter-die
-let noc_conf=2
 let phy_nocs=1 #default 1
+let noc_conf=2
+# NOC_CONF:0 means #P NoCS of 32 bits intra die, which get throttled to a shared 32 bits across dies
+# NOC_CONF:1 means #P-1 NoCS of 32 and one of 64 bit intra die, which get throttled to a shared NoC 32 bits across dies
+# NOC_CONF:2 means #P-1 NoCS of 32 and one of 64 bit intra die, which get throttled to #P NoCs of 32 bits across dies
+# NOC_CONF:3 means #P-1 NoCS of 32 and one of 64 bit intra and inter-die. No throttling.
+# Note that when P==1, then NOC_CONF 1 and 2 are the same.
 
 # How many iterations a task can run before parking
 let loop_chunk=64
@@ -91,7 +93,7 @@ grid_x=8
 # Functional simulation
 functional=1
 
-# 1: On-the-wayCascading,  3: Within+NoCascading, 4:Within+SelectiveCascading, 5:Within+AllCascading
+# 3: NoCascading, 4:SelectiveCascading, 5:AlwaysCascading
 proxy_routing=4
 # Set default based on App (below)
 write_thru=99
@@ -142,13 +144,10 @@ done
 let log2grid_x=$(log2 $grid_x)
 
 
-
-
 run_batch(){
   echo \#APP=$a
   echo \#DATASET=$d
   echo \#MESH=$grid_x-x-$grid_x
-  echo \#SIM_THREADS=$cores
 
   d_sub=${d:0:1}
   d_sub2=${d:4:6}
@@ -168,10 +167,12 @@ run_batch(){
 
   write_thru_post=$write_thru
   # 1: Write Thru, 0: Write Back
-  if [ $write_thru_post -eq 99 ]; then # Not set in the options, default value for apps
-    if [ $a -eq 1 ] || [ $a -eq 4 ] || [ $a -eq 5 ] || [ $a -eq 7 ]; then #Apps without frontier or with barrier
+  # If variable not set in the options, give default value for different apps!! If set, then use that value!
+  if [ $write_thru_post -eq 99 ]; then
+    if [ $a -eq 1 ] || [ $a -eq 4 ] || [ $a -eq 5 ] || [ $a -eq 7 ] || [ $a -eq 8 ]; then
+      #Apps without frontier or with barrier, use write back policy
       write_thru_post=0
-    else # 0 2 3
+    else # Apps: 0 2 3, i.e., SSSP, BFS, WCC, use the write thru policy
       write_thru_post=1
     fi
   fi
@@ -193,26 +194,29 @@ run_batch(){
     proxy_w=$grid_x
   fi
 
-  # If no proxy, we make sure the proxy routing is off
+  # If no proxy, we make sure the proxy routing is off!
   if [ $proxy_w -eq $grid_x ]; then 
     proxy_routing=0
   fi
 
-  # Determine number of threads to use
-  if [[ $grid_x -gt $max_threads ]]
-  then
-    cores=$max_threads
-  else
-    cores=$grid_x
+  threads=1 # Round down to the nearest power of 2
+  while [ $((threads * 2)) -le $max_threads ]; do
+    threads=$((threads * 2))
+  done
+  if [[ $grid_x -lt $threads ]]; then
+    threads=$grid_x*2
   fi
+  echo \#MAX_THREADS=$max_threads
+  echo \#SIM_THREADS=$threads
 
   options=""
   if [ $phy_nocs -gt 1 ]; then
     options="-DPHY_NOCS=$phy_nocs"
   fi
+  
   # Macros not actively used: -DSTEAL_W=$steal_w -DSHUFFLE=$shuffle -DQUEUE_PRIO=$queue_prio 
 
-  options="-DMAX_THREADS=$cores -DASSERT_MODE=$assert_mode -DPRINT=$verbose -DDCACHE=$dcache -DSRAM_SIZE=$sram_memory -DGLOBAL_BARRIER=$barrier_post -DTORUS=$torus -DGRID_X_LOG2=$log2grid_x -DAPP=$a -DDIE_W=$chiplet_w -DDIE_H=$chiplet_h -DPROXY_W=$proxy_w -DTEST_QUEUES=$large_queue -DWRITE_THROUGH=$write_thru_post -DNOC_CONF=$noc_conf -DLOOP_CHUNK=$loop_chunk -DPROXY_ROUTING=$proxy_routing -DFUNC=$functional $options"
+  options="-DMAX_THREADS=$threads -DASSERT_MODE=$assert_mode -DPRINT=$verbose -DDCACHE=$dcache -DSRAM_SIZE=$sram_memory -DGLOBAL_BARRIER=$barrier_post -DTORUS=$torus -DGRID_X_LOG2=$log2grid_x -DAPP=$a -DDIE_W=$chiplet_w -DDIE_H=$chiplet_h -DPROXY_W=$proxy_w -DTEST_QUEUES=$large_queue -DWRITE_THROUGH=$write_thru_post -DNOC_CONF=$noc_conf -DLOOP_CHUNK=$loop_chunk -DPROXY_ROUTING=$proxy_routing -DFUNC=$functional $options"
   
   if [ $force_proxy_ratio -gt 0 ]; then
     options="$options -DFORCE_PROXY_RATIO=$force_proxy_ratio"
@@ -228,17 +232,36 @@ run_batch(){
     options="$options -DBOARD_W=$board_w"
   fi
 
+  compiler_options=""; target=""
+  cluster=0  # 0:any, 1: intel-cascade-64, 2:intel-icelake-32,  3:amd
+  if [ $local_run -eq 0 ]; then
+    if [ $grid_x -gt 256 ] || [ $max_threads -gt 48 ]; then
+      cluster=1
+    else
+      cluster=2
+    fi
+    if [ $cluster -eq 1 ]; then
+      target="cascade"; compiler_options=" -march=cascadelake -mtune=cascadelake"
+    elif [ $cluster -eq 2 ]; then
+      target="icelake"; compiler_options=" -march=$target-server -mtune=$target-server"
+    elif [ $cluster -eq 3 ]; then
+      compiler_options=" -march=znver1 -mtune=znver1"
+      target="rome"
+    fi
+  fi
 
   case "$PWD" in
-    *"/Users/movera/git/"*)
+    *"/Users/"*)
       #compiler="g++-13"
       compiler="/usr/local/opt/llvm/bin/clang++"
       ;;
     *)
-      compiler="g++"
+      compiler="g++$compiler_options"
+      #compiler="icpx$compiler_options"
       ;;
   esac
 
+  # For pthreads use -lpthread if you don't have the openmp library installed
   compile="$compiler src/main.cpp -fopenmp -o $binary $options -O3"
   echo $compile
   $compile
@@ -262,28 +285,43 @@ run_batch(){
     else
       bin/$bin_name $dataset_folder/$d/ $bin $dry_run output.txt > $folder/DATA-$d--$grid_x-X-$grid_x--B$bin-A$a.log
     fi
-  else #della (local_run=0)
-    let hours=24
-    if [ $grid_x -gt 256 ]; then
-      let hours=96
-    elif [ $grid_x -gt 64 ]; then
-      let hours=48
+  else # cluster (local_run=0)
+    hours=24
+    total_mem=512
+    if [ $grid_x -gt 512 ]; then
+      hours=72
+      total_mem=2048
+    elif [ $grid_x -gt 256 ]; then
+      hours=72
+      total_mem=1024
+    elif [ $grid_x -gt 128 ] || ([ $grid_x -gt 64 ] && [ $a -eq 1 ]); then
+      hours=72
+      total_mem=512
     fi
+    
     slurm_file="SLURM-$d--$grid_x-X-$grid_x--B$bin-A$a.log"
     echo "#!/bin/bash"                        > batch.sh
     echo "#SBATCH --time=$hours:00:00"           >> batch.sh
     echo "#SBATCH --output=$sbatch_folder/$slurm_file" >> batch.sh
-    echo "#SBATCH --mem-per-cpu=8G" >> batch.sh
-    echo "#SBATCH --cpus-per-task=$cores"   >> batch.sh
+    echo "#SBATCH --nodes=1"               >> batch.sh
+    echo "#SBATCH --ntasks=1"              >> batch.sh
+    echo "#SBATCH --cpus-per-task=$max_threads"   >> batch.sh
     echo "#SBATCH --job-name=A$a-G$grid_x-$d-B$bin" >> batch.sh
-    echo "#SBATCH --gres=gpu:a100:0"        >> batch.sh
+    if [ $cluster -gt 0 ]; then
+      echo "#SBATCH --constraint=$target  "   >> batch.sh
+      if [ $cluster -gt 1 ]; then
+          echo "#SBATCH --gres=gpu:a100:0" >> batch.sh
+          echo "#SBATCH --mem-per-cpu=16G" >> batch.sh
+      else # cluster==1
+          echo "#SBATCH --mem=${total_mem}G" >> batch.sh
+      fi
+    fi
     #echo "#SBATCH --mail-type=begin"       >> batch.sh        # send email when job begins
     # echo "#SBATCH --mail-type=end"          >> batch.sh        # send email when job ends
-    # echo "#SBATCH --mail-user=movera@princeton.edu" >> batch.sh
-    echo "module load gcc-toolset/10"       >> batch.sh
+    #echo "module load gcc-toolset/10"       >> batch.sh
     cmd="srun ./$binary $PWD/$dataset_folder/$d/ $bin $dry_run > $folder/$output_file"
     echo $cmd; echo $cmd >> batch.sh; sbatch batch.sh;
-    squeue -u movera --format="%.18i %.9P %.50j %.8u %.2t %.10M %.6D %R"
+    squeue -u `whoami` --format="%.18i %.9P %.50j %.8u %.2t %.10M %.6D %R"
   fi
 }
 

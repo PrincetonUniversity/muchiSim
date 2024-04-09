@@ -72,7 +72,7 @@ int task1_kernel(int tX,int tY, u_int64_t timer, u_int64_t & compute_cycles){
 
       if (startInd<endEdgeIndex){ //EQ, JMP
         penalty+=check_dcache(tX,tY,graph->dense_vector, node, timer+penalty, time_fetched_vector, time_prefetch_vector, prefetch_tag_vector);
-        source_dist = 5;//graph->dense_vector[node]; //LD, Access to dense_vector array
+        source_dist = graph->dense_value;
         
         penalty+=task1_helper(tX,tY,global_params, startInd, endEdgeIndex, source_dist, timer+penalty);
       }

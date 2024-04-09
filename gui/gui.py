@@ -1,5 +1,4 @@
-import sys,os
-
+import sys,os,io,argparse
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QTextEdit, QLabel, QComboBox, QListWidget, QAbstractItemView, QFileDialog, QScrollArea, QLineEdit
 from PyQt5.QtGui import QImage, QPixmap, QMovie
 from PyQt5.QtCore import Qt
@@ -7,34 +6,49 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
-import imageio.v2 as imageio
 from datetime import datetime
+import imageio
 
-directory = "sim_logs/"
+output_dir = "plots/"
+log_dir = "sim_logs/"
+
 lista = []
 matrix_perf_counters = ['FMCollision In','FMCollision Out','FMCollision End','FMTask1','FMTask2','FMTask3','FMCore Active','FMRouter Active']
-average_perf_counters = ['Avg. Transactions','Avg. Latency']
+average_perf_counters = ['Avg. Transactions:', 'Avg. Latency:', 'DHit Rate (hit/miss):']
+options = matrix_perf_counters + average_perf_counters
 
 statistic_options = ['Heatmap','Boxplot','Average', 'Maximum', 'Minimum', 'Standard Deviation']
-apps = ['SSSP','PageRank',"BFS","WCC","SPMV","Histo","Multi"]
+apps = ['SSSP','PageRank',"BFS","WCC","SPMV","Histo","FFT","SPMV Flex","SPMM","Multi"]
 sizes = ['8','16','32','64','128','256','512','1024']
+datasets = ['Kron22','Kron25','Kron26','fft1','wikipedia']
 
-default_metric = 'FMRouter Active'
-default_plot = 'Heatmap'
-default_size = '64'
-default_app = 5
-default_name = 'HEAT64'
+
+# Create the parser
+parser = argparse.ArgumentParser(description='Set parameters via command line.')
+parser.add_argument('--nogui', action='store_true', help='Process directly without GUI')
+parser.add_argument('-m', '--metric', default='FMRouter Active', help='Metric name (default: %(default)s)')
+parser.add_argument('-p', '--plot', default='Average', help='Plot type (default: %(default)s)')
+parser.add_argument('-s', '--size', default='64', help='Size parameter (default: %(default)s)')
+parser.add_argument('-a', '--app', default=2, type=int, help='App number (default: %(default)i)')
+parser.add_argument('-n', '--name', default='HEAT8', help='Application name (default: %(default)s)')
+parser.add_argument('-d', '--dataset', default='Kron22', help='Dataset name (default: %(default)s)')
+
+# Parse arguments
+args = parser.parse_args()
+default_metric = args.metric
+default_plot = args.plot
+default_size = args.size
+default_app = args.app
+default_name = args.name
+default_dataset = args.dataset
+nogui = args.nogui
+print(f"Metric: {default_metric}, Plot: {default_plot}, Size: {default_size}, App: {default_app}, Name: {default_name}, Dataset: {default_dataset}")
 
 image_labels = []
 movies = []
 
-average_perf_counters = ['Avg. Transactions:', 'Avg. Latency:', 'DHit Rate (hit/miss):']
-options = matrix_perf_counters + average_perf_counters
-
-dataset = "Kron22"
-
-def parseAverage(configuration, application, size):
-    path = directory + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
+def parseAverage(configuration, application, size, dataset):
+    path = log_dir + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
     with open(path, 'r') as f:
         lines = f.readlines()
         # Create a list of lists, one for each counter
@@ -49,8 +63,8 @@ def parseAverage(configuration, application, size):
                     database[counter].append(float(value))
         return database
 
-def parseMatrix(configuration, application, size):
-    path = directory + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
+def parseMatrix(configuration, application, size, dataset):
+    path = log_dir + "DATA-"+ dataset + "--" + size + "-X-" + size + "--B" + configuration + "-A" + str(application) + ".log"
     with open(path, 'r') as f:
         lines = f.readlines()
         database = {delim: [] for delim in matrix_perf_counters}
@@ -75,8 +89,74 @@ def parseMatrix(configuration, application, size):
                     database[current_delim].append(matrix)
                     matrix = []
                     found = False
-
     return database
+
+def generate_figure(data, avg_data, item, stat):
+    statistics = []
+    if item not in matrix_perf_counters:
+        statistics = avg_data[item]
+    else:
+        frames = data[item]
+        for frame in frames:
+            matrix = np.array(frame[1:])
+            if stat == "Average":
+                statistics.append(np.mean(matrix))
+            elif stat == "Maximum":
+                statistics.append(np.max(matrix))
+            elif stat == "Minimum":
+                statistics.append(np.min(matrix))
+            elif stat == "Standard Deviation":
+                statistics.append(np.std(matrix))
+
+    # Pass the selected options to your plotting function (use your existing code here)
+    fig = Figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('Frame #', fontsize=12)
+    ax.set_ylabel('Average', fontsize=12)
+    ax.set_title('All Averages', fontsize=16)
+    ax.grid()
+    ax.plot(np.arange(len(statistics)), statistics, label=item)
+    if stat == "Boxplot":
+        ax.boxplot([np.array(frame[1:]).flatten() for frame in frames])
+    ax.legend(fontsize=16)
+
+    return fig
+
+def create_heatmap(data, item, config, app_index, size, dataset):
+    # Create a folder with the current timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    item_name = item.replace("FM", "")
+    item_name = item_name.replace("Core", "PU")
+    dirname = output_dir + "animated_heatmaps/" + timestamp + "_" + config + "_" + str(app_index) + "_" + size + "_" + dataset + "_" + item_name.replace(" ", "_")
+    os.makedirs(dirname, exist_ok=True)
+
+    filenames = []
+    for frame_number, frame in enumerate(data[item]):
+        plt.figure()
+        heatmap_data = np.array(frame[1:])
+        plt.imshow(heatmap_data, cmap='Blues', interpolation='nearest', vmin=0, vmax=100)
+        plt.title(f"Heatmap for {item_name} - Frame {frame_number}")
+        plt.colorbar()
+        plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
+        # Save each heatmap in the created folder
+        filename = f'{dirname}/heatmap_{item_name.replace(" ", "_")}_frame_{frame_number}.png'
+        plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
+        filenames.append(filename)
+        plt.close()
+        print(f"Saved heatmap for {item_name} - Frame {frame_number} as {filename}")
+
+    # Create a GIF from the saved heatmaps
+    if filenames:
+        images = [imageio.imread(filename) for filename in filenames]
+        gif_path = f'{dirname}/heatmap_animation.gif'
+        imageio.mimsave(gif_path, images, duration=1)
+        print("GIF created successfully!")
+        return gif_path
+
+    # Uncomment this part if you want to remove the temporary PNG files
+    # for filename in filenames:
+    #     os.remove(filename)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -117,12 +197,19 @@ class MainWindow(QMainWindow):
         # TextInput for configuration
         stats_layout = QHBoxLayout()
         stats_layout.addWidget(QLabel("Configuration:", self))
-
         self.config_input = QLineEdit(self)
         self.config_input.setPlaceholderText("Enter configuration here")
         self.config_input.setText(default_name)
-
         stats_layout.addWidget(self.config_input)
+        self.main_layout.addLayout(stats_layout)
+
+        # Dropdown for dataset
+        stats_layout = QHBoxLayout()
+        stats_layout.addWidget(QLabel("Dataset:", self))
+        self.dataset_dropdown = QComboBox()
+        self.dataset_dropdown.addItems(datasets)
+        self.dataset_dropdown.setCurrentText(default_dataset)
+        stats_layout.addWidget(self.dataset_dropdown)
         self.main_layout.addLayout(stats_layout)
 
         # Dropdown for application
@@ -155,26 +242,6 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(save_button)
         save_button.clicked.connect(self.save_image)
 
-
-    def generate_image(self):
-        # Replace this with your image generation code
-        fig = Figure(figsize=(5, 4), dpi=100)
-        ax = fig.add_subplot(111)
-        ax.plot([1, 2, 3, 4], [1, 4, 2, 3])
-        ax.set_title("My Plot")
-        ax.set_xlabel("X-axis")
-        ax.set_ylabel("Y-axis")
-        
-        canvas = FigureCanvas(fig)
-        canvas.draw()
-
-        width, height = fig.get_size_inches() * fig.get_dpi()
-        image = canvas.buffer_rgba()
-        qimage = QImage(image, int(width), int(height), QImage.Format_RGBA8888)
-        pixmap = QPixmap.fromImage(qimage)
-        
-        return pixmap
-
     def save_image(self):
         # Open a file dialog to choose the save location and filename
         options = QFileDialog.Options()
@@ -182,57 +249,28 @@ class MainWindow(QMainWindow):
         file_name, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "Images (*.png);;All Files (*)", options=options)
 
         if file_name:  # Check if the user has chosen a file
-            if not file_name.endswith('.png'):  # Add the .png extension if it's not present
+            if not file_name.endswith('.png'):
                 file_name += '.png'
             last = image_labels[-1]
             image = last.pixmap()  # Get the image from the label
             image.save(file_name)  # Save the image
-
 
     def generate_plot(self):
         selected_options = [item.text() for item in self.list_widget.selectedItems()]
         stat = self.stats_dropdown.currentText()
         config = self.config_input.text()
         size = self.size_dropdown.currentText()
-        # app = self.app_dropdown.currentText()
         app_index = self.app_dropdown.currentIndex()
-        data = parseMatrix(config, app_index,size)
-        avg_data = parseAverage(config, app_index, size)
+        dataset = self.dataset_dropdown.currentText()
 
-       
+        data = parseMatrix(config, app_index,size,dataset)
+        avg_data = parseAverage(config, app_index, size, dataset)
+
         for item in selected_options:
-            statistics = []
-            if item not in matrix_perf_counters:
-                statistics = avg_data[item]
-            else:
-                frames = data[item]
-                for frame in frames:
-                    matrix = np.array(frame[1:])
-                    if stat == "Average":
-                        statistics.append(np.mean(matrix))
-                    elif stat == "Maximum":
-                        statistics.append(np.max(matrix))
-                    elif stat == "Minimum":
-                        statistics.append(np.min(matrix))
-                    elif stat == "Standard Deviation":
-                        statistics.append(np.std(matrix))
-
             if stat != "Heatmap":
-                # Pass the selected options to your plotting function (use your existing code here)
-                fig = Figure(figsize=(10, 6))
-                ax = fig.add_subplot(111)
-
-                ax.set_xlabel('Frame #', fontsize=12)
-                ax.set_ylabel('Average', fontsize=12)
-                ax.set_title('All Averages', fontsize=16)
-                ax.grid()
-                ax.plot(np.arange(len(statistics)), statistics, label=item)
-                if stat == "Boxplot":
-                    ax.boxplot([np.array(frame[1:]).flatten() for frame in frames])
-                ax.legend(fontsize=16)
+                fig = generate_figure(data, avg_data, item, stat)
                 # Convert the plot to a QImage and display it in the image view
-                canvas = FigureCanvas(fig)
-                canvas.draw()
+                canvas = FigureCanvas(fig); canvas.draw()
                 width, height = fig.get_size_inches() * fig.get_dpi()
                 buf = canvas.buffer_rgba()
                 qimage = QImage(buf, int(width), int(height), QImage.Format_RGBA8888)
@@ -243,47 +281,40 @@ class MainWindow(QMainWindow):
                 image_labels.append(new_image_label)
 
             elif stat == "Heatmap":
-                # Create a folder with the current timestamp
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                os.makedirs(timestamp, exist_ok=True)
+                gif_path = create_heatmap(data, item, config, app_index, size, dataset)
+                movie = QMovie(gif_path)
+                new_movie_label = QLabel()
+                new_movie_label.setMovie(movie)
+                self.image_layout.addWidget(new_movie_label)
+                movies.append(new_movie_label)
+                movie.start()
 
-                filenames = []
-                for frame_number, frame in enumerate(data[item]):
-                    plt.figure()
-                    heatmap_data = np.array(frame[1:])
-                    plt.imshow(heatmap_data, cmap='Blues', interpolation='nearest', vmin=0, vmax=100)
-                    plt.title(f"Heatmap for {item} - Frame {frame_number}")
-                    #plt.title(f"Heatmap for Router Activity - Frame {frame_number}")
-                    plt.colorbar()
-                    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05)
-                    item_name = item.replace(" ", "_")
-                    # Save each heatmap in the created folder
-                    filename = f'{timestamp}/heatmap_{item_name}_frame_{frame_number}.png'
-                    plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
-                    filenames.append(filename)
-                    plt.close()
-                    print(f"Saved heatmap for {item_name} - Frame {frame_number} as {filename}")
-
-                # Create a GIF from the saved heatmaps
-                if filenames:
-                    images = [imageio.imread(filename) for filename in filenames]
-                    gif_path = f'{timestamp}/heatmap_animation.gif'
-                    imageio.mimsave(gif_path, images, duration=1)
-                    print("GIF created successfully!")
-
-                    movie = QMovie(gif_path)
-                    new_movie_label = QLabel()
-                    new_movie_label.setMovie(movie)
-                    self.image_layout.addWidget(new_movie_label)
-                    movies.append(new_movie_label)
-                    movie.start()
-
-                    # Uncomment this part if you want to remove the temporary PNG files
-                    # for filename in filenames:
-                    #     os.remove(filename)
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
+    if not nogui:
+        app = QApplication(sys.argv)
+        main_window = MainWindow()
+        main_window.show()
+        sys.exit(app.exec_())
+    else:
+        data = parseMatrix(default_name, default_app,default_size,default_dataset)
+        avg_data = parseAverage(default_name, default_app, default_size, default_dataset)
+
+        if default_plot != "Heatmap":
+            fig = generate_figure(data, avg_data, default_metric, default_plot)
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png')
+            # Go to the beginning of the BytesIO buffer
+            buf.seek(0)
+            # Create a QImage from the buffer
+            qimage = QImage()
+            qimage.loadFromData(buf.getvalue(), 'PNG')
+            current_dir = os.getcwd() + "/"+ output_dir + "images"
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            item_name = default_metric.replace("FM", "").replace("Core", "PU")
+            filename = timestamp + "_" + default_name + "_" + str(default_app) + "_" + default_size + "_" + default_dataset + "_" + item_name.replace(" ", "_")
+            full_path = os.path.join(current_dir, filename + ".png")
+            qimage.save(full_path)
+            
+        elif default_plot == "Heatmap":
+            gif_path = create_heatmap(data, default_metric, default_name, default_app, default_size, default_dataset)

@@ -28,11 +28,11 @@ void print_perf(bool last_print, u_int64_t total_mc_transactions, u_int64_t tota
   const double gops = total_ops/nanoseconds;
   cout << "GOP/s (aka OPS/ns): "<< gops  << endl;
   cout << "GOP/s per core: "<< gops/total_tiles << endl;
-  const double flops = total_flops/nanoseconds;
+  const double gflops = total_flops/nanoseconds;
   // This means Giga FLOP/s, not flop/s
-  cout << "FLOP/s: "<< flops << endl;
-  cout << "FLOP/s per core: "<< flops/total_tiles << endl;
-  cout << "Max Peak FLOP/s: "<< (physical_threads * wall_pu_cycles) / nanoseconds << endl; // 1 flop per physical thread per PU cycle
+  cout << "GFLOP/s: "<< gflops << endl;
+  cout << "GFLOP/s per core: "<< gflops/total_tiles << endl;
+  cout << "Max Peak GFLOP/s: "<< (physical_threads * wall_pu_cycles) / nanoseconds << endl; // 1 flop per physical thread per PU cycle
   // Bytes loaded/stored per cycle
   u_int64_t mem_ops = total_loads + total_stores;
   cout << "Avg. BW GB/s: "<< (mem_ops * vars["ld_st_op_byte_width"]) / nanoseconds << endl;
@@ -78,6 +78,7 @@ void print_perf(bool last_print, u_int64_t total_mc_transactions, u_int64_t tota
 
   if (last_print){
     cout << "\nSimulation time: " << sim_time << "\n";
+    cout << "Sim time / DUT time: " << (sim_time * 1000.0) / (miliseconds * physical_threads) << "\n";
     cout << "Sim noc_cy/s: " << wall_noc_cycles / sim_time << "\n";
     cout << "Sim Msg/s: " << total_messages / sim_time << "\n";
   }

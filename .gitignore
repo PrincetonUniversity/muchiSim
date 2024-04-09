@@ -4,23 +4,14 @@
 *.bin
 *.tsv
 *.out
+*.log
 batch.sh
 
-runs_micro/
-runs/RES*
-runs/SLURM*
-runs/program_outputs/*
-runs/page_full/
-runs/page_ep1/
-runs/large/
-runs3/
-datasets/
 
-sim_logs/*-BHEAT*
+sim_logs/*
 sim_counters/*
 plots/heatmaps/*
-plots/scaling/*
+plots/characterization/*
 plots/temp/*
 *.dSYM
-plots/*
 *env_gui

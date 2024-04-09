@@ -124,4 +124,7 @@ void calculate_derived_param(){
     hbm_mc_area_mm2 = mc_fixed_area_mm2 + hbm_gbits/d2d_interposer_areal_density_gbits_mm2;
     total_hbm_channels = hbm_channels * DIES;
     sample_time = std::pow(10, powers_sample_time);
+    #if PRINT==2 && GRID_X_LOG2 >= 6
+        sample_time *= 4;
+    #endif
 }

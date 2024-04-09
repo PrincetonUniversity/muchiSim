@@ -1,5 +1,6 @@
 
 using namespace std;
+#include<omp.h>
 #include "../src/common/macros.h"
 // System Configuration Parameters
 #include "../src/configs/config_system.h"

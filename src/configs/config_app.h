@@ -12,6 +12,8 @@
   #include "../apps/fft.h"
 #elif APP==SPMV_FLEX
   #include "../apps/spmv_flex.h"
+#elif APP==SPMM
+  #include "../apps/spmm.h"
 #else
   #include "../apps/multi.h"
 #endif

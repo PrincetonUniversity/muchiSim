@@ -7,8 +7,8 @@ else
 fi
 
 if [ -z "$4" ]; then
-  echo "Default grid_w=64"
-  let grid_w=64
+  let grid_w=128
+  echo "Default grid_w=$grid_w"
 else
   let grid_w=$4
   echo "grid_w=$grid_w"
@@ -24,11 +24,12 @@ fi
 declare -A options
 declare -A strings
 
-th=32
+th=8
 verbose=1
 assert=0
-exp="NPROXY"
+exp="PROXY"
 
+# Monolithic SRAM, runs 128x128, with varying proxy sizes
 let noc_conf=1
 let dcache=0
 let ruche=0
@@ -37,17 +38,16 @@ let torus=1
 let chiplet_w=$grid_w
 let board_w=$grid_w #Specify board so that the package has the same size as the board
 
-
-
-local_run=0
-
-sufix="-v $verbose -r $assert -t $th -u $noc_conf -m $grid_w -c $chiplet_w -k $board_w -l $ruche -o $torus -y $dcache -s $local_run"
+sufix="-v $verbose -r $assert -t $th -u $noc_conf -m $grid_w -c $chiplet_w -k $board_w -l $ruche -o $torus -y $dcache"
 i=0
+
+# No proxy
 let proxy_w=$grid_w
 strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
 let i=$i+1
 
+# Proxy 32x32
 let proxy_w=32
 strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w $sufix"
@@ -63,7 +63,7 @@ strings[$i]="${exp}${proxy_w}"
 options[$i]="-n ${strings[$i]} -e $proxy_w  $sufix"
 let i=$i+1
 
-####
+#### Fraction of the proxy cache size
 let proxy_w=16
 strings[$i]="${exp}${proxy_w}F"
 options[$i]="-n ${strings[$i]} -e $proxy_w -f 4 $sufix"

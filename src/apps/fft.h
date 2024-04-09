@@ -5,7 +5,7 @@
 
 
 #if FUNC
-#define SEND_DATA 1
+#define SEND_DATA 0
 void swap(float *a, float *b) {
     float temp = *a;
     *a = *b;
@@ -111,7 +111,7 @@ void config_app(){
   num_task_params[3] = num_task_params[2];
 
   // Configurations that are disallowed
-  assert(PROXY_FACTOR==1);
+  ALWAYS_ASSERT_MSG(PROXY_FACTOR==1, "PROXY must be disabled for FFT");
 
   task1_dest = 2;
   iq_sizes[1] = unused_buffer;

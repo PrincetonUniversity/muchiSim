@@ -179,6 +179,7 @@ void tsu_core_thread(u_int32_t wtid){
           tasks[2].output_pri = false;
           tasks[3].output_pri = false;
           tasks[2].runnable = tasks[2].invokable;
+          // Make sure we have capacity in the output queue of the task before invoking it
           #if WRITE_THROUGH==1
             tasks[3].runnable = tasks[3].invokable && (core_writeq[2].capacity() > num_task_params[2]);
           #else
@@ -252,9 +253,7 @@ void tsu_core_thread(u_int32_t wtid){
           }else{
             int delay = 1;
             // Advance many cycles if the entire column is idle
-            // REVISIT should make sure that the tile will not receive a task in the next 10 cycles
-            if (!column_active[wtid]) delay = 1; //10;
-
+            //if (!column_active[wtid]) delay = 10;
             frame_counters[x][y][IDLE]+=delay;
             // if the entire network is idle, see the diff between this tile and the most recent active tile
             update_timer(global_cid, delay, compute_cycles);

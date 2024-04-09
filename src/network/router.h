@@ -352,7 +352,7 @@ void RouterModel::get_dst(u_int32_t msg_data, int & dst_X, int & dst_Y){
    u_int32_t dst = msg_data % GRID_SIZE;
    dst_X = dst & GRID_Xm1;
    dst_Y = dst >> GRID_X_LOG2;
-   #if TORUS==0
+   #if TORUS==0 // Z pattern for Mesh tileID layout
       if ((dst_Y%2)==1) dst_X = GRID_Xm1 - dst_X;
    #endif  
 
@@ -361,20 +361,53 @@ void RouterModel::get_dst(u_int32_t msg_data, int & dst_X, int & dst_Y){
    #endif
 }
 
+
 void RouterModel::comp_destXY(int qid, uint16_t orig, u_int32_t msg_data, int & dst_X, int & dst_Y, bool & route_to_core, bool & exact_x, bool & exact_y, bool & switch_X_board, bool & switch_Y_board){
    get_dst(msg_data, dst_X, dst_Y);
    
-   #if PROXY_FACTOR>1 && PROXY_ROUTING>=3 // Route Within proxy region
-      if (qid == 3){
-         int dst_rep_X = (id_X / PROXY_W);
-         int dst_rep_Y = (id_Y / PROXY_H);
+   #if PROXY_FACTOR>1
+      if (qid == 3){ // Only for QID=3, i.e., T2 explicitly spawned a T3'
+         int dst_region_X = (id_X / PROXY_W);
+         int dst_region_Y = (id_Y / PROXY_H);
          int offset_in_rep_X = (dst_X % PROXY_W);
          int offset_in_rep_Y = (dst_Y % PROXY_H);
          // Truncate the destination to the nearest Proxy
-         int x_within = dst_rep_X * PROXY_W + offset_in_rep_X;
-         int y_within = dst_rep_Y * PROXY_H + offset_in_rep_Y;
-         dst_X = x_within;
-         dst_Y = y_within;
+         int x_within = dst_region_X * PROXY_W + offset_in_rep_X;
+         int y_within = dst_region_Y * PROXY_H + offset_in_rep_Y;
+
+         #if WITHIN_REGION==0
+            #if TORUS==1
+            int x_prior = (dst_region_X-1) * PROXY_W + offset_in_rep_X;
+            int x_next  = (dst_region_X+1) * PROXY_W + offset_in_rep_X;
+            int y_prior = (dst_region_Y-1) * PROXY_H + offset_in_rep_Y;
+            int y_next  = (dst_region_Y+1) * PROXY_H + offset_in_rep_Y;
+            #else //MESH
+            int x_prior = dst_region_X > 0 ? (dst_region_X-1) * PROXY_W + offset_in_rep_X : x_within;
+            int x_next  = (dst_region_X+1)*PROXY_W < GRID_X ? (dst_region_X+1) * PROXY_W + offset_in_rep_X : x_within;
+            int y_prior = dst_region_Y > 0 ? (dst_region_Y-1) * PROXY_H + offset_in_rep_Y : y_within;
+            int y_next  = (dst_region_Y+1)*PROXY_H < GRID_Y ? (dst_region_Y+1) * PROXY_H + offset_in_rep_Y : y_within;
+            #endif
+
+            // dst_X as the closest x to id_X between x_within, x_prior, x_next
+            if (abs(x_within-id_X) < abs(x_prior-id_X)){
+               // If within is closer than prior, we 
+               if (abs(x_within-id_X) < abs(x_next-id_X)) dst_X = x_within;
+               else dst_X = x_next;
+            } else dst_X = x_prior;
+            
+            // dst_Y as the closest y to id_Y between y_within, y_prior, y_next
+            if (abs(y_within-id_Y) < abs(y_prior-id_Y)){
+               if (abs(y_within-id_Y) < abs(y_next-id_Y)) dst_Y = y_within;
+               else dst_Y = y_next;
+            } else dst_Y = y_prior;
+            
+            dst_X = dst_X % GRID_X;
+            dst_Y = dst_Y % GRID_Y;
+         #else
+            dst_X = x_within;
+            dst_Y = y_within;
+         #endif
+
       }
    #endif
 
@@ -382,73 +415,26 @@ void RouterModel::comp_destXY(int qid, uint16_t orig, u_int32_t msg_data, int & 
    exact_y = (dst_Y == id_Y);
    exact_x = (dst_X == id_X);
 
-   // With Cascade Writeback mode, find proxy tiles on the way to the true owner
-   #if PROXY_FACTOR>1
-   #if PROXY_ROUTING==1
-      if (qid == 3){
-         #if BOARD_W < GRID_X
-            // The following code is used to calculate the destination coordinates of a certain element
-            // based on its current ID and the dimensions of the board it is placed on.
-            // First, we calculate the row (dst_board_Y) and column (dst_board_X) that the element's ID corresponds to on the board.
-            int dst_board_X = (id_X / BOARD_W);
-            int dst_board_Y = (id_Y / BOARD_H);
-
-            // Next, we calculate the offset between the element's current position and the nearest board in both dimensions.
-            int offset_in_board_X = (dst_X % BOARD_W);
-            int offset_in_board_Y = (dst_Y % BOARD_H);
-
-            // Finally, we adjust the element's destination coordinates so that they are aligned with the nearest board.
-            dst_X = dst_board_X * BOARD_W + offset_in_board_X;
-            dst_Y = dst_board_Y * BOARD_H + offset_in_board_Y;
-         #endif
-
-         // Route to Proxy that is on the way to the real owner
-         bool is_proxy_y = ( (dst_Y % PROXY_H) == (id_Y % PROXY_H) );
-         bool is_proxy_x = ( (dst_X % PROXY_W) == (id_X % PROXY_W) );
-         // route to the proxy tile unless it's a proxy tile and it's coming from the core (avoid endless loop)
-         if (!(is_proxy_y && is_proxy_x && (orig==C)) ){
-            #if SELECTIVE_SINKING==1
-               bool came_from_vertical = orig==N || orig==S || orig==RN || orig==RS;
-               bool cant_drop = !came_from_vertical && !exact_y;
-               if (cant_drop && orig!=C) assert(is_proxy_y);
-               uint16_t dest = (dst_Y < id_Y ? N : (dst_Y > id_Y ? S : (dst_X < id_X ? W : E)));
-               bool port_is_not_empty = !output_q[dest][qid].is_empty();
-               if (cant_drop || port_is_not_empty)
-            #endif
-               {exact_y |= is_proxy_y; exact_x |= is_proxy_x;}
-         }
-      }
-   #elif PROXY_ROUTING>=4 // Proxy_routing=3 never cascades
+   #if PROXY_FACTOR>1 && PROXY_ROUTING>=4 // Proxy_routing=3 never cascades
       if (qid == 2){
          // Route to Proxy that is on the way to the real owner
-         bool is_proxy_y = ( (dst_Y % PROXY_H) == (id_Y % PROXY_H) );
-         bool is_proxy_x = ( (dst_X % PROXY_W) == (id_X % PROXY_W) );
+         bool is_proxy = ( (dst_Y % PROXY_H) == (id_Y % PROXY_H) ) && ( (dst_X % PROXY_W) == (id_X % PROXY_W) );
          // route to the proxy tile unless it's a proxy tile and it's coming from the core (avoid endless loop)
-         if (!(is_proxy_y && is_proxy_x && (orig==C)) ){
-            uint16_t dest = (dst_Y < id_Y ? N : (dst_Y > id_Y ? S : (dst_X < id_X ? W : E)));
-            // Check if it's a proxy
-            if (is_proxy_y && is_proxy_x){
-               // We want that: (a) coalesce a#if PROXY_ROUTING==4 lot while not in drain mode (b) coalesce a little while in drain mode
-               // Go into the proxy if more than half the queue is free
-
-               bool sink_into_proxy = true;
-               #if PROXY_ROUTING==4 // extra selection
-                  bool into_core_not_full = !output_q[C][3].cannot_fit_two();
-                  //bool in_drain = (input_q[C][3].occupancy() < 4) && (input_q[C][2].occupancy() < 4) && (input_q[C][1].occupancy() < 4);
-                  bool trajectory_has_something = !output_q[dest][2].is_empty();
-                  bool trajectory_nearly_full = output_q[dest][2].cannot_fit_two();
-                  bool into_core_not_too_busy = output_q[C][3].more_than_half_free();// && input_q[C][3].more_than_half_free();
-                  // I sink if the trajectory is full, or
-                  // The input to the core is not too busy in drain mode if my current path is busy, or I sink in normal mode if the destination queue is not busy
-                  bool select_to_sink = into_core_not_full && trajectory_nearly_full || into_core_not_too_busy;// && (in_drain && trajectory_has_something || !in_drain);
-                  sink_into_proxy = select_to_sink;
-               #endif
-               exact_y |= sink_into_proxy;
-               exact_x |= sink_into_proxy;
-            }
+         if (is_proxy && (orig!=C)){
+            bool sink_into_proxy = true; // PROXY_ROUTING==5 always sinks into proxy
+            #if PROXY_ROUTING==4 // extra selection
+               uint16_t dest = (dst_Y < id_Y ? N : (dst_Y > id_Y ? S : (dst_X < id_X ? W : E)));
+               bool into_core_not_full = !output_q[C][3].cannot_fit_two();
+               bool trajectory_has_something = !output_q[dest][2].is_empty();
+               bool trajectory_nearly_full = output_q[dest][2].cannot_fit_two();
+               bool into_core_not_too_busy = output_q[C][3].more_than_half_free();
+               bool select_to_sink = into_core_not_full && trajectory_nearly_full || into_core_not_too_busy;
+               sink_into_proxy = select_to_sink;
+            #endif
+            exact_y |= sink_into_proxy;
+            exact_x |= sink_into_proxy;
          }
       }
-   #endif
    #endif
 
    // Steal region means that a in-transit task message can be stolen by a core that is in the same region
@@ -504,6 +490,17 @@ void RouterModel::comp_destXY(int qid, uint16_t orig, u_int32_t msg_data, int & 
    #endif
 }
 
+// Routing algorithm for the Mesh NoC
+// DOR=0 means it can try to dynamic take turns
+// DOR=1 means Dimension-Ordered Routing
+#if TORUS==1
+   #define DOR 1 // With Torus we must use DOR
+#else
+   #define DOR 1 // With Mesh we can use DOR or dynamic routing
+#endif
+//TORUS: Basic Y then X routing (Dimension-Ordered with bubble algorithm, i.e., only injecting from the PU into the NoC if there is at least X empty slots)
+
+
 void RouterModel::find_dest(int qid, uint16_t orig, u_int32_t msg_data, int & abs_diff_X, int & abs_diff_Y, bool & Y_routing_pri, bool & dnorth, bool & dsouth, bool & dwest, bool & deast, bool & route_to_core, bool & exact_X, bool & exact_Y, bool & switch_X_board, bool & switch_Y_board){
    int dst_X, dst_Y;
    // Assign all these boolean variables inside comp_destXY
@@ -515,27 +512,21 @@ void RouterModel::find_dest(int qid, uint16_t orig, u_int32_t msg_data, int & ab
    abs_diff_Y = dnorth ? id_Y-dst_Y : dst_Y-id_Y;
    abs_diff_X = dwest  ? id_X-dst_X : dst_X-id_X;
 
-   //TORUS: Basic Y then X routing (Dimension-Ordered with bubble alg), with or without Ruche
-   //MESH: Random Init with dynamic turns, with 3/4 of the options.
-   Y_routing_pri = true; //True for torus networks
    #if TORUS==1
       dnorth = dnorth && (abs_diff_Y <= BOARD_H_HALF) || (dst_Y > id_Y) && (abs_diff_Y > BOARD_H_HALF);
       dwest  = dwest  && (abs_diff_X <= BOARD_W_HALF) || (dst_X > id_X) && (abs_diff_X > BOARD_W_HALF);
-      dsouth = !dnorth && !exact_Y;
-      deast  = !dwest && !exact_X;
-   #elif TORUS==0 //no torus
-      dsouth = !dnorth && !exact_Y;
-      deast  = !dwest && !exact_X;
-      // Priority Y axis movement IF it can go North or West, but not SouthEast turn, WestNorth turn not allowed either
-      // bool dest_X_odd = (dst_X%2);
-      // bool dest_X_even = !dest_X_odd;
-      // bool sure_Yfirst = dnorth && dwest;
-      // bool sure_Xfirst = dsouth && deast;
-      // bool maybe_Yfirst =  dest_X_even && (dnorth || dwest) || dest_X_odd && (dsouth || deast);
-      //Y_routing_pri = sure_Yfirst || maybe_Yfirst && !sure_Xfirst;
-      Y_routing_pri = dwest;
+   #endif
+
+   dsouth = !dnorth && !exact_Y;
+   deast  = !dwest && !exact_X;
+   
+   #if DOR==0
+      Y_routing_pri = dwest; // First dimension depends on the destination if DOR=0
+   #else
+      Y_routing_pri = true; // True for DOR!
    #endif
 }
+
 
 uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_int64_t router_timer, u_int16_t * next_inp4out, u_int32_t & collisions){
    int want_to_move_accum = 0;
@@ -596,7 +587,7 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_in
             }
             // Route to axis Y if Y_routing got priority and we are not at the correct Y or if we are already in exact_x
             else if (Y_routing_pri && !exact_Y || exact_X){
-               #if TORUS==1
+               #if (DOR==1) && ASSERT_MODE
                   // Assert that we don't take a turn from X-dim to Y-dim
                   assert (orig!=PX);assert(orig!=E); assert(orig!=W);
                #endif
@@ -604,7 +595,7 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_in
 
                if (dnorth) {
                   if (next_route(drain_Y,orig,N,qid,next_inp4out,abs_diff_Y) ){ //couldn't route to N
-                     #if TORUS==0
+                     #if DOR==0
                         //it can try go East, as East/North is okay
                         if (deast){
                            if (next_route(drain_X,orig,E,qid,next_inp4out,abs_diff_X) ) collisions++;
@@ -614,7 +605,7 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_in
                   }
                }else if (dsouth) {
                   if (next_route(drain_Y,orig,S,qid,next_inp4out,abs_diff_Y) ){  //couldn't route to S
-                     #if TORUS==0
+                     #if DOR==0
                         //it can try go West, as West/South is okay
                         if (dwest){
                            if (next_route(drain_X,orig,W,qid,next_inp4out,abs_diff_X) ) collisions++;
@@ -627,7 +618,7 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_in
             }else{
                if (deast){
                   if (next_route(drain_X,orig,E,qid,next_inp4out,abs_diff_X) ){  //couldn't route to E
-                     #if TORUS==0
+                     #if DOR==0
                         //it can try go North, as East/North is okay
                         if (dnorth){
                            if (next_route(drain_Y,orig,N,qid,next_inp4out,abs_diff_Y) ) collisions++;
@@ -637,7 +628,7 @@ uint64_t RouterModel::calc_inp4out(bool * drain_X, bool * drain_Y, int qid, u_in
                   }
                }else if (dwest){
                   if (next_route(drain_X,orig,W,qid,next_inp4out,abs_diff_X) ){  //couldn't route to W
-                     #if TORUS==0
+                     #if DOR==0
                         //it can try go South, as West/South is okay
                         if (dsouth){
                            if (next_route(drain_Y,orig,S,qid,next_inp4out,abs_diff_Y) ) collisions++;
@@ -788,23 +779,25 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
                if (origin < DIR_NONE){
                   //If the origin input wants to be routed to a specific d(estination)
                   ASSERT_MSG(!input_empty[origin][qid], "Must not be empty");
-                  
+                  R_queue<Msg> * iq = input_q[origin];
                   bool t3_oq_not_full = true;
-                  #if PROXY_FACTOR == 1
-                     bool t3_to_core = false;
-                  #else
-                     bool t3_to_core = (qid==2 || qid==3) && (d==C); // T3' to Core or T3 to Core, need to check due to proxy
-                     #if PROXY_ROUTING==5
-                     if (t3_to_core){
-                        Msg pre_msg = input_q[origin][qid].peek();
-                        int dst_X, dst_Y; get_dst(pre_msg.data, dst_X, dst_Y);
-                        bool owner_core = (dst_X == id_X && dst_Y == id_Y) && !output_q[C][2].cannot_fit_two();
-                        if (!owner_core) t3_oq_not_full = !output_q[C][3].cannot_fit_two();
+                  bool owner_core;
+                  bool t3_to_core = false;
+                  #if PROXY_FACTOR > 1
+                  // There can be the case that we send it to T3' to the closest proxy and it ends up being the owner. In that case we go from qid=3 to qid=2
+                  // It can also go from qid=2 to qid=3 if we were en route to the owner and we are captured by a proxy
+                  t3_to_core = (qid==2 || qid==3) && (d==C); // T3' to Core or T3 to Core, need to check due to proxy
+                  if (t3_to_core){
+                     Msg pre_msg = iq[qid].peek();
+                     int dst_X, dst_Y; get_dst(pre_msg.data, dst_X, dst_Y);
+                     // We consider it the owner (T3) if it's the destination and it can fit in the IQ for T3
+                     // If it was coming from T3' but T3 IQ is full, then it goes to T3' even though it's the owner. That's okay because the owner could also be a proxy of itself!
+                     owner_core = (dst_X == id_X && dst_Y == id_Y) && !output_q[C][2].cannot_fit_two();
+                     // If it's not the owner, then check the IQ of T3'
+                     if (!owner_core) t3_oq_not_full = !output_q[C][3].cannot_fit_two();
                      }
-                     #endif
                   #endif
 
-                  R_queue<Msg> * iq = input_q[origin];
                   // t3_to_core move should move all the flits at once
                   if (!t3_to_core || (iq[qid].occupancy() > 1) && t3_oq_not_full){
                      u_int16_t hop_latency = check_border_traffic(d,qid,&already_routed[0]);
@@ -812,11 +805,8 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
                      msg.time = noc_to_pu_cy(router_timer+hop_latency);
 
                      u_int16_t qid_dest = qid;
+                     #if PROXY_FACTOR > 1
                      if (t3_to_core){ // input occupancy must have been more than 1
-                        int dst_X, dst_Y;
-                        get_dst(msg.data, dst_X, dst_Y);
-                        // If it was coming from T3' but T3 IQ is full, then it goes to T3' even though it's the owner. That's okay because the owner could also be a proxy of itself!
-                        bool owner_core = (dst_X == id_X && dst_Y == id_Y) && !output_q[C][2].cannot_fit_two();
                         // if it's the real dest then qid=2, else qid=3
                         if (owner_core) qid_dest = 2;
                         else qid_dest = 3; // If coming from ch-2 then check that ch-3 is not busy!
@@ -824,6 +814,7 @@ int RouterModel::advance(pthread_mutex_t * mutex, bool * drain_X,bool * drain_Y,
                         ASSERT_MSG(msg.type != TAIL, "Msg cannot be TAIL");
                         ASSERT_MSG(!iq[qid].is_empty(), "IQ cannot be empty");
                      }
+                     #endif
 
                      output_q[d][qid_dest].enqueue(msg); moved[qid]++;
 

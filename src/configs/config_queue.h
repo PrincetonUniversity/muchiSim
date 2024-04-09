@@ -16,7 +16,7 @@ u_int32_t rq_sizes[NUM_QUEUES] = {unused_buffer, router_buffer, router_buffer, r
 #endif
 
 #define Q_SIZE_REF (GRID_X > 64 ? 64 : GRID_X)
-#if TEST_QUEUES>0
+#if TEST_QUEUES>0 // Testing the ration between input and output queues!!
   const u_int32_t io_factor_t3b = default_io_ratio; //1 << (TEST_QUEUES-1);
   const u_int32_t io_factor_t2  = default_io_ratio; //1 << (TEST_QUEUES-1);
 #else
@@ -39,7 +39,7 @@ u_int32_t task_chunk_size[NUM_QUEUES] = {UINT32_MAX,UINT32_MAX,UINT32_MAX,UINT32
 // DEFAULT CONFIGURATIONS THAT CAN BE OVERWRITTEN PER APP
 // These MUST NOT BE USED WITHIN THIS FILE, but after config() has completed
 u_int32_t t2_piped_tasks = smt_per_tile * 12; //16;
-#if TEST_QUEUES>0
+#if TEST_QUEUES>0 // Testing the ratio between T2 and T3 queues!!
 u_int32_t t2_t3_ratio = smt_per_tile * (1 << (TEST_QUEUES-1));
 #else
 u_int32_t t2_t3_ratio = smt_per_tile * 16; //20;

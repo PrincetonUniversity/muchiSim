@@ -1,4 +1,5 @@
 using namespace std;
+
 #include "../src/common/macros.h"
 // System Configuration Parameters
 #include "../src/configs/config_system.h"

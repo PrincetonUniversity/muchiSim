@@ -1,5 +1,10 @@
 #include "common/macros.h"
-#include <omp.h>
+#define USE_OMP 1
+#if USE_OMP
+  #include <omp.h>
+#else
+  #include <pthread.h>
+#endif
 // System Configuration Parameters
 #include "configs/config_system.h"
 #include "configs/config_queue.h"
@@ -22,7 +27,20 @@ graph_loader * graph = NULL;
 #include "configs/config_app.h"
 #include "network/network.h"
 
+
+void *thread_function(void *arg) {
+    long tid = (long)arg;
+    // cout << tid << flush;
+    if (tid < COLUMNS) {
+        router_thread(tid);
+    } else {
+        tsu_core_thread(tid - COLUMNS);
+    }
+    return NULL;
+}
+
 int main(int argc, char** argv) {
+  //print_processor_info();
   calculate_derived_param();
   // ==== Check Configurations Allowed ====
   assert(pow(2,log2(GRID_X))==GRID_X );
@@ -66,12 +84,23 @@ int main(int argc, char** argv) {
   // ==== START THE SIMULATION ====
   cout << std::setprecision(2) << std::fixed << "\n\nStarting Simulation\n" << std::flush;
   auto start = chrono::system_clock::now();
-  omp_set_num_threads(MAX_THREADS);
-  #pragma omp parallel default(shared)
-  {
-    int tid = omp_get_thread_num();
-    if (tid<COLUMNS) router_thread(tid); else tsu_core_thread(tid-COLUMNS);
-  }
+  #if USE_OMP
+    // int max_threads = omp_get_max_threads(); cout << "Max Available threads: " << max_threads << "\n"; assert(MAX_THREADS <= max_threads);
+    omp_set_num_threads(MAX_THREADS);
+    #pragma omp parallel default(shared)
+    {
+      long tid = omp_get_thread_num();
+      thread_function((void*)tid);
+    }
+  #else
+    pthread_t threads[MAX_THREADS]; int rc; long t;
+    for(t = 0; t < MAX_THREADS; t++) {
+        rc = pthread_create(&threads[t], NULL, thread_function, (void *)t);
+        if (rc) {std::cout << "Error: unable to create thread," << rc << "\n"; exit(-1);}
+    }
+    for(t = 0; t < MAX_THREADS; t++) pthread_join(threads[t], NULL);
+  #endif
+
   auto end = std::chrono::system_clock::now();
   chrono::duration<double> elapsed_seconds = end-start;
   double sim_time = elapsed_seconds.count();
@@ -79,7 +108,7 @@ int main(int argc, char** argv) {
   // ==== PRINT THE PERFORMANCE COUNTERS and RESULTS ====
   print_stats_acum(true, sim_time);
   bool result_correct = (argc >= 5) ? result_correct = compare_out(argv[4]) : true;
-  cout << "\nVersion 31\n\n";
+  cout << "\nVersion 32\n\n";
 
   // ==== FREE MEMORY ALLOCATED ====
   destroy_cache_structures();

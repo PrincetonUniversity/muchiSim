@@ -56,17 +56,21 @@ u_int64_t cache_tag(void * addr) {
 
 #if APP<ALTERNATIVE
   u_int64_t cache_tag(void * addr, u_int64_t index) {
-    // ret is [0, nodes] for all
+    u_int64_t ret_len = graph->nodes;
+    #if APP==SPMM
+      ret_len *= B_numcols;
+    #endif
+    // ret is [0, nodes] for all applications
     // edge array is [nodes, nodes+edges] (histo is out already)
-    if (addr==graph->edge_array){index += graph->nodes;}
+    if (addr==graph->edge_array){index += ret_len;}
     // node array is [N+E, 2N+E] (wcc and bfs are out already)
-    else if (addr==graph->node_array){index += graph->nodes + graph->edges;}
+    else if (addr==graph->node_array){index += ret_len + graph->edges;}
     // in pagerank, in_r is [2N+E,]
-    else if (addr==in_r){index += 2*graph->nodes + graph->edges;}
+    else if (addr==in_r){index += ret_len + graph->nodes + graph->edges;}
     // in SPMV/SSSP, edge_values is [2N+E,]
-    else if (addr==graph->edge_values){index += 2*graph->nodes + graph->edges;}
+    else if (addr==graph->edge_values){index += ret_len + graph->nodes + graph->edges;}
     // SPMV includes a dense vector of size N
-    else if (addr==graph->dense_vector){index += 2*graph->nodes + 2*graph->edges;}
+    else if (addr==graph->dense_vector){index += ret_len + graph->nodes + 2*graph->edges;}
     // Frontier
     else if (addr!=ret){
       bool is_list = (addr==frontier_list);

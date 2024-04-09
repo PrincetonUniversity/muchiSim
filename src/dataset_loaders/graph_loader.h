@@ -7,6 +7,8 @@
 #include <chrono>
 #include <climits>
 
+const u_int32_t B_numcols = 64;
+
 class graph_loader {
 public:
   string graph_name;
@@ -20,6 +22,7 @@ public:
   uint32_t *edge_array;
   uint32_t *edge_values;
   uint32_t *dense_vector=NULL;
+  uint32_t dense_value = 5;
   
   graph_loader(string base, int binary);
   ~graph_loader();
@@ -101,10 +104,14 @@ bool graph_loader::output_edges_traversed(char* output_name, uint64_t edges_trav
 }
 
 bool graph_loader::output_result(char* output_name){
+  u_int64_t ret_len = nodes;
+  #if APP==SPMM
+    ret_len *= B_numcols;
+  #endif
   #if PROXYS>1 && (DRAIN_PROXY==0 || PCACHE==0)
     //aggregate values of proxy arrays
     for (u_int32_t j=0; j<PROXYS; j++){
-      for (uint64_t i=0; i<nodes; i++){
+      for (uint64_t i=0; i<ret_len; i++){
         ret[i] += proxys[j][i];
       }
     }
@@ -119,10 +126,15 @@ bool graph_loader::output_result(char* output_name){
 
   uint32_t adv=1;
   #if SHUFFLE
-    adv=nodes/GRID_SIZE;
+    adv=ret_len/GRID_SIZE;
   #endif
   for (uint32_t k=0; k<adv; k++){
-    for (uint32_t i=k; i<nodes; i+=adv){
+    #if APP==SPMM
+      u_int32_t inc=B_numcols;
+    #else
+      u_int32_t inc=adv;
+    #endif
+    for (uint32_t i=k; i<ret_len; i+=inc){
       outfile << ret[i] << "\n";
     }
   }

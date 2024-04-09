@@ -52,6 +52,7 @@ void print_configuration(ostream& fout){
   fout << "ld_st_op_byte_width: "<< ld_st_op_byte_width << endl;
 
   fout << "PROXY_ROUTING: "<< PROXY_ROUTING << endl;
+  fout << "WITHIN_REGION: " << WITHIN_REGION << endl;
   fout << "WRITE_THROUGH: "<< WRITE_THROUGH << endl;
   fout << "ASSERT_MODE: "<<ASSERT_MODE << endl;
   fout << "GLOBAL_BARRIER: "<<GLOBAL_BARRIER << endl;
@@ -280,7 +281,7 @@ void print_stats_acum(bool last_print, double sim_time){
   #if PCACHE
   cout << "\n---Pcache---\n";
   cout << "Pcache Size: "<<pcache_size << endl;
-  cout << "Cached: "<<proxys_cached << endl;
+  cout << "Cached: "<<proxys_cached << endl; // If Cache==0, then the proxy segment fits entirely in SRAM, no cache
   cout << "  PHits: "<<pcache_hits << endl;
   cout << "  PMisses: "<<pcache_misses << endl;
   uint64_t total_requests_pcache = pcache_hits + pcache_misses;

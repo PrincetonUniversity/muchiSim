@@ -4,14 +4,14 @@
 #include <fstream>
 #include <map>
 using namespace std;
-#include "src/configs/param_energy.h"
-#include "src/configs/param_cost.h"
-#include "src/common/macros.h"
+#include "configs/param_energy.h"
+#include "configs/param_cost.h"
+#include "common/macros.h"
 
 map<string, double> vars;
-#include "src/common/calc_energy.h"
-#include "src/common/calc_perf.h"
-#include "src/common/calc_cost.h"
+#include "common/calc_energy.h"
+#include "common/calc_perf.h"
+#include "common/calc_cost.h"
 
 std::vector<std::string> keys = {
     "total_noc_messages",

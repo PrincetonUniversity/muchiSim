@@ -47,6 +47,7 @@ union float_int{
 #define HISTO 5
 #define FFT 6
 #define SPMV_FLEX 7
+#define SPMM 8
 
 #define ALTERNATIVE 10
 
@@ -195,14 +196,15 @@ union float_int{
 #ifndef NOC_CONF
   #define NOC_CONF 2
 #endif
-// NOC_CONF:0 means 2 NoCS of 32 bits intra die, which get throttled to a shared 32 bits across dies
-// NOC_CONF:1 means 2 NoCS of 32 and 64 bit intra die, which get throttled to a shared 32 bits across dies
-// NOC_CONF:2 means 2 NoCS of 32 and 64 bit intra die, which get throttled to 2 NoCs of 32 and 32 bits across dies
-// NOC_CONF:3 means 2 NoCS of 32 and 64 bit intra and inter-die
+// NOC_CONF:0 means #P NoCS of 32 bits intra die, which get throttled to a shared 32 bits across dies
+// NOC_CONF:1 means #P-1 NoCS of 32 and one of 64 bit intra die, which get throttled to a shared NoC 32 bits across dies
+// NOC_CONF:2 means #P-1 NoCS of 32 and one of 64 bit intra die, which get throttled to #P NoCs of 32 bits across dies
+// NOC_CONF:3 means #P-1 NoCS of 32 and one of 64 bit intra and inter-die. No throttling.
 #define NO_WIDE_NOC 99
 #if NOC_CONF>0
-  // Set to PHYSICAL NOC INDEX 1
-  #define WIDE_NOC_ID (PHY_NOCS - 1)
+  // It means that the wide noc is the physical NoC with the highest NoC ID.
+  // If we only have one node then NoC ID 0 is the wide NoC
+  #define WIDE_NOC_ID (PHY_NOCS - 1) 
 #else
   #define WIDE_NOC_ID (NO_WIDE_NOC)
 #endif
@@ -289,15 +291,18 @@ union float_int{
   #define global(x, y)( (( (u_int32_t)y << GRID_X_LOG2) + (u_int32_t) x) )
 #endif
 
-#ifndef PROXY_ROUTING
-  #define PROXY_ROUTING 4 //  1: On-the-wayCascading,  3: Within+NoCascading, 4:Within+SelectiveCascading, 5:Within+AllCascading
+
+//Whether the T3' is first routed to the proxy tile within the proxy region (0), or to the closest proxy tile (1)
+#if TORUS==1
+  #define WITHIN_REGION 0
+#else
+  #define WITHIN_REGION 1
 #endif
 
-#if PROXY_ROUTING==1
-  #define dest_pcache_writeback() (3)
-#else
-  #define dest_pcache_writeback() (2)
+#ifndef PROXY_ROUTING
+  #define PROXY_ROUTING 4 // 3: NoCascading, 4:SelectiveCascading, 5:Within+AllCascading
 #endif
+#define dest_pcache_writeback() (2) // The write-back of the proxy cache is T3, and the task becomes T3' if it falls into a proxy
 
 #define DRAIN_PROXY 1
 
@@ -315,7 +320,7 @@ union float_int{
 const u_int32_t uncontested_noc = 3;
 const u_int32_t write_queue_max_occupancy = 4;
 
-#define get_qid() (dest_qid)
+#define get_qid() (dest_qid) // Depends on the PROXY config in config_queue.h
 #define double_to_long(d) ((u_int64_t)d)
 #define noc_to_pu_cy(noc_cycle) (double_to_long((noc_cycle) * noc_to_pu_ratio))
 #define pu_to_noc_cy(pu_cycle) (double_to_long((pu_cycle) * pu_to_noc_ratio))
@@ -329,10 +334,11 @@ const u_int32_t write_queue_max_occupancy = 4;
 #endif
 
 #if ASSERT_MODE
-  #define ASSERT_MSG(cond, msg) ({if (!(cond)){std::cout << "ERROR: " << msg << std::endl << std::flush; assert(cond);} })
+  #define ASSERT_MSG(cond, msg) ALWAYS_ASSERT_MSG(cond, msg)
 #else
   #define ASSERT_MSG(cond, msg)  // No-op if ASSERT_MODE is not defined
 #endif
+#define ALWAYS_ASSERT_MSG(cond, msg) ({if (!(cond)){std::cout << "ERROR: " << msg << std::endl << std::flush; assert(cond);} })
 
 
 #if GRID_X > 64

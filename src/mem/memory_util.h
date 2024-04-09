@@ -209,7 +209,6 @@ void calculate_storage_per_tile(){
     u_int32_t proxys_words_per_tile = 0;
   #endif
 
-
   u_int32_t input_queue_sizes = 0;
   u_int32_t total_queue_sizes = 0;
   
@@ -218,8 +217,6 @@ void calculate_storage_per_tile(){
       total_queue_sizes+=oq_sizes[q];
   }
   total_queue_sizes+=input_queue_sizes;
-
-
 
   // Pad to the next multiple of the cache line size
   while (dataset_words_per_tile%dcache_words_in_line!=0) dataset_words_per_tile++;
