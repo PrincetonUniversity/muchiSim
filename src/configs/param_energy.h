@@ -15,7 +15,7 @@ const double noc_freq_design = noc_freq;
 
 const double noc_vdd = get_vdd(noc_freq);
 
-// This is SRAM logic, should not be changed unless we good data
+// This is SRAM logic, should not be changed unless we have good data
 // Current one https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9162985
 const double mem_freq_design = 1.0;
 const double mem_freq = 1.0;

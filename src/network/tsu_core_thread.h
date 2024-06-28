@@ -1,6 +1,8 @@
 void update_timer(u_int32_t global_cid, int delay, u_int64_t compute_cycles){
   // Update the sample period wrt to task delay
-  if (delay>sample_time) sample_time*=2;
+  #if PRINT<2
+    if (delay>sample_time) sample_time*=2;
+  #endif
 
   u_int32_t base = global_cid*smt_per_tile;
   // Add delay to the pu_cycles of the current thread

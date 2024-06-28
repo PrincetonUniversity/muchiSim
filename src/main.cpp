@@ -1,5 +1,4 @@
 #include "common/macros.h"
-#define USE_OMP 1
 #if USE_OMP
   #include <omp.h>
 #else

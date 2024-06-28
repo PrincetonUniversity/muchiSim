@@ -43,7 +43,6 @@ public:
   int64_t edges;
   uint64_t edges_traversed;
   Vertex* vertex_vector;
-  omp_lock_t * locks;
   
   graph_loader(string base);
   ~graph_loader();
@@ -81,7 +80,6 @@ graph_loader::graph_loader(string base){
   nodes=(65536/GRID_SIZE)*GRID_SIZE*1;
   edges=955864;
   vertex_vector = (Vertex*) malloc(nodes * sizeof(Vertex));
-  locks = new omp_lock_t[nodes];
 
   nodePerTile = (nodes+GRID_SIZE-1)/GRID_SIZE;
   edgePerTile  = (edges+GRID_SIZE-1)/GRID_SIZE;

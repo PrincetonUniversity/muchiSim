@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ -z "$MUCHI_ROOT" ]; then
+    echo "MUCHI_ROOT is not set, run: source setup.sh"
+    exit 1
+fi
+source $MUCHI_ROOT/exp/util.sh;
 
 if [ $1 -gt 5 ]; then
   apps="0 1 2 3 4 5"
@@ -38,7 +43,7 @@ let torus=1
 let chiplet_w=$grid_w
 let board_w=$grid_w #Specify board so that the package has the same size as the board
 
-sufix="-v $verbose -r $assert -t $th -u $noc_conf -m $grid_w -c $chiplet_w -k $board_w -l $ruche -o $torus -y $dcache"
+sufix="-v $verbose -s $LOCAL_RUN -r $assert -t $th -u $noc_conf -m $grid_w -c $chiplet_w -k $board_w -l $ruche -o $torus -y $dcache"
 i=0
 
 # No proxy

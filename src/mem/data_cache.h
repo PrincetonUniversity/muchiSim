@@ -121,7 +121,9 @@ T get_dcache(int tX,int tY, T * array, u_int64_t & penalty, u_int64_t timer){
 
   #if DCACHE>=1
     #if DCACHE==1 // Enable dache if data doesn't fit in scratchpad
-    if (dataset_cached){
+    if (!dataset_cached){
+      pu_delay += sram_read_latency;
+    } else {
     #elif DCACHE>=2 // Always force cache to be enabled
     {
     #endif
@@ -214,7 +216,10 @@ T get_dcache(int tX,int tY, T * array, u_int64_t & penalty, u_int64_t timer){
           check_freq(dcache_freq, tags, set, elem_tag);
         #endif
     }
+  #else // DCACHE==0
+    pu_delay = sram_read_latency;
   #endif
+  
   load(1);
   #if ASSERT_MODE
     assert(pu_delay > 0);

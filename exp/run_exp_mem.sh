@@ -1,4 +1,10 @@
 #!/bin/bash
+if [ -z "$MUCHI_ROOT" ]; then
+    echo "MUCHI_ROOT is not set, run: source setup.sh"
+    exit 1
+fi
+source $MUCHI_ROOT/exp/util.sh;
+
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
     echo "Error: Missing required parameters."
     exit 1
@@ -32,7 +38,7 @@ i=0
 let noc_conf=1
 let dcache=1
 
-local_run=0
+local_run=$LOCAL_RUN
 
 # Torus
 let torus=1

@@ -8,7 +8,8 @@ u_int32_t smt_per_tile = 1;
 // Latency of one hop inside the die
 u_int32_t on_die_hop_latency = 1; // in cycles of noc clk
 const u_int32_t d2d_hop_latency_ns = 2; // in ns
-const u_int32_t noc_width = 32;
+
+const u_int32_t noc_width = 32; // NOTE: Currently only supported 32 bits per NoC. Double width (64 bits) is possible via NOC_CONF (see macros.h)
 
 // Hops occur already at the edge of the die or board, so this latency (in ns) only depends on a constant distance
 // 2ns for PHI to cross the die, and 0.5 ns per mm of wire, 1 cycle on each side of the die to get a fresh clock
@@ -36,7 +37,10 @@ u_int32_t l2_read_latency = l2_cache_latency + ceil_macro(noc_to_pu_ratio*averag
 u_int32_t hbm_device_latency = ceil_macro(30*pu_mem_ratio);
 u_int32_t hbm_read_latency = hbm_device_latency + ceil_macro(noc_to_pu_ratio*average_die_to_edge_distance*on_die_hop_latency);
 
+// The modeled penalty for a hardware-based barrier synchronization
 u_int32_t barrier_penalty = GRID_X*3;
+
+
 
 // ==== CHIPLET MODEL ====
 // Parameters from https://www.opencompute.org/events/past-events/hipchips-chiplet-workshop-isca-conference
@@ -93,6 +97,8 @@ const double torus_no_ruche_router_area_mm2     = noc_area(0.00414);
 const double torus_ruche_router_area_mm2        = noc_area(0.01042);
 
 
+u_int32_t sample_time = 1000; // in PU cycles
+
 #if APP<ALTERNATIVE
     #include "config_system_default.h"
 #else
@@ -113,7 +119,7 @@ const double torus_ruche_router_area_mm2        = noc_area(0.01042);
 #elif (GRID_X_LOG2 < 12) // < 4096x4096
     u_int32_t powers_sample_time = 2;
 #endif
-u_int32_t sample_time = 1000;
+
 
 
 void calculate_derived_param(){
@@ -123,8 +129,10 @@ void calculate_derived_param(){
     hbm_gbits = hbm_channels * hbm_channel_bit_width;
     hbm_mc_area_mm2 = mc_fixed_area_mm2 + hbm_gbits/d2d_interposer_areal_density_gbits_mm2;
     total_hbm_channels = hbm_channels * DIES;
-    sample_time = std::pow(10, powers_sample_time);
-    #if PRINT==2 && GRID_X_LOG2 >= 6
-        sample_time *= 4;
-    #endif
+    if (sample_time == 1000){ // Default, not overrriden
+        sample_time = std::pow(10, powers_sample_time);
+        #if PRINT==2 && GRID_X_LOG2 >= 6
+            sample_time *= 4;
+        #endif
+    }
 }

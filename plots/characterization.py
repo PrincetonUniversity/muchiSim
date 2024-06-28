@@ -7,12 +7,28 @@ mpl.use('pdf')
 import matplotlib.gridspec as gridspec
 
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from matplotlib import rc
 import numpy as np
-import sys, getopt
-plt.rcParams["font.family"] = "Times New Roman"
-rc('font',**{'family':'serif','serif':['Times New Roman']})
-rc('text', usetex=True)
+import sys, subprocess, getopt
+
+def is_latex_installed():
+    try:
+        subprocess.run(['latex', '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+# Set Matplotlib configuration based on LaTeX availability
+use_latex = False #is_latex_installed()
+if use_latex:
+    plt.rcParams['text.usetex'] = True
+    print("Using LaTeX")
+else:
+    plt.rcParams['text.usetex'] = False
+    print("Not using LaTeX")
+
+plt.rcParams['font.family'] = ['DejaVu Serif', 'sans-serif', 'DejaVu Sans']
 
 folder = ["sim_logs"]
 font = 20
@@ -150,15 +166,52 @@ def collect_data(binaries, metrics, apps, inputs,plot_type, plot_metric):
         b=b+1
     return data_planes
 
+def get_metric(plot_metric, perf_metric, plot_type):
+    metrics = None
+    if plot_metric==0:
+        metrics = ["time"]
+    elif plot_metric==1:
+        metrics = ["Core_active"]
+    elif plot_metric==2:
+        metrics = ["router_energy"]
+    elif plot_metric==3:
+        metrics = ["sim_time"]
+    elif plot_metric==4:
+        metrics = ["arith_intensity_msgs"]
+    elif plot_metric==5:
+        metrics = ["arith_intensity_loads"]
+    elif plot_metric==6:
+        metrics = ["flops"]
+    elif plot_metric==7:
+        metrics = ["energy"]
+    elif plot_metric==8:
+        metrics = ["total_msg"]
+    elif plot_metric==9:
+        metrics = ["dhit_rate"]
+    elif plot_metric==10:
+        if plot_type==19: # NoC plot
+            metrics = [perf_metric,"cost_2d"]
+        else:
+            metrics = [perf_metric,"cost_2.5d"]
+    elif plot_metric==11:
+        metrics = ["sim_time","time"]
+    elif plot_metric==12:
+        metrics = ["edges"]
+
+
+    return metrics
+
 def main(argv):
     global default_grid_width
-    usage = "characterization.py -p <plot_type> -m <metric> (0:time, 1:utilization)"
+    global folder
+    usage = "characterization.py -p <plot_type> -m <metric> (0:time, 1:utilization, 2:energy, 3:sim_time, 4:arith_intensity_msgs, 5:arith_intensity_loads, 6:flops, 7:energy, 8:total_msg, 9:dcache_hit-rate, 10:perf/$) -e <artifact_evaluation> (0:default, 1:muchisim_eval, 2:tutorial)"
     plot_type = 0
     plot_len = 0
     plot_metric = 0
+    artifact_type = 0
 
     try:
-        opts, args = getopt.getopt(argv,"hp:m:")
+        opts, args = getopt.getopt(argv,"hp:m:e:")
     except getopt.GetoptError:
         print(usage)
         sys.exit(2)
@@ -166,10 +219,12 @@ def main(argv):
         if opt == '-h':
             print(usage)
             sys.exit()
-        elif opt in ("-p", "--plot_type"):
+        elif opt in ("-p", "--plot_type"): # See the list of plot types for the different experiments
             plot_type = int(arg)
-        elif opt in ("-m", "--metric"):
+        elif opt in ("-m", "--metric"): # Different metrics to plot (see get_metric function)
             plot_metric = int(arg)
+        elif opt in ("-e", "--artifact_evaluation"):
+            artifact_type = int(arg)
 
     # Num cols of the leyend of the plot
     cols=6
@@ -190,7 +245,12 @@ def main(argv):
     ]
 
     hatches = ['','\\','.','//','o','-','x','*','O']
-    muchisim_eval = False
+    muchisim_eval = artifact_type==1
+    if muchisim_eval:
+        folder = ["sim_paper"]
+    elif artifact_type==2:
+        folder = ["sim_micro"]
+
 
     perf_word = "TEPS"
     perf_metric = "TEPS"
@@ -220,19 +280,20 @@ def main(argv):
             
             if not muchisim_eval:
                 legend_left_point = -0.2; legend_width = 7
-                inputs = ['Kron22','Kron25']; binaries = ["MEM0","MEM1","MEM2","MEM6","MEM3","MEM4","MEM5"]; app_cols = 2; cols=4
-                comp = ("128T/C 64KB","128T/C 128KB","128T/C 256KB","128T/C 512KB","32T/C 128KB","32T/C 256KB","32T/C 512KB")
+                inputs = ['Kron22','Kron25']; binaries = ["MEM0","MEM1","MEM2","MEM6","MEM3","MEM4","MEM5"];
+                app_cols = 2; cols=4
+                legend_text = ("128T/C 64KB","128T/C 128KB","128T/C 256KB","128T/C 512KB","32T/C 128KB","32T/C 256KB","32T/C 512KB")
             else:
                 inputs = ['Kron25']; binaries = ["MEM0","MEM1","MEM2","MEM3","MEM4","MEM5"];
                 app_cols = 1; cols=3; legend_top_sep=-0.15; legend_width = 8.5
                 apps = ['sssp','pagerank','bfs','wcc','spmv','spmm','histo']
-                comp = ("128 Tile/Ch 64 KiB","128 Tile/Ch 128 KiB","128 Tile/Ch 256 KiB","32 Tile/Ch 128 KiB","32 Tile/Ch 256 KiB","32 Tile/Ch 512KiB")
+                legend_text = ("128 Tile/Ch 64 KiB","128 Tile/Ch 128 KiB","128 Tile/Ch 256 KiB","32 Tile/Ch 128 KiB","32 Tile/Ch 256 KiB","32 Tile/Ch 512KiB")
                 
 
         elif plot_type==10: #QUEUE size comparison
             y_lim = 2.5
             binaries = ["OQUEUE1","OQUEUE3","OQUEUE4","OQUEUE5","OQUEUE6"]
-            comp = ("OQ2=OQ1","OQ2=OQ1*4","OQ2=OQ1*8","OQ2=OQ1*16","OQ2=OQ1*32")
+            legend_text = ("OQ2=OQ1","OQ2=OQ1*4","OQ2=OQ1*8","OQ2=OQ1*16","OQ2=OQ1*32")
             apps = ['sssp','pagerank','bfs','wcc','spmv']
             cols=3
             legend_width = 5.5
@@ -241,41 +302,41 @@ def main(argv):
             default_grid_width = 128
             #binaries = ["PROXY128", "CASC2","NPCACHESCL16F2","NPROXY16F","NPCACHESCL16F8","CASCF162"]
             binaries = ["PROXY128","PROXY16", "PROXY16F2","PROXY16F","PROXY16F16","PROXY16F64"]
-            comp = ("No Proxy (Dalorex)","16x16 P\$ in Full","16x16 P\$ 1/2","16x16 P\$ 1/4","16x16 P\$ 1/16","16x16 P\$ 1/64")
+            legend_text = ("No Proxy (Dalorex)","16x16 P\\$ in Full","16x16 P\\$ 1/2","16x16 P\\$ 1/4","16x16 P\\$ 1/16","16x16 P\\$ 1/64")
             cols=3
         elif plot_type==12: #PROXY size comparison
             #inputs = ['wikipedia','liveJournal','Kron22']
             y_lim = 13.5; default_grid_width = 128
             binaries = ["PROXY128","PROXY32","PROXY16F","PROXY8F","PROXY16","PROXY8"]
-            comp = ("No Proxy (Dalorex)","Proxy 32x32","Proxy 16x16","Proxy 8x8")
+            legend_text = ("No Proxy (Dalorex)","Proxy 32x32","Proxy 16x16","Proxy 8x8")
             # y_lim = 26; default_grid_width = 256
             # binaries = ["DLX_SCALE_D256","PROXY32","DLX_SCALE_T256"]
-            # comp = ("No Proxy (Dalorex)","Proxy 32x32","Proxy 16x16")
+            # legend_text = ("No Proxy (Dalorex)","Proxy 32x32","Proxy 16x16")
             cols=4
             legend_width = 6.8
 
         elif plot_type==13: #STEAL REGION comparison
             binaries = ["S16S0X0","S16S0X1","S16S1X0","S16S1X1"]
-            comp = ("S16S0X0","S16S0X1","S16S1X0","S16S1X1")
+            legend_text = ("S16S0X0","S16S0X1","S16S1X0","S16S1X1")
 
         elif plot_type==14: #Dalorex vs Tascade
             y_lim = 12
             #inputs = ['wikipedia','liveJournal','Kron22']
             apps = ['sssp','pagerank','bfs', 'wcc','spmv','histo']
             binaries = ["DLX_SCALE_D64--64","DLX_SCALE_T64--64","PROXY128--128","PROXY16--128","DLX_SCALE_D256--256","DLX_SCALE_T256--256"]
-            comp = ("Dalorex-64x64","Tascade-64x64","Dalorex-128x128","Tascade-128x128","Dalorex-256x256","Tascade-256x256")
+            legend_text = ("Dalorex-64x64","Tascade-64x64","Dalorex-128x128","Tascade-128x128","Dalorex-256x256","Tascade-256x256")
             cols=3
         elif plot_type==15: #NETWORK
             y_lim = 18
             #inputs = ['Kron22']
             apps = ['bfs','spmv','histo']
             binaries = ["NOCWN0","NOCWN1","NOCWN2","NOCWN6"]
-            comp = ("(a) Mesh 32", "(b) Torus 32", "(c) 64:32", "(d) +Die-Skip")
+            legend_text = ("(a) Mesh 32", "(b) Torus 32", "(c) 64:32", "(d) +Die-Skip")
             cols=2
         elif plot_type==16: #PREFETCHING
             y_lim = 4
             binaries = ["DMBC6","DMBC5","DMBC4","DMBC3","DMBC1"]
-            comp = ("Always HBM","Cache last request","Remote SRAM","Local SRAM","Always SRAM")
+            legend_text = ("Always HBM","Cache last request","Remote SRAM","Local SRAM","Always SRAM")
             legend_width = 3.2
             cols=3
         elif plot_type==17: #Simulation time
@@ -285,14 +346,14 @@ def main(argv):
             #inputs = ['Kron22--16',"Kron22--32","Kron22--64"]
             inputs = ["Kron22--32","Kron22--64"]
             binaries = ["ITHR2","ITHR4","ITHR8","ITHR16","ITHR32"]
-            comp = ("2 Threads","4 Threads","8 Threads","16 Threads","32 Threads")
+            legend_text = ("2 Threads","4 Threads","8 Threads","16 Threads","32 Threads")
             legend_width = 7.5
         elif plot_type==18: #FFT validation
             y_lim = 2
             apps = ['fft']
             inputs = ['fft1']
             binaries = ["B3--32","B3--64","B3--128","B3--256", "B3--512"]
-            comp = ("32","64","128", "256","512")
+            legend_text = ("32","64","128", "256","512")
             legend_width = 3
             cols=3
         elif plot_type==19: #NOC_TYPES
@@ -300,13 +361,13 @@ def main(argv):
             y_lim = 8.6
             inputs = ['Kron22','wikipedia']
             binaries = ["NOC0","NOC1","NOC2","NOC3","NOC4"]
-            comp = ("Mesh 32-bit",  "Mesh 64-bit",  "Torus 64-bit", "+inter-die-NoC 32-bit","NoC Freq=2Ghz") #, "+Ruche")
+            legend_text = ("Mesh 32-bit",  "Mesh 64-bit",  "Torus 64-bit", "+inter-die-NoC 32-bit","NoC Freq=2Ghz") #, "+Ruche")
             cols=3    
         elif plot_type==20: #PU_FREQ
             default_grid_width = 64
             y_lim = 10
             binaries = ["PUF0","PUF1","NOCM3","PUF4"]
-            comp = ("PU=0.25Ghz","PU=0.5Ghz","PU=1.0Ghz","PU=2.0Ghz")
+            legend_text = ("PU=0.25Ghz","PU=0.5Ghz","PU=1.0Ghz","PU=2.0Ghz")
             legend_width = 6.5
             cols=4
         elif plot_type==21: # Cascade Policy
@@ -314,77 +375,57 @@ def main(argv):
             y_lim = 11
             binaries = ["PROXY128","CASC0","CASC1","PROXY16"]
             cols=2
-            comp = ("Dalorex","Proxy \& Merge Owner","Proxy \& Cascade","Tascade")
+            legend_text = ("Dalorex","Proxy \\& Merge Owner","Proxy \\& Cascade","Tascade")
         elif plot_type==22: # Write Thru
             apps = ['sssp','bfs','wcc']
             default_grid_width = 128
             y_lim = 2
             binaries = ["1PMCCASC0","CASC2","THRU0","THRU1","THRU2"]
-            comp = ("WT Never", "WT Selective","WB Never", "WB Always", "WB Selective")
+            legend_text = ("WT Never", "WT Selective","WB Never", "WB Always", "WB Selective")
             cols=3
         elif plot_type==23: #GRANULARITY
             y_lim = 2.5
-            binaries = ["GRANU0--64","GRANU1--32","GRANU2--16"]
-            comp = ("1PU/Tile 64x64Tiles",  "4PU/Tile 32x32Tiles",  "16PU/Tile 16x16Tiles")
-            cols=3
+            if artifact_type==3: # Tutorial
+                apps = ['spmv'];
+                inputs = ['Kron16'];
+                binaries = ["GRANU0--32","GRANU1--16","GRANU2--8"]
+                cols=1
+            else:
+                apps = ['sssp','pagerank','bfs','wcc','spmv','histo']
+                inputs = ['wikipedia','Kron22']
+                binaries = ["GRANU0--64","GRANU1--32","GRANU2--16"]
+                cols=3
+            legend_text = ("1PU/Tile 64x64Tiles",  "4PU/Tile 32x32Tiles",  "16PU/Tile 16x16Tiles")
             legend_width = 6.8
         elif plot_type>=24 and plot_type <=27 : # Sync advantage
             default_grid_width = 128
             if plot_type==24:
                 y_lim = 11
                 binaries = ["PROXY128","SYNC0","SYNC1","PROXY16"]
-                comp = ("No Proxy (Dalorex)", "Proxy Sync \& Merge", "Proxy Sync \& Cascade", "Tascade")
+                legend_text = ("No Proxy (Dalorex)", "Proxy Sync \\& Merge", "Proxy Sync \\& Cascade", "Tascade")
                 cols=2
             elif plot_type==25:
                 y_lim = 13
                 colors[2] = colors[3];hatches[2] = hatches[3]
                 binaries = ["PROXY128","SYNC0","SYNCUP1","THRU0","CASC2"]
-                comp = ("No Proxy (Dalorex)","Proxy Sync \& Merge","Proxy Sync \& Cascade","Proxy Merge","Tascade")
+                legend_text = ("No Proxy (Dalorex)","Proxy Sync \\& Merge","Proxy Sync \\& Cascade","Proxy Merge","Tascade")
             elif plot_type==26:
                 colors[2] = colors[3];hatches[2] = hatches[3]
                 binaries = ["PX_NOC3","PX_NOC4","PX_NOC5"]
-                comp = ("No Proxy (Inter-chip)","Proxy Sync \& Merge","Tascade")
+                legend_text = ("No Proxy (Inter-chip)","Proxy Sync \\& Merge","Tascade")
             elif plot_type==27:
                 y_lim = 11
                 c1 = colors[1]; colors[1] = colors[3]; h1 = hatches[1]; hatches[1] = hatches[3]; colors[3] = c1; hatches[3] = h1
                 c1 = colors[2]; colors[2] = colors[3]; h1 = hatches[2]; hatches[2] = hatches[3]; colors[3] = c1; hatches[3] = h1
                 binaries = ["PROXY128","PROXY16","PX_NOC0","PX_NOC11","PX_NOC2","PX_NOC3"]
-                comp = ("No Proxy (Torus)","Tascade (Torus)", "No Proxy (Mesh)","Tascade (Mesh)", "No Proxy (Inter-chip)","Tascade (Inter-chip)")
+                legend_text = ("No Proxy (Torus)","Tascade (Torus)", "No Proxy (Mesh)","Tascade (Mesh)", "No Proxy (Inter-chip)","Tascade (Inter-chip)")
                 cols=3
 
-
-        #whether we show utilization or normalized performance
         if metrics == None:
-            if plot_metric==0:
-                metrics = ["time"]
-            elif plot_metric==1:
-                metrics = ["Core_active"]
-            elif plot_metric==2:
-                metrics = ["router_energy"]
-            elif plot_metric==3:
-                metrics = ["sim_time"]
-            elif plot_metric==4:
-                metrics = ["arith_intensity_msgs"]
-            elif plot_metric==5:
-                metrics = ["arith_intensity_loads"]
-            elif plot_metric==6:
-                metrics = ["flops"]
-            elif plot_metric==7:
-                metrics = ["energy"]
-            elif plot_metric==8:
-                metrics = ["total_msg"]
-            elif plot_metric==9:
-                metrics = ["dhit_rate"]
-            elif plot_metric==10:
-                if plot_type==19: # NoC plot
-                    metrics = [perf_metric,"cost_2d"]
-                else:
-                    metrics = [perf_metric,"cost_2.5d"]
-            elif plot_metric==11:
-                metrics = ["sim_time","time"]
+            metrics = get_metric(plot_metric, perf_metric, plot_type)
 
         plot_len = len(binaries)
-        bars = len(inputs)+len(comp)/1.1
+        bars = len(inputs)+len(legend_text)/1.1
 
     elif (plot_type==1): #ENERGY BREAKDOWN!!!
         if plot_metric==0:
@@ -396,9 +437,9 @@ def main(argv):
         apps = ['sssp','bfs', 'wcc','spmv','histo']
         #apps = ['histo']
         inputs = ['Kron25','Kron26']
-        comp = ('Logic', 'Memory', 'Network')
+        legend_text = ('Logic', 'Memory', 'Network')
         legend_width = 4.8
-        bars = len(inputs)+len(comp)/1.1
+        bars = len(inputs)+len(legend_text)/1.1
 
     # "PACKAGES" experiment, comparing Tascade-SRAM, Dalorex and Tascade-HBM
     elif (plot_type==2 or plot_type==3): #perf/$ or energy/op
@@ -407,23 +448,23 @@ def main(argv):
         apps = ['sssp','bfs','wcc','spmv','histo']
         inputs = ['Kron25','Kron26']
         cols=3
-        #comp = ('DCRA SRAM','Dalorex','DCRA 2.5D-HBM (Horizontal)','DCRA 3D-HBM (Vertical)')
-        comp = ('DCRA SRAM','Dalorex','DCRA-HBM')
+        #legend_text = ('DCRA SRAM','Dalorex','DCRA 2.5D-HBM (Horizontal)','DCRA 3D-HBM (Vertical)')
+        legend_text = ('DCRA SRAM','Dalorex','DCRA-HBM')
         colors[2] = colors[3];hatches[2] = hatches[3]
         legend_width = 5
-        bars = len(inputs)+len(comp)/1.1
+        bars = len(inputs)+len(legend_text)/1.1
         if plot_type==2:
             if plot_metric==0:
                 y_lim = 4.5
-                label=perf_word+"/\$ Improvement"
+                y_label = perf_word+"/\\$ Improvement"
                 metrics = [perf_metric,"cost_2d","cost_2.5d","cost_3d"]
             else:
                 y_lim = 1
-                label=perf_word+" Improvement"
+                y_label = perf_word+" Improvement"
                 metrics = [perf_metric]
         else:
             y_lim = 2
-            label=perf_word+'/Watt Improvement'
+            y_label = perf_word+'/Watt Improvement'
             metrics = ["energy","3d_energy","cost_2d","cost_2.5d","cost_3d"]
 
     elif (plot_type==4) or (plot_type==6): # Scaling 2^10 to 2^20 plot!
@@ -437,19 +478,19 @@ def main(argv):
 
         if plot_metric==0:
             metrics = [perf_metric,"gops","effective_bw"]
-            comp = [perf_metric, "Operations/s", "Avg. Mem. BW (Bytes/s)"]
+            legend_text = [perf_metric, "Operations/s", "Avg. Mem. BW (Bytes/s)"]
             legend_width = 6 #6.5
         elif plot_metric==1:
             metrics = [perf_metric,"power","cost_2.5d","total_msg"]
-            comp = [perf_word+"/\$", perf_metric+"/Watt", "NoC Messages"]
+            legend_text = [perf_word+"/\\$", perf_metric+"/Watt", "NoC Messages"]
             legend_width = 6
         elif plot_metric==2:
             metrics = [perf_metric,"gops","power"]
-            comp = [perf_word+"/Watt", "Operations/s/Watt"]
+            legend_text = [perf_word+"/Watt", "Operations/s/Watt"]
             legend_width = 5
         elif plot_metric==3:
             metrics = ["sim_time","time","gops","total_msg"]
-            comp = ["1","2","3"]
+            legend_text = ["1","2","3"]
             legend_width = 5.5
 
         plot_len = len(metrics)
@@ -474,18 +515,17 @@ def main(argv):
     for j in range(len(apps)):
         accum_energy = []
         ax = plt.subplot(gs[0, j * app_cols:j * app_cols + app_cols],frameon=False)  # Full width
-        plt.rcParams["font.family"] = "Times New Roman"
  
         if plot_type==0: #network comparison
             plt.ylim([0, 3])
-            label = perf_label+" Improvement"
+            y_label = perf_label+" Improvement"
         elif plot_type>=9:
             if metrics[0]=="Core_active":
                 plt.ylim([0, 100])
-                label='PU Utilization'
+                y_label='PU Utilization'
             elif metrics[0]=="dhit_rate":
                 plt.ylim([0, 100])
-                label='Hit Rate (\%)'
+                y_label='Hit Rate (\\%)'
             elif metrics[0]=="energy":
                 if plot_type==9:
                     plt.ylim([0, 4])
@@ -493,14 +533,14 @@ def main(argv):
                     plt.ylim([0.75, 1.25])
                 else:
                     plt.ylim([0, 2])
-                label = energy_label +" Improvement"
+                y_label = energy_label +" Improvement"
             elif metrics[0]=="total_msg":
-                label='Reduction in NoC traffic'
+                y_label='Reduction in NoC traffic'
                 if plot_type==12:
                     plt.ylim([0, 4])
                 elif plot_type==14: # Scaling Dalorex vs Tascade
                     ax.set_yscale('log'); plt.ylim([0.1, 10])
-                    label='Increase in NoC Traffic w/ Scale'
+                    y_label='Increase in NoC Traffic w/ Scale'
                 elif plot_type==21:
                     plt.ylim([0, 4])
                 else:
@@ -540,29 +580,29 @@ def main(argv):
                                     if len(data) > 14:
                                         data[7][j][k] = data[14][j][k]* 1000000.0 / (data[15][j][k] * size3)
                         
-                label = "Sim time / DUT Time"
+                y_label = "Sim time / DUT Time"
             elif metrics[0]=="sim_time":
                 if plot_type==14:
                     plt.ylim([100, 1000000])
                     plt.yscale('log')
                 else:
                     plt.ylim([0, 20000])
-                label='Simulator Runtime (s)'
+                y_label='Simulator Runtime (s)'
             elif metrics[0]=="arith_intensity_msgs":
                 plt.ylim([0, 1])
-                label='Arithmetic Intensity (FLOP/Msgs)'
+                y_label='Arithmetic Intensity (FLOP/Msgs)'
             elif metrics[0]=="arith_intensity_loads":
                 plt.ylim([0, 1])
-                label='Arithmetic Intensity (FLOP/Loads)'
+                y_label='Arithmetic Intensity (FLOP/Loads)'
             elif plot_metric==6:
                 plt.ylim([0, 1000])
-                label='Throughput (FLOPs)'
+                y_label='Throughput (FLOPs)'
             elif metrics[0]==perf_metric:
                 if plot_type==19:
                     plt.ylim([0, 8.6])
                 else:
                     plt.ylim([0, 5])
-                label=perf_label+"/\$ Improvement"
+                y_label=perf_label+"/\\$ Improvement"
                 for k in range(0, len(inputs)):
                     data[0][j][k] = data[0][j][k]*1.0/data[1][j][k]
                     data[1][j][k] = data[2][j][k]*1.0/data[3][j][k]
@@ -580,14 +620,20 @@ def main(argv):
                     ax.set_yscale('log'); plt.ylim([0.7, 100])
                 else:
                     plt.ylim([0, y_lim])
-                label = perf_label+" Improvement"
+                y_label = perf_label+" Improvement"
+            elif metrics[0]=="edges":
+                plt.ylim([0, 2])
+                if plot_type==14:
+                    y_label='Increase in \\# Edges Processed w/ Scale'
+                else:
+                    y_label='Decrease in \\# Edge Processed'
             else:
                 print("ERROR: Metric not supported: "+metrics[0])
                 sys.exit(2)
 
         elif plot_type==1: #energy_breakdown
             plt.ylim([0, 100])
-            label='Energy Breakdown (\% of total)'
+            y_label='Energy Breakdown (\\% of total)'
             #colors=['yellow','r','b']
             for k in range(0, len(inputs)):
                 total_energy = 0
@@ -632,7 +678,7 @@ def main(argv):
 
         elif plot_type==4 or plot_type==6: #TEPS, gigaoperations/s
             ax.set_yscale('log')
-            label=''
+            y_label=''
             if metrics[2] == 'effective_bw': #absolute perf plot
                 if (plot_type==4):
                     plt.ylim([1000000000, 100000000000000])
@@ -707,7 +753,7 @@ def main(argv):
             font_xticks = 1
             for inpt in inputs:
                 objs.append("")
-        if plot_type==17:
+        elif plot_type==17:
             for inpt in inputs:
                 grid_x = int(inpt.split("--")[1])
                 objs.append("%dx%d" % (grid_x,grid_x))
@@ -772,7 +818,7 @@ def main(argv):
             elif metrics[0]=="time" or metrics[0]=="energy": # the lower the better for all these!
                 data[i][j] = [ (y*1.0/x) for x,y in zip(data[i][j], normalized)]
                 print(data[i][j])
-            elif metrics[0]=="total_msg":
+            elif metrics[0]=="total_msg" or metrics[0]=="edges":
                 if plot_type==14:
                     data[i][j] = [ (x*1.0/y) for x,y in zip(data[i][j], normalized)]
                 else:
@@ -818,7 +864,11 @@ def main(argv):
                 rects_list.append(barr)
             plt.xticks(y_pos+0.3, objs, fontsize=font_xticks, rotation=0)
             if j==0 and not do_not_show_legend:
-                plt.legend(rects_list, comp, handletextpad=0.15, fontsize=font, bbox_to_anchor=(legend_left_point, legend_top_sep, legend_width, legend_height), loc=1, ncol=cols, mode="expand", borderaxespad=0.)
+                # replace all instances of \\ if not using LaTeX
+                legend_text_plot = legend_text
+                if not use_latex:
+                    legend_text_plot = [x.replace("\\", "") for x in legend_text]
+                plt.legend(rects_list, legend_text_plot, handletextpad=0.15, fontsize=font, bbox_to_anchor=(legend_left_point, legend_top_sep, legend_width, legend_height), loc=1, ncol=cols, mode="expand", borderaxespad=0.)
             if plot_metric!=7 and plot_type!=3 and plot_type!=2 and plot_metric!=11: #not log plots, not small space within bars as in energy plots
                 ax.yaxis.set_minor_locator(AutoMinorLocator())
         else:
@@ -847,7 +897,7 @@ def main(argv):
                         line_for_legend.append(line3[0])
                         legend_labels.append(perf_word); legend_labels.append("Operations/s"); legend_labels.append("Avg. Mem. BW (Bytes/s)")
                     elif metrics[2]=="cost_2.5d":
-                        legend_labels.append(perf_word+"/\$"); legend_labels.append(perf_word+"/Watt")
+                        legend_labels.append(perf_word+"/\\$"); legend_labels.append(perf_word+"/Watt")
                         if plot_type==4:
                             line_for_legend.append(line3[0])
                             legend_labels.append("NoC Message Hops")
@@ -876,7 +926,9 @@ def main(argv):
 
         plt.title(title, fontsize=font)  
         if j==0:
-            plt.ylabel(label, fontsize=font)
+            if not use_latex:
+                y_label = y_label.replace("\\", "")
+            plt.ylabel(y_label, fontsize=font)
             plt.yticks(fontsize=font-4)
         else:
             plt.yticks(fontsize=0)
@@ -890,7 +942,6 @@ def main(argv):
         ax = plt.subplot(gs[0, len(apps) * app_cols: len(apps) * app_cols + 1],frameon=False)  # Full width
         plt.grid(True, which='major', axis = 'y', color = 'black', linestyle = '--', linewidth = 0.15, zorder=0)
         plt.grid(True, which='minor', axis = 'y', color = 'gray', linestyle = '--', linewidth = 0.03, zorder=1)
-        plt.rcParams["font.family"] = "Times New Roman"
         plt.ylim(ylims)
         ax.set_yscale(ylim_scale)
         plt.xticks([1], [''], fontsize=font_xticks, rotation=0)
@@ -913,9 +964,9 @@ def main(argv):
                     elif i==5:
                         colors[i]='lightpink'
                         hatches[i]=hatches[i-2]
-                    comp = ("NoProxy (Dalorex)","Proxy32x32","Proxy16x16F", "Proxy8x8F","Proxy16x16","Proxy8x8", )
+                    legend_text = ("NoProxy (Dalorex)","Proxy32x32","Proxy16x16F", "Proxy8x8F","Proxy16x16","Proxy8x8", )
 
-            print("total geomean of %s %0.2f" % (comp[i], geo_data ) )
+            print("total geomean of %s %0.2f" % (legend_text[i], geo_data ) )
 
             barr = plt.bar(bar_id*bar_width, geo_data, bar_width, color=colors[i], alpha=1.0, linewidth=0.1, zorder=zonder_id,hatch=hatches[i])
 
@@ -927,9 +978,9 @@ def main(argv):
             line2 = plt.plot(line_x_pos, [geo_mean(geomean_per_type[1]), geo_mean(geomean_per_type[3]), geo_mean(geomean_per_type[5]) ], marker='*', linestyle='-', color='darkorange')
 
 
-    for i in range(2,len(comp)):
-        print("total geomean of %s over %s %0.2f" % (comp[i], comp[i-1], geo_mean(geomean_per_type[i])/geo_mean(geomean_per_type[i-1]) ) )
-        print("total geomean of %s over %s %0.2f" % (comp[i], comp[i-2], geo_mean(geomean_per_type[i])/geo_mean(geomean_per_type[i-2]) ) )
+    for i in range(2,len(legend_text)):
+        print("total geomean of %s over %s %0.2f" % (legend_text[i], legend_text[i-1], geo_mean(geomean_per_type[i])/geo_mean(geomean_per_type[i-1]) ) )
+        print("total geomean of %s over %s %0.2f" % (legend_text[i], legend_text[i-2], geo_mean(geomean_per_type[i])/geo_mean(geomean_per_type[i-2]) ) )
 
 
     plt.savefig('plots/characterization/characterization%d_%d.pdf' %  (plot_type, plot_metric), bbox_inches='tight')

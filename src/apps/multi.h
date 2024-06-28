@@ -36,7 +36,7 @@ std::vector <std::string> sep(std::string & line) {
 std::vector<Edge> getVector(string filename, uint64_t tid, u_int64_t & penalty){
   std::ifstream file(filename);
   if (!file.is_open()) {
-    printf("Tile %lu cannot open %s\n", tid, filename.c_str());
+    printf("Could not open file %s\n", filename.c_str());
     exit(1);
   }
   struct stat stats;
@@ -96,7 +96,6 @@ int read_file(int tX, int tY){
     graph->vertex_vector[i].id = UINT32_MAX;
     graph->vertex_vector[i].num_edges = 0;
     penalty += 4;
-    omp_init_lock(&graph->locks[i]);
   }
   return penalty;
 }
@@ -125,18 +124,15 @@ int create_hashmap(int tX,int tY){
   // LK; cout << "Thread " << global(tX,tY) << " start " << start << " end " << end << endl; ULK;
   for (size_t i = start; i < end; i++) {
 
-    ////// SELLER //////
     u_int32_t search_key = edge_vectors[tid][i].src;
     u_int32_t index = lookup(search_key, penalty);
-    // Lock the index
-    omp_set_lock(&graph->locks[index]);
+
     // If empty slot, initialize Vertex
     if (vertex_vector[index].id == UINT32_MAX) {
       vertex_vector[index].id = search_key;
       vertex_vector[index].edges = (Edge*) malloc(sizeof(Edge) * 2);
       vertex_vector[index].edges[0] = edge_vectors[tid][i];
       vertex_vector[index].num_edges=1;
-      #pragma omp atomic
       vertexs_cnt++;
       assert(vertexs_cnt < graph->nodes);
 
@@ -149,7 +145,6 @@ int create_hashmap(int tX,int tY){
       }
     } else{assert(0);}
     penalty += 8;
-    omp_unset_lock(&graph->locks[index]);
 
   } // end for edges
   return penalty;

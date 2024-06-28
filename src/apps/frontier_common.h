@@ -7,6 +7,17 @@ void check_range(int tX,int tY, u_int32_t start_index, u_int32_t end_index){
   assert(end_index<=(edge_base+edgePerTile));
 }
 
+// Function to find the position of the most significant bit (MSB)
+u_int32_t findMSB(u_int32_t vector) {
+    u_int32_t msb = 0;
+    while (vector != 0) {
+        vector >>= 1;
+        msb++;
+    }
+    return msb - 1; // Return zero-based index of the MSB
+}
+ 
+
 void destroy_dataset_structures(){
   delete graph;
   free(ret);
@@ -64,13 +75,14 @@ int process_nodes(int tX,int tY, int i, u_int32_t bitmap_base, u_int64_t timer){
   u_int32_t vector = 0, node, local_index;
   #if GLOBAL_BARRIER<=2
     vector = bitmap_frontier[bitmap_base + i]; //LD
-    assert(vector); //META
+    ASSERT_MSG(vector>0, "Vector must not be zero");
   #endif
-  
   do{
     #if GLOBAL_BARRIER<=2 //Coalescing
     //INST1 ->  local_node = SEARCH_MSB(VECTOR)
-    u_int32_t msb; asm("bsrl %1,%0" : "=r"(msb) : "r"(vector));
+    //u_int32_t msb; asm("bsrl %1, %0" : "=r"(msb) : "r"((u_int32_t)vector));
+    u_int32_t msb = findMSB(vector);
+
     //INST2
     local_index = (i << 5) + msb;
     //INTR3 VECTOR = MASK_OUT_BIT(msb)
@@ -186,9 +198,7 @@ int add_to_frontier(int tX, int tY, u_int32_t neighbor_index, u_int64_t timer){
     vector = vector | block_idx_oh;
     //INTR2 Store vector
     bitmap_frontier[index] = vector;
-    #if ASSERT_MODE
-      assert(vector > 0);
-    #endif
+    ASSERT_MSG(vector > 0, "Vector must not be zero");
     load_mem_wait(3);
     store(3);
   #else

@@ -4,7 +4,7 @@
         cd gui
         python3 -m venv env_gui
         source env_gui/bin/activate
-        pip install --upgrade pip'
+        pip install --upgrade pip
         pip install PyQt5
         pip install matplotlib
         pip install imageio

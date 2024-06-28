@@ -14,4 +14,7 @@ plots/heatmaps/*
 plots/characterization/*
 plots/temp/*
 *.dSYM
-*env_gui
+gui/env*
+*.DS_Store
+plots/animated_heatmaps/*
+plots/images/*
